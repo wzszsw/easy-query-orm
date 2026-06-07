@@ -3,6 +3,10 @@
 The starter auto-configures `EasyQueryClient` and `EasyEntityQuery` from your `DataSource`. You inject
 `EasyEntityQuery` and use it directly.
 
+Use this file first for Spring bean registration, starter dependency, or
+`easy-query.enable` / `easy-query.database` problems. For Kotlin proxy
+generation itself, jump straight to `setup-kotlin.md`.
+
 ## When to use / not
 
 Use for a Spring Boot project. You still need the proxy processor on the compile path: **APT (`sql-processor`)

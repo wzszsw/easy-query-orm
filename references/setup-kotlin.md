@@ -3,6 +3,10 @@
 How to wire easy-query into a Kotlin project. Kotlin uses **KSP** for proxy generation — **not KAPT**.
 The runtime API is identical to Java; only the build setup and the lambda surface differ.
 
+If the problem is "cannot find `UserProxy`" or "proxy not generated", start and
+stop in this file unless the entity annotations themselves are obviously wrong.
+You should not need `troubleshooting.md` for the first pass.
+
 ## When to use / not
 
 Use for a Kotlin project (Gradle). For plain Java see `setup-java.md`; for Spring Boot see
@@ -124,6 +128,7 @@ it always works.
 - Forgetting the `kotlin.srcDir("build/generated/ksp/main/kotlin")` line → proxies unresolved in the IDE.
 - KSP version not matching the Kotlin version (the `x.y.z-a.b.c` suffix is Kotlin-version-specific).
 - Passing `Topic.class` (Java) instead of `Topic::class.java` (Kotlin).
+- Missing either `@EntityProxy` or `ProxyEntityAvailable<Entity, EntityProxy>` on the entity.
 
 ## Sources
 - 官方文档: `easy-query-doc/src/guide/kotlin.md` (Gradle KSP build, entity, init, infix).

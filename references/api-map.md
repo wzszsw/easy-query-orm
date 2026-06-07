@@ -79,10 +79,10 @@ Read `query.md` for ordinary conditions. Read `functions-native-sql.md` only if
 
 | Symbol | Purpose | Read Next |
 |--------|---------|-----------|
-| `whereObject(request)` | DTO-driven filters | `dto-object-query.md` |
+| `whereObject(request)` | Query-form / request-object driven filters | `dto-object-query.md` |
 | `orderByObject(sort)` | DTO-driven sort | `dto-object-query.md` |
 | `selectAutoInclude(ResultDTO.class)` | DTO graph result | `select-auto-include.md` |
-| `@EasyWhereCondition` | DTO filter metadata | `dto-object-query.md` |
+| `@EasyWhereCondition` | Query-form filter metadata | `dto-object-query.md` |
 | `ObjectSortBuilder` | Sort allowlist / builder API | `dto-object-query.md` |
 | `anyColumn(...)` | Dynamic property path sort/filter helper | `dto-object-query.md` |
 

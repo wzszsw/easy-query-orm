@@ -47,9 +47,16 @@ task; do not read the whole `references/` tree by default.
    write/transaction, advanced business query, troubleshooting, or review.
 2. Read one core reference first. Read one advanced reference only when the
    task actually needs it.
-3. If the exact symbol is unclear, search before emitting code:
+3. For setup or proxy-generation problems, read only the matching setup file
+   first:
+   - Kotlin / `ksp` / `kapt` / missing `*Proxy`: `references/setup-kotlin.md`
+   - Plain Java / Maven / APT / missing `*Proxy`: `references/setup-java.md`
+   - Spring Boot bean/config/starter issues: `references/setup-spring-boot.md`
+   Read `entity-mapping.md` only if the entity annotations themselves look wrong.
+   Do not open `troubleshooting.md` first for setup questions.
+4. If the exact symbol is unclear, search before emitting code:
    `python scripts/search_references.py include2 selectAutoInclude`.
-4. If the bundled references still do not cover a method, inspect the target
+5. If the bundled references still do not cover a method, inspect the target
    project or source before using it.
 
 ## Routing Table
@@ -57,8 +64,8 @@ task; do not read the whole `references/` tree by default.
 | Task | Read |
 |------|------|
 | Set up Kotlin + KSP + entity/proxy generation | `references/setup-kotlin.md` |
-| Set up plain Java + Maven/APT | `references/setup-java.md` |
-| Integrate with Spring Boot starter | `references/setup-spring-boot.md` |
+| Set up plain Java + Maven/APT + proxy generation | `references/setup-java.md` |
+| Integrate with Spring Boot starter or fix bean/config registration | `references/setup-spring-boot.md` |
 | Check starter defaults and behavior-affecting config | `references/configuration-starter.md` |
 | Define entity annotations and proxy model | `references/entity-mapping.md` |
 | Declare entity relations and fix `@Navigate` direction/cardinality | `references/relation-query.md` |

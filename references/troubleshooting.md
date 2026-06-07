@@ -6,6 +6,11 @@ unexpectedly, or when a familiar API throws in a non-obvious way.
 This file is a triage guide, not a full tutorial. For each issue, apply the
 first fix, then read the referenced file if deeper changes are needed.
 
+Do not open this file first for ordinary setup questions such as Kotlin `ksp`
+vs `kapt`, missing `sql-processor`, missing `sql-ksp-processor`, or starter bean
+registration. Use `setup-java.md`, `setup-kotlin.md`, or `setup-spring-boot.md`
+first.
+
 ## Proxy and Build Issues
 
 ### `*Proxy` Not Generated
@@ -215,8 +220,16 @@ Symptom:
 
 First fix:
 
-- remove ad hoc fields from the DTO object query path
-- switch the hard-to-express part back to explicit DSL
+- keep real query-form fields in the `whereObject(...)` path
+- move paging, transport-only, or ad hoc business-only fields out of the DTO
+  query object
+- switch only the hard-to-express part back to explicit DSL when needed
+
+Reminder:
+
+- `whereObject(...)` is still a good default for large frontend/admin query
+  forms with many optional conditions
+- the problem is usually the object shape, not the existence of `whereObject(...)`
 
 Read next:
 

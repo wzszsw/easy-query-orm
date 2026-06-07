@@ -1,6 +1,6 @@
 # DTO Object Query
 
-Use this reference for standard request-object driven filtering and sorting with
+Use this reference for request-object driven filtering and sorting with
 `whereObject(...)` and `orderByObject(...)`.
 
 Do not use this file as the main guide for:
@@ -29,8 +29,17 @@ List<SysUser> users = easyEntityQuery.queryable(SysUser.class)
     .toList();
 ```
 
-Use this approach when the request DTO already carries easy-query filter/sort
-metadata and the query shape is stable enough to describe declaratively.
+This is usually the preferred approach for frontend/admin query forms with many
+optional filters. When the request object already models the search form,
+`whereObject(...)` avoids long repetitive gated DSL chains and keeps filtering
+rules declarative.
+
+Use this approach when:
+
+- the request DTO is essentially a query form
+- many conditions are optional
+- the filter shape is stable enough to describe with metadata
+- list/search pages need the same condition logic repeatedly
 
 ## `@EasyWhereCondition`
 
@@ -91,6 +100,8 @@ Notes:
 - `tableIndex` / `tablesIndex` are for explicit join tables, not implicit joins.
 - `DEFAULT` follows starter config `defaultCondition`; the default behavior may be
   `LIKE` rather than `CONTAINS`.
+- This style works especially well for frontend query forms where many inputs map
+  one-to-one onto entity fields or relation paths.
 
 ## `orderByObject` and `ObjectSort`
 
@@ -169,7 +180,8 @@ Rules:
 
 ## When Explicit DSL Is Clearer
 
-For small or ad hoc filters, ordinary DSL can still be easier to review:
+For small filters, one-off service methods, or query shapes that do not really
+look like a form object, ordinary DSL can still be easier to review:
 
 ```java
 easyEntityQuery.queryable(SysUser.class)
@@ -187,5 +199,8 @@ Or gate the whole clause:
 query.where(request.hasName(), user -> user.name().contains(request.getName()));
 ```
 
-Use explicit DSL when the request object abstraction makes the query harder to
-understand than the direct condition chain.
+Use explicit DSL when:
+
+- the request object abstraction makes the query harder to understand
+- the condition depends on nontrivial branching or computed business rules
+- only a few fields are involved and the DSL is shorter than the metadata
