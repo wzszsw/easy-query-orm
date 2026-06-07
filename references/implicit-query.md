@@ -4,6 +4,10 @@ easy-query's core advantage is relation-driven implicit SQL generation. In docs 
 
 ## Relation Modeling Required
 
+The examples below use `Fields.xxx` constants. Those come from Lombok
+`@FieldNameConstants` on the related entity classes. If the project does not use
+that Lombok annotation, replace the `Fields` constants with string literals.
+
 Implicit relation APIs require navigation metadata on entity or DTO fields:
 
 ```java

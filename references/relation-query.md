@@ -30,6 +30,12 @@ Imports:
 
 - `com.easy.query.core.annotation.Navigate`
 - `com.easy.query.core.enums.RelationTypeEnum`
+- `lombok.experimental.FieldNameConstants` when you want `Entity.Fields.xxx`
+  constants instead of string literals
+
+The examples below use `Company.Fields.id`, `SysUser.Fields.companyId`, and
+similar constants. Those `Fields` members come from Lombok
+`@FieldNameConstants` on the involved entity or mapping classes.
 
 ## One-to-Many
 
@@ -113,6 +119,7 @@ from database cardinality.
 ## Minimal Example Pair
 
 ```java
+@FieldNameConstants
 public class Company implements ProxyEntityAvailable<Company, CompanyProxy> {
     @Column(primaryKey = true)
     private String id;
@@ -125,6 +132,7 @@ public class Company implements ProxyEntityAvailable<Company, CompanyProxy> {
     private List<SysUser> users;
 }
 
+@FieldNameConstants
 public class SysUser implements ProxyEntityAvailable<SysUser, SysUserProxy> {
     @Column(primaryKey = true)
     private String id;

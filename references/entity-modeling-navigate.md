@@ -6,6 +6,19 @@ DTO-side navigation, and path-based mapping.
 
 ## Relation Shapes
 
+Examples below use `Fields.xxx` constants. Those come from Lombok
+`@FieldNameConstants` on the entity or mapping class, for example:
+
+```java
+import lombok.experimental.FieldNameConstants;
+
+@FieldNameConstants
+public class Company { ... }
+```
+
+If the project does not use Lombok `@FieldNameConstants`, replace those
+constants with string literals.
+
 Common relation forms:
 
 ```java
