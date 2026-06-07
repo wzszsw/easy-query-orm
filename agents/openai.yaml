@@ -1,0 +1,4 @@
+interface:
+  display_name: "Easy Query ORM"
+  short_description: "Code with easy-query ORM using verified APIs"
+  default_prompt: "Use $easy-query-orm to implement this easy-query repository or service code with verified ORM APIs."

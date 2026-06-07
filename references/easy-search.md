@@ -1,0 +1,158 @@
+# EasySearch Extension
+
+Use this reference only when the project has the `sql-search` extension and
+request parameters are expressed through `EasySearch` / `@EasyCond`.
+
+This is an extension layer over the normal DTO object query APIs. For ordinary
+`whereObject(...)`, `orderByObject(...)`, `@EasyWhereCondition`, and
+`ObjectSortBuilder`, read `dto-object-query.md`.
+
+## What EasySearch Changes
+
+`SearchInjectConfiguration` registers EasySearch-specific executors:
+
+- `WhereObjectQueryExecutor -> EasySearchWhereObjectQueryExecutor`
+- `ObjectSortQueryExecutor -> EasySearchObjectSortQueryExecutor`
+- `EasySearchMetaDataManager`
+- `EasySearchQueryExecutor`
+- `EasySearchConfigurationProvider`
+
+That means an `EasySearch` instance is passed into the standard APIs:
+
+```java
+EasySearch search = EasySearch.of(UserSearch.class)
+    .param("name", "tom")
+    .param("age-ge", 18)
+    .addDefaultSort("createTime:desc");
+
+List<User> rows = easyEntityQuery.queryable(User.class)
+    .whereObject(search)
+    .orderByObject(search)
+    .toList();
+```
+
+The call surface looks like ordinary DTO object query, but the metadata model and
+parameter parsing rules are different.
+
+## `@EasyCond`
+
+`@EasyCond` can be declared on fields or at type level.
+
+Examples:
+
+```java
+@EasyCond(name = "kw", property = "name", cond = Like.class)
+private String keyword;
+
+@EasyCond(property = "age", condOnly = {GreaterEquals.class, LessEquals.class})
+private Integer age;
+
+@EasyCond(property = "createTime", sort = EasySortType.Desc)
+private LocalDateTime createTime;
+```
+
+Source fields:
+
+```java
+boolean value() default true;
+String name() default "";
+String property() default "";
+String tableAlias() default "";
+Class<?> table() default Object.class;
+int tableIndex() default -1;
+Class<? extends Op> cond() default Op.class;
+Class<? extends Op>[] condOnly() default {};
+EasySortType sort() default EasySortType.Asc;
+EasySortType[] sortOnly() default {EasySortType.Asc, EasySortType.Desc};
+```
+
+Use `table`, `tableAlias`, or `tableIndex` only when request params need to
+target joined tables rather than the root table.
+
+## Parameter Format
+
+Default parser options:
+
+```text
+groupSplitter = "|"
+classSplitter = "."
+paramSplitter = "-"
+orderSplitter = ":"
+sortParam = "sort"
+indexEnabled = true
+strict = true
+defaultEnabled = false
+whereEnabled = true
+orderEnabled = true
+```
+
+Condition parameter format:
+
+```text
+[groupName|][className.]paramName[-index]
+```
+
+Sort parameter format:
+
+```text
+[className.]paramName[:asc|desc|ascend|descend]
+```
+
+Example:
+
+```java
+EasySearch.of(UserSearch.class)
+    .table("role", RoleSearch.class)
+    .param("name", "tom")
+    .param("age-ge", 18)
+    .param("age-le", 60)
+    .param("role.name-lk", "admin")
+    .param("sort", "createTime:desc");
+```
+
+For joined tables:
+
+```java
+EasySearch.of(UserSearch.class)
+    .tableIndex("role", RoleSearch.class, 1)
+    .param("role.name-lk", "admin");
+```
+
+## Operator Suffixes
+
+Registered operator names include:
+
+```text
+eq, ne
+gt, ge, lt, le
+in, notIn
+lk, notLike
+likeMatchLeft, notLikeMatchLeft
+likeMatchRight, notLikeMatchRight
+rc, ro, rco, roc
+notRangeClosed, notRangeOpen, notRangeClosedOpen, notRangeOpenClosed
+isNotNull
+```
+
+The actual parameter suffix is `paramSplitter + opName`, for example `age-ge`.
+
+## Defaults and Safety
+
+- strict mode is `true` by default
+- excluded default params include `token`, `page`, `current`, `pageSize`
+- fields are disabled by default because `defaultEnabled = false`
+- `condOnly` restricts legal operators
+- `sortOnly` restricts legal sort directions
+
+`EasySortType.of(...)` recognizes `asc`, `desc`, `ascend`, and `descend`.
+
+## When Not to Use
+
+Do not use EasySearch when:
+
+- the project has not installed/configured `sql-search`
+- the query is small and a normal DTO or explicit DSL is clearer
+- the request cannot be safely represented as parameter-name/operator pairs
+
+If the project only needs normal request DTO filtering/sorting, prefer
+`dto-object-query.md`.
