@@ -7,6 +7,10 @@ Do not use this file as the main guide for:
 
 - DTO result graph mapping: read `select-auto-include.md`
 - `sql-search` / `EasySearch` / `@EasyCond`: read `easy-search.md`
+- ordinary non-form dynamic query logic: read `query.md`
+
+This file covers one branch of easy-query dynamic query: query/search form
+objects. It is not the general default for all "dynamic query" tasks.
 
 ## Core APIs
 
@@ -48,6 +52,9 @@ Use this approach when:
 - the filter shape is stable enough to describe with metadata
 - list/search pages need the same condition logic repeatedly
 
+Do not treat this as the default just because the query is "dynamic". If the
+task is not really a search form, prefer normal DSL from `query.md`.
+
 It can be combined with DSL in the same query chain. This is often the best
 shape for real business code:
 
@@ -62,6 +69,9 @@ queryable
 Use `whereObject(...)` for the broad query-form conditions, then add explicit
 DSL only for the few conditions that are relation-heavy, computed, or otherwise
 awkward to express with annotations.
+
+That mixed shape is mainly for search endpoints. Do not generalize it to
+arbitrary service-layer query composition.
 
 ## `@EasyWhereCondition`
 
@@ -158,7 +168,8 @@ builder.allowed(propertyName);
 builder.notAllowed(propertyName);
 ```
 
-Use it for frontend-driven or external sort input:
+Use it for frontend-driven or external sort input that belongs to the same
+search/query form workflow:
 
 - `allowed(...)`: declare sortable fields explicitly
 - `notAllowed(...)`: deny specific fields that still exist on the object shape
@@ -174,7 +185,8 @@ builder.orderBy("user.name", true);
 ## `anyColumn(...)`
 
 Use `anyColumn(...)` for controlled dynamic property access when a property path
-must be chosen at runtime.
+must be chosen at runtime. This is a general dynamic-query helper, not specific
+to search-form DTOs.
 
 ```java
 query.where(card -> {
@@ -206,7 +218,7 @@ Rules:
 ## When Explicit DSL Is Clearer
 
 For small filters, one-off service methods, or query shapes that do not really
-look like a form object, ordinary DSL can still be easier to review:
+look like a form object, ordinary DSL is usually the better default:
 
 ```java
 easyEntityQuery.queryable(SysUser.class)
@@ -234,4 +246,5 @@ Use explicit DSL when:
 
 Do not swing too far the other way: if the task is obviously "build a search
 endpoint with many optional filters", prefer `whereObject(...)` first rather
-than hand-writing a long chain of gated predicates.
+than hand-writing a long chain of gated predicates. Outside that search-form
+shape, stay with DSL.

@@ -79,8 +79,8 @@ Read `query.md` for ordinary conditions. Read `functions-native-sql.md` only if
 
 | Symbol | Purpose | Read Next |
 |--------|---------|-----------|
-| `whereObject(request)` | Query-form / request-object driven filters; preferred for large search forms | `dto-object-query.md` |
-| `orderByObject(sort)` | DTO-driven sort | `dto-object-query.md` |
+| `whereObject(request)` | Query/search-form DTO filters; use for many optional form fields, not as a general query default | `dto-object-query.md` |
+| `orderByObject(sort)` | Search-form DTO sort / request-driven sort | `dto-object-query.md` |
 | `selectAutoInclude(ResultDTO.class)` | DTO graph result | `select-auto-include.md` |
 | `@EasyWhereCondition` | Query-form filter metadata | `dto-object-query.md` |
 | `ObjectSortBuilder` | Sort allowlist / builder API (`com.easy.query.core.api.dynamic.sort`) | `dto-object-query.md` |
@@ -99,7 +99,8 @@ Typical chain:
 - `orderByObject(search)`
 
 For ordinary backend search/list pages, prefer `whereObject(queryForm)` before
-writing a long manual gated DSL chain.
+writing a long manual gated DSL chain. For non-form dynamic query composition,
+read `query.md` first instead.
 
 ## Relation and Include Symbols
 

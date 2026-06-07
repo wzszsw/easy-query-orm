@@ -34,10 +34,9 @@ task; do not read the whole `references/` tree by default.
 4. Use gated overloads for optional filters such as `.eq(condition, value)` or
    `where(condition, o -> ...)`; never build string SQL conditions for normal
    dynamic filters.
-5. For backend list pages, frontend search forms, and "search/list/page with
-   many optional conditions" tasks, prefer a query-form DTO with
-   `whereObject(...)` first. Add explicit DSL only for the parts that are hard
-   to express declaratively.
+5. Treat `whereObject(...)` as a search-form tool, not a general query default.
+   Use it when the task is clearly a query/search form with many optional
+   request fields. For non-form dynamic query logic, stay with gated DSL first.
 6. Keep pagination stable with `orderBy(...)` plus a tie-breaker when the sort
    key is not unique.
 7. Treat update/delete row count `0` as a meaningful signal, not silent
@@ -77,8 +76,8 @@ task; do not read the whole `references/` tree by default.
 | Basic query chain: `where`, order, projection, pagination, terminals | `references/query.md` |
 | Advanced query composition: explicit joins, manual subquery, draft/tuple, native fragments, tracking | `references/query-composition.md` |
 | Implicit relation queries, group joins, tree/partition/case patterns | `references/implicit-query.md` |
-| DTO object filters/sorts via `whereObject` and `orderByObject` | `references/dto-object-query.md` |
-| User-management / admin-search / multi-condition list query | `references/dto-object-query.md` first, then add DSL only where needed |
+| Query/search-form DTO filters/sorts via `whereObject` and `orderByObject` | `references/dto-object-query.md` |
+| User-management / admin-search / multi-condition search form endpoint | `references/dto-object-query.md` first, then add DSL only where needed |
 | `EasySearch` and `@EasyCond`-driven search/sort | `references/easy-search.md` |
 | `selectAutoInclude`, nested DTO return, auto include extras | `references/select-auto-include.md` |
 | Structured loading with `include`, `include2`, `loadInclude`, `fillOne/fillMany` | `references/include-structured-loading.md` |

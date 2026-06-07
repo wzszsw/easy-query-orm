@@ -4,9 +4,10 @@ Use this reference only when the project has the `sql-search` extension and
 request parameters are expressed through `EasySearch` (`com.easy.query.search`)
 / `@EasyCond` (`com.easy.query.search.annotation`).
 
-This is an extension layer over the normal DTO object query APIs. For ordinary
-`whereObject(...)`, `orderByObject(...)`, `@EasyWhereCondition`, and
-`ObjectSortBuilder`, read `dto-object-query.md`.
+This is an extension layer over the normal DTO object query APIs. It is still a
+search/query-form oriented model. For ordinary `whereObject(...)`,
+`orderByObject(...)`, `@EasyWhereCondition`, and `ObjectSortBuilder`, read
+`dto-object-query.md`.
 
 ## What EasySearch Changes
 

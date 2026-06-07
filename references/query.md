@@ -72,6 +72,10 @@ easyEntityQuery.queryable(SysUser.class)
 Never concatenate strings. Each predicate has an overload whose first arg is a boolean gate; when `false`,
 the condition is skipped. There is also a `where(condition, lambda)` form.
 
+This is the general default for non-form dynamic query logic. If the task is
+specifically a search/query form endpoint with many optional request fields,
+read `dto-object-query.md` for the `whereObject(...)` branch instead.
+
 ```java
 // gate per predicate (.eq(condition, value) / .like(condition, value))
 easyEntityQuery.queryable(SysUser.class)
