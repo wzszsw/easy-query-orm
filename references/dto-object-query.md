@@ -12,6 +12,10 @@ Do not use this file as the main guide for:
 This file covers one branch of easy-query dynamic query: query/search form
 objects. It is not the general default for all "dynamic query" tasks.
 
+For the common combined shape "search/page form + stable sort + DTO graph
+return", read `search-form-page.md` first. That file exists to avoid mixing
+several broader references for one standard endpoint pattern.
+
 ## Core APIs
 
 Source signatures:
@@ -72,6 +76,20 @@ awkward to express with annotations.
 
 That mixed shape is mainly for search endpoints. Do not generalize it to
 arbitrary service-layer query composition.
+
+## Search-Form Filters With Manual Sort
+
+For many admin/search page endpoints, filters are form-like but sorting is only
+`sortBy + asc/desc`. In that shape:
+
+- keep filters in `whereObject(...)`
+- keep sort as explicit allowlisted `.orderBy(...)`
+- append stable fallback order such as `createdTime desc`, `id desc`
+- then call `selectAutoInclude(ResultDTO.class)` and `toPageResult(...)`
+
+Do not force `orderByObject(...)` just because `whereObject(...)` is being used.
+If the sortable fields are few, manual `orderBy(...)` is often clearer and
+cheaper than introducing `ObjectSort`.
 
 ## `@EasyWhereCondition`
 
@@ -169,7 +187,8 @@ builder.notAllowed(propertyName);
 ```
 
 Use it for frontend-driven or external sort input that belongs to the same
-search/query form workflow:
+search/query form workflow when the request already models sort metadata as an
+`ObjectSort` shape:
 
 - `allowed(...)`: declare sortable fields explicitly
 - `notAllowed(...)`: deny specific fields that still exist on the object shape

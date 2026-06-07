@@ -37,12 +37,21 @@ task; do not read the whole `references/` tree by default.
 5. Treat `whereObject(...)` as a search-form tool, not a general query default.
    Use it when the task is clearly a query/search form with many optional
    request fields. For non-form dynamic query logic, stay with gated DSL first.
-6. Keep pagination stable with `orderBy(...)` plus a tie-breaker when the sort
+6. For search-form page endpoints, filters may use `whereObject(...)` while
+   sorting stays explicit `orderBy(...)`. Do not force `orderByObject(...)`
+   unless the request already implements `ObjectSort` or the project already
+   has a sort helper.
+7. If the user asks for example code and does not point to a concrete target
+   project path/file, do not recursively scan the whole workspace looking for
+   placeholder types such as `PageResult`, `UserListDTO`, or sort helpers.
+   Answer from bundled references and clearly mark project-local wrapper/helper
+   substitutions.
+8. Keep pagination stable with `orderBy(...)` plus a tie-breaker when the sort
    key is not unique.
-7. Treat update/delete row count `0` as a meaningful signal, not silent
+9. Treat update/delete row count `0` as a meaningful signal, not silent
    success.
-8. For advanced relation loading, DTO projection, and aggregate persistence,
-   follow the dedicated references instead of guessing from the base query DSL.
+10. For advanced relation loading, DTO projection, and aggregate persistence,
+    follow the dedicated references instead of guessing from the base query DSL.
 
 ## Workflow
 
@@ -50,16 +59,20 @@ task; do not read the whole `references/` tree by default.
    write/transaction, advanced business query, troubleshooting, or review.
 2. Read one core reference first. Read one advanced reference only when the
    task actually needs it.
-3. For setup or proxy-generation problems, read only the matching setup file
+3. For search-form page endpoints that combine optional filters, sorting,
+   pagination, and DTO graph return, read `references/search-form-page.md`
+   first. Do not open `api-map.md`, `include-structured-loading.md`,
+   `entity-modeling-navigate.md`, or `troubleshooting.md` first for that shape.
+4. For setup or proxy-generation problems, read only the matching setup file
    first:
    - Kotlin / `ksp` / `kapt` / missing `*Proxy`: `references/setup-kotlin.md`
    - Plain Java / Maven / APT / missing `*Proxy`: `references/setup-java.md`
    - Spring Boot bean/config/starter issues: `references/setup-spring-boot.md`
    Read `entity-mapping.md` only if the entity annotations themselves look wrong.
    Do not open `troubleshooting.md` first for setup questions.
-4. If the exact symbol is unclear, search before emitting code:
+5. If the exact symbol is unclear, search before emitting code:
    `python scripts/search_references.py include2 selectAutoInclude`.
-5. If the bundled references still do not cover a method, inspect the target
+6. If the bundled references still do not cover a method, inspect the target
    project or source before using it.
 
 ## Routing Table
@@ -76,6 +89,7 @@ task; do not read the whole `references/` tree by default.
 | Basic query chain: `where`, order, projection, pagination, terminals | `references/query.md` |
 | Advanced query composition: explicit joins, manual subquery, draft/tuple, native fragments, tracking | `references/query-composition.md` |
 | Implicit relation queries, group joins, tree/partition/case patterns | `references/implicit-query.md` |
+| Search/page form endpoint: optional filters + stable sort + DTO graph result | `references/search-form-page.md` |
 | Query/search-form DTO filters/sorts via `whereObject` and `orderByObject` | `references/dto-object-query.md` |
 | User-management / admin-search / multi-condition search form endpoint | `references/dto-object-query.md` first, then add DSL only where needed |
 | `EasySearch` and `@EasyCond`-driven search/sort | `references/easy-search.md` |
