@@ -19,17 +19,17 @@ for Java**, **KSP (`sql-ksp-processor`) for Kotlin** (Kotlin Spring projects sho
 <dependency>
     <groupId>com.easy-query</groupId>
     <artifactId>sql-springboot-starter</artifactId>
-    <version>3.1.89</version>
+    <version>3.2.10</version>
 </dependency>
 <dependency>
     <groupId>com.easy-query</groupId>
     <artifactId>sql-mysql</artifactId>      <!-- dialect -->
-    <version>3.1.89</version>
+    <version>3.2.10</version>
 </dependency>
 <dependency>
     <groupId>com.easy-query</groupId>
     <artifactId>sql-processor</artifactId>  <!-- APT; KSP instead for Kotlin -->
-    <version>3.1.89</version>
+    <version>3.2.10</version>
     <scope>provided</scope>
 </dependency>
 ```
@@ -111,4 +111,4 @@ transaction; don't also open a manual `beginTransaction()` inside it. See `trans
 - 官方文档: `easy-query-doc/src/guide/spring-boot.md` (application.yml, code-first, navigate).
 - 源码验证: `EasyQueryProperties` @ `com.easy.query.sql.starter.config` (keys: enable, database,
   name-conversion, print-sql, print-nav-sql, delete-throw); auto-config registers `EasyQueryClient` and
-  `EasyEntityQuery` beans. Starter artifact `sql-springboot-starter`. Skill baseline 3.1.89-dev.
+  `EasyEntityQuery` beans. Starter artifact `sql-springboot-starter`. Skill baseline 3.2.10.

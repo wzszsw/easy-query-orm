@@ -159,7 +159,7 @@ There is also a gated overload `limit(condition, offset, rows)` (skipped when `c
 
 ## Pagination — `toPageResult`
 
-Returns `EasyPageResult<T>` with `getData()` and `getTotal()`. **Always pair with `orderBy`** and add a
+Returns `EasyPageResult<T>` (`com.easy.query.core.api.pagination`) with `getData()` and `getTotal()`. **Always pair with `orderBy`** and add a
 tiebreaker if the sort key is not unique, or pages may repeat/skip rows.
 
 ```java
@@ -185,4 +185,4 @@ Pagination composes with `select(...)` — call `.toPageResult(...)` after the p
 - 源码验证: `sql-test/.../QueryTest.java`, `.../doc/DocTest.java` (dynamic conditions), `.../dameng/
   DamengQueryTest.java` (pagination, select-DTO). `EasyPageResult` getData/getTotal verified.
 - 官方文档: `easy-query-doc/src/ability/where.md`, `ability/select/page.md`, `ability/select/order.md`.
-  Skill baseline 3.1.89-dev.
+  Skill baseline 3.2.10.

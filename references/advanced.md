@@ -6,7 +6,7 @@ confirm against the user's version.
 
 ## Aggregate + groupBy + projection
 
-Group with `GroupKeys.of(...)`, then project keys and aggregates in `select`. Inside the select lambda,
+Group with `GroupKeys.of(...)` (`com.easy.query.core.proxy.sql`), then project keys and aggregates in `select`. Inside the select lambda,
 `g.key1()` is the first group key and `g.groupTable()` exposes the grouped columns for aggregate functions.
 
 ```java
@@ -26,7 +26,7 @@ List<TopicGroupDTO> rows = easyEntityQuery.queryable(Topic.class)
 ```
 
 Aggregate functions on a grouped column: `.count()` / `.intCount()` / `.sum()` / `.avg()` / `.max()` /
-`.min()`. There is also a `Select.DRAFT.of(...)` form to project into a lightweight `DraftN` tuple when you
+`.min()`. There is also a `Select.DRAFT.of(...)` form from `com.easy.query.core.proxy.sql.Select` to project into a lightweight `DraftN` tuple when you
 don't want a dedicated DTO. Non-grouped aggregates (e.g. over a join) use `sumOrNull` / `sumOrDefault` /
 `maxOrNull` / `minOrNull` terminals.
 
@@ -109,4 +109,4 @@ List<Order> orders = multiEntityQuery.executeScope("ds2", eq ->
   `h2/H2BaseTest.java` (`applyShardingInitializer`). `DatabaseCodeFirst`/`CodeFirstCommand` @
   `com.easy.query.core.basic.api.database`.
 - 官方文档: `easy-query-doc/src/ability/select/group.md`, `src/super/*` (sharding),
-  `src/guide/sb-multi-datasource.md`, `src/guide/spring-boot.md` (code-first). Skill baseline 3.1.89-dev.
+  `src/guide/sb-multi-datasource.md`, `src/guide/spring-boot.md` (code-first). Skill baseline 3.2.10.

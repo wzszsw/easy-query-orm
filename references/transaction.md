@@ -11,7 +11,7 @@ repositories or controllers.
 
 ## Plain Java/Kotlin — `beginTransaction()` with try-with-resources
 
-`Transaction` is `AutoCloseable`. Commit explicitly; if the block exits (exception or early return) before
+`Transaction` (`com.easy.query.core.basic.jdbc.tx`) is `AutoCloseable`. Commit explicitly; if the block exits (exception or early return) before
 `commit()`, the transaction auto-rolls-back on `close()`.
 
 ```java
@@ -91,4 +91,4 @@ public class OrderService {
 ## Sources
 - 源码验证: `sql-test/.../DirectRelationTest.java`, `.../mysql8/M8Save2Test.java` (try-with-resources +
   commit/rollback); `Transaction` @ `com.easy.query.core.basic.jdbc.tx`.
-- 官方文档: `easy-query-doc/src/ability/transaction.md`. Skill baseline 3.1.89-dev.
+- 官方文档: `easy-query-doc/src/ability/transaction.md`. Skill baseline 3.2.10.

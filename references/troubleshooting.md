@@ -230,6 +230,9 @@ Reminder:
 - `whereObject(...)` is still a good default for large frontend/admin query
   forms with many optional conditions
 - the problem is usually the object shape, not the existence of `whereObject(...)`
+- `whereObject(...)` and explicit `.where(...)` can be mixed in one chain; you do
+  not need to abandon `whereObject(...)` just because one or two conditions are
+  easier to express in DSL
 
 Read next:
 

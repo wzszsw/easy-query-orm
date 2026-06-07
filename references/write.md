@@ -134,4 +134,4 @@ easyEntityQuery.deletable(SysUserVersionLong.class)
 ## Sources
 - 源码验证: `sql-test/.../InsertTest.java`, `UpdateTest.java`, `DeleteTest.java`, `VersionTest.java`;
   `SQLExecuteExpectRows` (`executeRows(long,String[,String])`) @ `com.easy.query.core.basic.api.internal`.
-- 官方文档: `easy-query-doc/src/ability/{insert,update,delete}.md`. Skill baseline 3.1.89-dev.
+- 官方文档: `easy-query-doc/src/ability/{insert,update,delete}.md`. Skill baseline 3.2.10.

@@ -7,9 +7,9 @@ Use this file only to confirm symbol names and decide which reference to read
 
 | Symbol | Purpose | Read Next |
 |--------|---------|-----------|
-| `EasyEntityQuery` | Default strong-typed proxy DSL client | `query.md` |
-| `DefaultEasyEntityQuery` | Concrete `EasyEntityQuery` implementation | `setup-java.md`, `setup-kotlin.md` |
-| `EasyQueryClient` | Weak-typed core client | local project first |
+| `EasyEntityQuery` | Default strong-typed proxy DSL client (`com.easy.query.api.proxy.client`) | `query.md` |
+| `DefaultEasyEntityQuery` | Concrete `EasyEntityQuery` implementation (`com.easy.query.api.proxy.client`) | `setup-java.md`, `setup-kotlin.md` |
+| `EasyQueryClient` | Weak-typed core client (`com.easy.query.core.api.client`) | local project first |
 | `EasyQueryBootstrapper` | Bootstrap/build the client | `setup-java.md`, `setup-kotlin.md`, `setup-spring-boot.md` |
 
 Common top-level methods:
@@ -35,8 +35,8 @@ Common top-level methods:
 | `@LogicDelete` | Logic delete | `write.md` |
 | `@Navigate` | Relation metadata | `relation-query.md`, `entity-modeling-navigate.md` |
 | `@NavigateFlat` | DTO/VO path flattening | `entity-modeling-navigate.md` |
-| `ProxyEntityAvailable<TEntity, TProxy>` | Proxy-enabled entity contract | `entity-mapping.md` |
-| `RelationTypeEnum` | Relation kind enum | `relation-query.md` |
+| `ProxyEntityAvailable<TEntity, TProxy>` | Proxy-enabled entity contract (`com.easy.query.core.proxy`) | `entity-mapping.md` |
+| `RelationTypeEnum` | Relation kind enum (`com.easy.query.core.enums`) | `relation-query.md` |
 | `@ShardingTableKey` | Sharding route key | `advanced.md` |
 
 ## Query Chain Symbols
@@ -79,24 +79,27 @@ Read `query.md` for ordinary conditions. Read `functions-native-sql.md` only if
 
 | Symbol | Purpose | Read Next |
 |--------|---------|-----------|
-| `whereObject(request)` | Query-form / request-object driven filters | `dto-object-query.md` |
+| `whereObject(request)` | Query-form / request-object driven filters; preferred for large search forms | `dto-object-query.md` |
 | `orderByObject(sort)` | DTO-driven sort | `dto-object-query.md` |
 | `selectAutoInclude(ResultDTO.class)` | DTO graph result | `select-auto-include.md` |
 | `@EasyWhereCondition` | Query-form filter metadata | `dto-object-query.md` |
-| `ObjectSortBuilder` | Sort allowlist / builder API | `dto-object-query.md` |
+| `ObjectSortBuilder` | Sort allowlist / builder API (`com.easy.query.core.api.dynamic.sort`) | `dto-object-query.md` |
 | `anyColumn(...)` | Dynamic property path sort/filter helper | `dto-object-query.md` |
 
 ## EasySearch Symbols
 
 | Symbol | Purpose | Read Next |
 |--------|---------|-----------|
-| `EasySearch.of(...)` | Search object factory | `easy-search.md` |
-| `@EasyCond` | Search/filter/sort metadata | `easy-search.md` |
+| `EasySearch.of(...)` | Search object factory (`com.easy.query.search`) | `easy-search.md` |
+| `@EasyCond` | Search/filter/sort metadata (`com.easy.query.search.annotation`) | `easy-search.md` |
 
 Typical chain:
 
 - `whereObject(search)`
 - `orderByObject(search)`
+
+For ordinary backend search/list pages, prefer `whereObject(queryForm)` before
+writing a long manual gated DSL chain.
 
 ## Relation and Include Symbols
 
@@ -116,9 +119,9 @@ If the result target is a DTO graph, prefer `selectAutoInclude(...)` before
 
 Useful projection helpers:
 
-- `Select.of(...)`
-- `Select.DRAFT`
-- `Select.TUPLE`
+- `Select.of(...)` (`com.easy.query.core.proxy.sql`)
+- `Select.DRAFT` (`com.easy.query.core.proxy.sql`)
+- `Select.TUPLE` (`com.easy.query.core.proxy.sql`)
 - `Select.PART`
 - `Select.aggregateOf(...)`
 - `FETCHER`
@@ -135,7 +138,7 @@ Read `query.md` for normal select, `query-composition.md` for draft/tuple or
 | `deletable(...)` | Delete rows | `write.md` |
 | `withVersion(...)` / `ignoreVersion()` | Version handling | `write.md` |
 | `disableLogicDelete()` / `allowDeleteStatement(true)` | Physical delete opt-in | `write.md` |
-| `beginTransaction()` | Plain transaction API | `transaction.md` |
+| `beginTransaction()` | Plain transaction API returning `Transaction` (`com.easy.query.core.basic.jdbc.tx`) | `transaction.md` |
 | `@Transactional` | Spring transaction boundary | `transaction.md` |
 | `savable(...)` | Aggregate graph save | `savable-aggregate.md` |
 
@@ -143,7 +146,7 @@ Read `query.md` for normal select, `query-composition.md` for draft/tuple or
 
 | Symbol | Purpose | Read Next |
 |--------|---------|-----------|
-| `groupBy(...)` / `GroupKeys.of(...)` | Group query | `advanced.md` |
+| `groupBy(...)` / `GroupKeys.of(...)` | Group query (`com.easy.query.core.proxy.sql.GroupKeys`) | `advanced.md` |
 | `getDatabaseCodeFirst()` | Code-first DDL | `advanced.md` |
 | `applyShardingInitializer(...)` | Sharding registration | `advanced.md` |
 | `EasyMultiEntityQuery.executeScope(...)` | Multi-datasource scope | `advanced.md` |

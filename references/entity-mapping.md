@@ -128,4 +128,4 @@ class SysUser : ProxyEntityAvailable<SysUser, SysUserProxy> {
 - 源码验证: `sql-test/.../entity/SysUserVersionLongLogicDel.java`, `.../entity/Topic.java`; annotations @
   `com.easy.query.core.annotation`; `LogicDeleteStrategyEnum` @
   `com.easy.query.core.basic.extension.logicdel`; `VersionLongStrategy` @
-  `com.easy.query.core.basic.extension.version`. Skill baseline 3.1.89-dev.
+  `com.easy.query.core.basic.extension.version`. Skill baseline 3.2.10.

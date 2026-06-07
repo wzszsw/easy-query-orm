@@ -34,11 +34,15 @@ task; do not read the whole `references/` tree by default.
 4. Use gated overloads for optional filters such as `.eq(condition, value)` or
    `where(condition, o -> ...)`; never build string SQL conditions for normal
    dynamic filters.
-5. Keep pagination stable with `orderBy(...)` plus a tie-breaker when the sort
+5. For backend list pages, frontend search forms, and "search/list/page with
+   many optional conditions" tasks, prefer a query-form DTO with
+   `whereObject(...)` first. Add explicit DSL only for the parts that are hard
+   to express declaratively.
+6. Keep pagination stable with `orderBy(...)` plus a tie-breaker when the sort
    key is not unique.
-6. Treat update/delete row count `0` as a meaningful signal, not silent
+7. Treat update/delete row count `0` as a meaningful signal, not silent
    success.
-7. For advanced relation loading, DTO projection, and aggregate persistence,
+8. For advanced relation loading, DTO projection, and aggregate persistence,
    follow the dedicated references instead of guessing from the base query DSL.
 
 ## Workflow
@@ -74,6 +78,7 @@ task; do not read the whole `references/` tree by default.
 | Advanced query composition: explicit joins, manual subquery, draft/tuple, native fragments, tracking | `references/query-composition.md` |
 | Implicit relation queries, group joins, tree/partition/case patterns | `references/implicit-query.md` |
 | DTO object filters/sorts via `whereObject` and `orderByObject` | `references/dto-object-query.md` |
+| User-management / admin-search / multi-condition list query | `references/dto-object-query.md` first, then add DSL only where needed |
 | `EasySearch` and `@EasyCond`-driven search/sort | `references/easy-search.md` |
 | `selectAutoInclude`, nested DTO return, auto include extras | `references/select-auto-include.md` |
 | Structured loading with `include`, `include2`, `loadInclude`, `fillOne/fillMany` | `references/include-structured-loading.md` |

@@ -148,4 +148,4 @@ against a real DB matters.
   (bootstrap + listener), `listener/{ListenerContext,ListenerContextManager,MyJdbcListener}.java`,
   `h2/{H2BaseTest,DataSourceFactory}.java`. `H2DatabaseConfiguration` @ `com.easy.query.h2.config` (sql-h2).
 - 官方文档: `easy-query-doc/src/guide/spring-boot.md` (code-first `syncTableCommand` / `executeWithTransaction`).
-  Skill baseline 3.1.89-dev.
+  Skill baseline 3.2.10.

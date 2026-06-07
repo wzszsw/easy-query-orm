@@ -1,7 +1,8 @@
 # EasySearch Extension
 
 Use this reference only when the project has the `sql-search` extension and
-request parameters are expressed through `EasySearch` / `@EasyCond`.
+request parameters are expressed through `EasySearch` (`com.easy.query.search`)
+/ `@EasyCond` (`com.easy.query.search.annotation`).
 
 This is an extension layer over the normal DTO object query APIs. For ordinary
 `whereObject(...)`, `orderByObject(...)`, `@EasyWhereCondition`, and
@@ -36,7 +37,7 @@ parameter parsing rules are different.
 
 ## `@EasyCond`
 
-`@EasyCond` can be declared on fields or at type level.
+`@EasyCond` (`com.easy.query.search.annotation`) can be declared on fields or at type level.
 
 Examples:
 
@@ -68,6 +69,8 @@ EasySortType[] sortOnly() default {EasySortType.Asc, EasySortType.Desc};
 
 Use `table`, `tableAlias`, or `tableIndex` only when request params need to
 target joined tables rather than the root table.
+
+`EasySortType` is `com.easy.query.search.EasySortType`.
 
 ## Parameter Format
 

@@ -19,23 +19,23 @@ Use for a plain Java (non-Spring) project. The query/write/transaction DSL appli
     <dependency>
         <groupId>com.easy-query</groupId>
         <artifactId>sql-core</artifactId>
-        <version>3.1.89</version>
+        <version>3.2.10</version>
     </dependency>
     <dependency>
         <groupId>com.easy-query</groupId>
         <artifactId>sql-api-proxy</artifactId>   <!-- strong-typed proxy API -->
-        <version>3.1.89</version>
+        <version>3.2.10</version>
     </dependency>
     <dependency>
         <groupId>com.easy-query</groupId>
         <artifactId>sql-mysql</artifactId>       <!-- dialect: pick one (sql-h2 / sql-pgsql / sql-mssql ...) -->
-        <version>3.1.89</version>
+        <version>3.2.10</version>
     </dependency>
     <!-- APT processor: generates the *Proxy classes at compile time -->
     <dependency>
         <groupId>com.easy-query</groupId>
         <artifactId>sql-processor</artifactId>
-        <version>3.1.89</version>
+        <version>3.2.10</version>
         <scope>provided</scope>
     </dependency>
     <!-- your JDBC driver + connection pool -->
@@ -128,4 +128,4 @@ from `sql-mysql`, `H2DatabaseConfiguration` from `sql-h2`).
 - 源码验证: `EasyQueryBootstrapper` @ `com.easy.query.core.bootstrapper`; `DefaultEasyEntityQuery` @
   `com.easy.query.api.proxy.client`; entity pattern from `sql-test/.../entity/Topic.java`;
   `MySQLDatabaseConfiguration` @ `com.easy.query.mysql.config`.
-- APT module: `sql-processor`. Skill baseline 3.1.89-dev.
+- APT module: `sql-processor`. Skill baseline 3.2.10.

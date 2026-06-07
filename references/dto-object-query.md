@@ -34,12 +34,34 @@ optional filters. When the request object already models the search form,
 `whereObject(...)` avoids long repetitive gated DSL chains and keeps filtering
 rules declarative.
 
+Typical examples:
+
+- user management search
+- admin list page filters
+- order list / customer list / bank-card list query forms
+- controller/service `search` or `page` endpoints with many optional request fields
+
 Use this approach when:
 
 - the request DTO is essentially a query form
 - many conditions are optional
 - the filter shape is stable enough to describe with metadata
 - list/search pages need the same condition logic repeatedly
+
+It can be combined with DSL in the same query chain. This is often the best
+shape for real business code:
+
+```java
+queryable
+    .whereObject(queryForm)
+    .where(queryForm.getRoleId() != null, user -> user.roles().any(role -> role.id().eq(queryForm.getRoleId())))
+    .orderByObject(queryForm)
+    .orderBy(user -> { user.createdTime().desc(); user.id().desc(); });
+```
+
+Use `whereObject(...)` for the broad query-form conditions, then add explicit
+DSL only for the few conditions that are relation-heavy, computed, or otherwise
+awkward to express with annotations.
 
 ## `@EasyWhereCondition`
 
@@ -105,7 +127,8 @@ Notes:
 
 ## `orderByObject` and `ObjectSort`
 
-`orderByObject(...)` expects an `ObjectSort` configuration or a project helper
+`orderByObject(...)` expects an `ObjectSort` (`com.easy.query.core.api.dynamic.sort`)
+configuration or a project helper
 that produces one.
 
 Pattern:
@@ -124,7 +147,7 @@ does not exist on the supported query/sort object shape, the query may fail fast
 
 ## `ObjectSortBuilder`
 
-Source methods:
+Source methods from `com.easy.query.core.api.dynamic.sort.ObjectSortBuilder`:
 
 ```java
 builder.orderBy(propertyName, asc);
@@ -165,6 +188,8 @@ query.orderBy(card -> {
 
 Still validate user-provided property names through an allowlist.
 
+`OrderByModeEnum` is `com.easy.query.core.func.def.enums.OrderByModeEnum`.
+
 ## Relation-Aware DTO Filters
 
 DTO request objects can target relation paths when entity navigation metadata is
@@ -193,6 +218,8 @@ easyEntityQuery.queryable(SysUser.class)
     });
 ```
 
+`NotNullOrEmptyValueFilter` is `com.easy.query.core.expression.builder.core`.
+
 Or gate the whole clause:
 
 ```java
@@ -204,3 +231,7 @@ Use explicit DSL when:
 - the request object abstraction makes the query harder to understand
 - the condition depends on nontrivial branching or computed business rules
 - only a few fields are involved and the DSL is shorter than the metadata
+
+Do not swing too far the other way: if the task is obviously "build a search
+endpoint with many optional filters", prefer `whereObject(...)` first rather
+than hand-writing a long chain of gated predicates.

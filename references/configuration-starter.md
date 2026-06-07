@@ -30,7 +30,7 @@ easy-query.autoIncludeTable = THROW
 
 ## Coding Implications
 
-- Object insert omits null columns by default. Use `setSQLStrategy(SQLExecuteStrategyEnum.ALL_COLUMNS)` when nulls must be inserted, for example when upsert conflict columns may be null.
+- Object insert omits null columns by default. Use `setSQLStrategy(SQLExecuteStrategyEnum.ALL_COLUMNS)` (`com.easy.query.core.enums`) when nulls must be inserted, for example when upsert conflict columns may be null.
 - Object update writes all columns by default. Use explicit expression update or `ONLY_NOT_NULL_COLUMNS` when request objects may contain null fields that should not overwrite data.
 - Physical delete can be blocked by `deleteThrow` and logic-delete guards. Use documented delete APIs intentionally.
 - `whereObject` default string condition is controlled by `defaultCondition`; source default is `LIKE`.
