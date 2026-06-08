@@ -1,33 +1,8 @@
 # selectAutoInclude
 
-`selectAutoInclude` is a core DTO result API. It combines select mapping with include-style relation loading to build nested DTO/VO result shapes.
-
-Source tests show it is not "just select": the root query runs first, then
-easy-query issues include-like follow-up relation queries keyed by hidden
-relation columns such as `__relation__id`.
-
-## Core Signatures
-
-Client source:
-
-```java
-default <TR> Query<TR> selectAutoInclude(Class<TR> resultClass)
-<TR> Query<TR> selectAutoInclude(
-    Class<TR> resultClass,
-    SQLActionExpression1<ColumnAsSelector<T1, TR>> selectExpression,
-    boolean replace
-)
-```
-
-Proxy source:
-
-```java
-selectAutoInclude(ResultDTO.class)
-selectAutoInclude(ResultDTO.class, proxy -> Select.of(...))
-selectAutoInclude(ResultDTO.class, proxy -> Select.of(...), replace)
-```
-
-For joins, arity-specific overloads exist through `Selectable2...10` and `EntitySelectable2...10`.
+`selectAutoInclude` is the main DTO/VO structured-return API. Think
+"auto-select root + include-style relation assembly", not "single joined
+select".
 
 ## Basic Pattern
 
@@ -39,18 +14,12 @@ List<SysBankDTO> list = easyEntityQuery.queryable(SysBank.class)
 
 The DTO describes the returned object graph. It can include nested objects and lists when the shape has matching navigation metadata.
 
-## Execution Shape
+Execution shape:
 
-What source/tests show:
-
-- The root query selects DTO scalar columns plus relation key columns needed for
-  later assembly.
-- Nested relation data is fetched by separate include-style batched queries.
-- Deep DTO graphs can therefore produce multiple SQL statements; this is normal.
-- Relation batching follows starter `relationGroupSize`, whose default is `512`.
-
-Use `include-structured-loading.md` if you need to compare this execution model
-against handwritten `include/include2/loadInclude/fillMany`.
+- Root query selects DTO scalar fields plus hidden relation keys.
+- Nested data is fetched by separate include-style relation queries.
+- Deep graphs normally mean multiple SQL statements.
+- Batching follows starter `relationGroupSize` default `512`.
 
 ## Extra Select Pattern
 
@@ -64,7 +33,7 @@ List<PostDTO> list = easyEntityQuery.queryable(Post.class)
     .toList();
 ```
 
-`replace = false` keeps auto-selected fields and appends extra select. `replace = true` replaces the automatic select behavior for the select expression.
+`replace = false` appends to auto select. `replace = true` replaces it.
 
 ## Critical Constraint
 
@@ -78,9 +47,8 @@ query.selectAutoInclude(SysUser.class);
 query.selectAutoInclude(SysUserDTO.class);
 ```
 
-Source has `SelectAutoIncludeTableEnum.THROW/WARNING/IGNORE`; default option is `THROW`. The implementation throws: "selectAutoInclude should not use database entity objects as return results".
-
-Reason: passing database entities can pull the whole relation tree.
+Source has `SelectAutoIncludeTableEnum.THROW/WARNING/IGNORE`; default is
+`THROW`.
 
 ## DTO Navigation
 
@@ -96,7 +64,7 @@ public class UserDTO {
 }
 ```
 
-Important distinction from source:
+Important distinction:
 
 - For DTO/VO metadata used only by `selectAutoInclude`, the `@Navigate`
   annotation comment says defining `RelationTypeEnum` is the essential part and
@@ -106,8 +74,7 @@ Important distinction from source:
   `entity-modeling-navigate.md`; otherwise runtime may throw
   `entityRelationToImplicitProvider is null...`.
 
-If the DTO relation property has different field names or a path through entity
-relations, use the patterns from `entity-modeling-navigate.md`.
+If names or paths do not line up, use `entity-modeling-navigate.md`.
 
 ## Flattened Paths with NavigateFlat
 
@@ -124,10 +91,10 @@ private List<String> menuIds;
 Source constraints:
 
 - `@NavigateFlat` is for non-table DTO/VO use.
-- Target must be a collection unless the single value is a basic type or database entity.
-- Field type must match the entity path value because the include processor uses the entity as data container.
-- If a `@NavigateFlat` VO and a same-level id are requested together incorrectly, source comments say it can error.
-- `prefix = true` lets the alias act as a reusable path prefix instead of the full terminal path.
+- Target should be a collection unless the final value is a basic type or
+  entity.
+- Field type must match the entity-path value.
+- `prefix = true` turns the alias into a reusable path prefix.
 
 ## Extra Auto Include Configure
 
@@ -141,7 +108,9 @@ EntityExtraAutoIncludeConfigure<TProxy, TEntity>
     .ignoreNavigateConfigure();
 ```
 
-Core interface comment: this is for `selectAutoInclude` from the second level onward, to compensate for class-based DSL limitations. It applies to non-table DTO/VO. `@NavigateFlat` properties cannot have extra filters, but `@NavigateFlat` objects can.
+This hook is mainly for second-level-and-deeper DTO/VO relation tuning.
+`@NavigateFlat` properties cannot have extra filters, but `@NavigateFlat`
+objects can.
 
 Pattern seen in docs/tests uses static config on generated proxy table:
 
@@ -156,10 +125,8 @@ Additional source-backed behavior:
 
 - `.configure(queryable -> { ... })` can apply query-level behaviors such as
   `orderBy(...)` or `ALL_SUB_QUERY_GROUP_JOIN`.
-- `.ignoreNavigateConfigure()` tells auto include to ignore relation settings
-  inherited from `@Navigate`, such as `orderByProps`, `limit`, or `offset`.
-- This hook is most useful from the second level onward, where DTO class DSL is
-  otherwise too limited.
+- `.ignoreNavigateConfigure()` ignores relation settings inherited from
+  `@Navigate`.
 
 Use this when nested DTO relation includes need custom filtering, custom sort,
 `subQueryToGroupJoin`, or extra selected values.
@@ -179,11 +146,8 @@ Use `@Navigate(ignoreAutoInclude = true)` on tree child relation if the DTO shap
 
 ## Include Override Rule
 
-Docs say `selectAutoInclude` automatically performs include according to DTO information. If explicit include is already written, the handwritten include wins.
-
-Source tests confirm this precedence. Use explicit `include(...)` first when
-you need handcrafted `where/orderBy/limit` on a relation and still want
-`selectAutoInclude` to assemble the DTO graph.
+If explicit `include(...)` is already written, it wins over auto include on the
+same path.
 
 ## Practical Checklist
 

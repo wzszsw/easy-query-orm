@@ -1,13 +1,12 @@
 # Entity Navigation Metadata
 
 Read this after `entity-mapping.md` when the task depends on advanced relation
-metadata instead of plain table/column mapping. This file focuses on `@Navigate`,
-DTO-side navigation, and path-based mapping.
+metadata rather than plain mapping.
 
 ## Relation Shapes
 
-Examples below use `Fields.xxx` constants. Those come from Lombok
-`@FieldNameConstants` on the entity or mapping class, for example:
+Examples use `Fields.xxx` constants from Lombok `@FieldNameConstants`, for
+example:
 
 ```java
 import lombok.experimental.FieldNameConstants;
@@ -47,8 +46,9 @@ private List<UserBook> books;
 private List<Role> roles;
 ```
 
-`selfProperty` / `targetProperty` define the direct relation columns.
-`mappingClass` plus the two `*MappingProperty` arrays are required for many-to-many.
+`selfProperty` / `targetProperty` define direct relation columns.
+`mappingClass` plus the two `*MappingProperty` arrays are required for
+many-to-many.
 
 ## Entity vs DTO/VO Navigation
 
@@ -65,12 +65,12 @@ Treat these as two different use cases:
   entity plz set supportNonEntity = true.` if the DTO/VO path is used like a
   queryable relation without verified support.
 
-Use DTO/VO `@Navigate` to describe result graphs. Do not assume it is a full
-replacement for entity-side relation modeling.
+Use DTO/VO `@Navigate` to describe result graphs, not to replace entity-side
+relation modeling.
 
 ## High-Value `@Navigate` Options
 
-Source fields that most often affect behavior:
+High-value fields:
 
 ```java
 RelationTypeEnum value();
@@ -92,15 +92,13 @@ boolean ignoreAutoInclude() default false;
 
 Use them deliberately:
 
-- `required = true`: allows inner-join style semantics where the related row must exist.
-- `subQueryToGroupJoin = true`: useful for hot to-many filters/aggregates that repeatedly translate to subquery group joins.
-- `orderByProps` / `limit` / `offset`: shape to-many relation loading and partition-style element access.
-- `supportNonEntity = true`: required when non-entity proxy navigation itself
-  must participate in implicit query DSL behavior; do not add it blindly to
-  every DTO field.
-- `partitionOrder`: source enum choices are `THROW`, `IGNORE`, `NAVIGATE`,
-  `KEY_ASC`, `KEY_DESC`.
-- `ignoreAutoInclude = true`: prevents tree-like relations from being treated as ordinary auto include paths.
+- `required = true`: inner-join oriented relation semantics
+- `subQueryToGroupJoin = true`: hot to-many filter/aggregate path
+- `orderByProps` / `limit` / `offset`: to-many load / partition shaping
+- `supportNonEntity = true`: only when non-entity proxy navigation itself is
+  used in DSL
+- `partitionOrder`: `THROW`, `IGNORE`, `NAVIGATE`, `KEY_ASC`, `KEY_DESC`
+- `ignoreAutoInclude = true`: keep tree-like relations out of auto include
 
 ## Query-Level Relation Tuning
 
@@ -123,13 +121,12 @@ Ordered limited relation example:
 private List<Comment> latestComments;
 ```
 
-If partition-like access is needed and no order is declared, the default
-`PartitionOrderEnum.THROW` may fail fast. Add an explicit order.
+If partition-like access has no order, default `THROW` may fail fast.
 
 ## DTO Navigation
 
-DTO/VO relation fields can carry navigation metadata when the result graph cannot
-be inferred from simple field naming alone.
+DTO/VO relation fields can carry navigation metadata when simple naming is not
+enough.
 
 ```java
 public class UserDTO {
@@ -143,19 +140,15 @@ public class UserDTO {
 
 Refine that example before copying it:
 
-- If the field is only result metadata for `selectAutoInclude`, start with
-  `@Navigate(value = RelationTypeEnum.OneToMany)` and add more only when source
-  patterns prove they are consumed.
-- If the DTO/VO path itself will be used in implicit query DSL, then
-  `supportNonEntity = true` becomes relevant.
+- result metadata only -> start with plain `RelationTypeEnum`
+- DTO/VO path used in DSL -> `supportNonEntity = true` becomes relevant
 
 Do not use DTO-side `@Navigate` as a generic substitute for missing entity
 relations.
 
 ## `@NavigateFlat`
 
-Use path-based flattening when a DTO field maps through one or more entity
-relations.
+Use `@NavigateFlat` when a DTO field maps through one or more entity relations.
 
 ```java
 private static final MappingPath MENU_IDS_PATH =
@@ -167,15 +160,12 @@ private List<String> menuIds;
 
 Rules:
 
-- It is for DTO/VO traversal paths, not ordinary entity table objects.
-- The final target must align with the DTO field type.
-- The target should be a collection unless the final single value is a basic
-  type or a database entity.
-- Source comments warn that flattening a VO and also pulling the same-level id
-  incorrectly can throw.
-- The mapped field type must match the entity-path value type because the
-  include processor uses the entity object as the data container.
-- Use `prefix = true` only when the alias is a reusable path prefix.
+- DTO/VO traversal only, not ordinary entity table objects
+- final target must match the DTO field type
+- collection target unless the final single value is a basic type or entity
+- same-level flatten + id misuse can throw
+- mapped field type must match the entity-path value type
+- `prefix = true` only for reusable path prefixes
 
 ## `directMapping`, `@EasyTree`, `@Encryption`
 

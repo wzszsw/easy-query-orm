@@ -12,15 +12,14 @@ import sys
 from pathlib import Path
 
 
-def main() -> int:
-    terms = sys.argv[1:]
-    if not terms:
-        print("usage: search_references.py <term> [term...]")
-        return 2
+def compile_patterns(terms: list[str]) -> list[re.Pattern[str]]:
+    return [re.compile(re.escape(term), re.IGNORECASE) for term in terms]
 
-    root = Path(__file__).resolve().parents[1]
+
+def iter_matches(root: Path, terms: list[str]) -> list[str]:
     refs = root / "references"
-    patterns = [re.compile(re.escape(term), re.IGNORECASE) for term in terms]
+    patterns = compile_patterns(terms)
+    matches: list[str] = []
 
     for path in sorted(refs.glob("*.md")):
         try:
@@ -31,7 +30,19 @@ def main() -> int:
         for lineno, line in enumerate(lines, 1):
             if any(pattern.search(line) for pattern in patterns):
                 rel = path.relative_to(root).as_posix()
-                print(f"{rel}:{lineno}: {line}")
+                matches.append(f"{rel}:{lineno}: {line}")
+    return matches
+
+
+def main() -> int:
+    terms = sys.argv[1:]
+    if not terms:
+        print("usage: search_references.py <term> [term...]")
+        return 2
+
+    root = Path(__file__).resolve().parents[1]
+    for match in iter_matches(root, terms):
+        print(match)
 
     return 0
 

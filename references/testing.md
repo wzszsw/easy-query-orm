@@ -6,13 +6,13 @@ Three complementary ways to test, from most to least common in business projects
 2. **SQL-shape assertion with `.toSQL()`** — assert the generated SQL string without touching any DB.
 3. **Capture executed SQL via a listener** — the repo's own style (real DB + assert exact SQL + params).
 
-Pick (1) for "does my query/insert/update do the right thing", (2) for "is the SQL what I expect" with zero
-DB setup, (3) when you need to assert the exact executed SQL *and* parameters against a real database.
+Pick (1) for behavior, (2) for SQL shape without DB setup, and (3) only when
+exact SQL+params assertions matter.
 
 ## 1. Behavior test — H2 in-memory + code-first DDL
 
-No external database. Build an `EasyEntityQuery` over an in-memory H2 datasource, create tables from the
-entities via code-first, seed data, then assert behavior.
+No external database. Build `EasyEntityQuery` over in-memory H2, create tables
+via code-first, seed data, then assert behavior.
 
 Dependencies (test scope): `com.easy-query:sql-h2`, `com.h2database:h2`, JUnit, a connection pool.
 
@@ -79,8 +79,8 @@ class TopicQueryTest {
 }
 ```
 
-`getDatabaseCodeFirst().syncTableCommand(List<Class<?>>).executeWithTransaction(arg -> arg.commit())` is the
-verified code-first entry. (Kotlin: same calls, `Topic::class.java`, `.use {}` not needed here.)
+`getDatabaseCodeFirst().syncTableCommand(...).executeWithTransaction(...)` is
+the verified code-first entry.
 
 ## 2. SQL-shape assertion — `.toSQL()` (no DB)
 
@@ -96,8 +96,7 @@ String q = easyEntityQuery.queryable(Topic.class)
         .toSQL();
 // assert q contains the WHERE / ORDER BY you expect
 ```
-This still needs an `EasyEntityQuery` instance (build one over H2 as in §1, or any configured client) but no
-data and no actual execution.
+This still needs an `EasyEntityQuery` instance, but no data and no execution.
 
 ## 3. Capture executed SQL + params via a listener (repo style)
 
@@ -123,10 +122,8 @@ Assert.assertEquals("123xxx(String)",
 listenerContextManager.clear();
 ```
 
-`ListenerContext`, `ListenerContextManager`, and `MyJdbcListener` are **test helpers that live in
-`sql-test`**, not public framework API — copy/adapt them from the repo if you want this style. For most
-business projects, prefer §1 (behavior) or §2 (`.toSQL()`); reach for §3 only when asserting exact SQL+params
-against a real DB matters.
+`ListenerContext`, `ListenerContextManager`, and `MyJdbcListener` are repo test
+helpers, not public API.
 
 ## Choosing
 
@@ -137,15 +134,7 @@ against a real DB matters.
 
 ## Common mistakes
 
-- H2 without `DB_CLOSE_DELAY=-1` → the in-memory DB is dropped when the first connection closes.
-- Forgetting code-first `syncTableCommand(...)` → tables don't exist, queries fail.
-- Dialect mismatch: building with `MySQLDatabaseConfiguration` while the test DB is H2 (use
-  `H2DatabaseConfiguration`, optionally `MODE=MySQL` on the H2 url for MySQL-ish SQL).
-- Treating the `sql-test` listener helpers as importable framework classes.
-
-## Sources
-- 源码验证: `sql-test/.../QueryTest.java`, `DeleteTest.java` (`.toSQL()` assertions), `BaseTest.java`
-  (bootstrap + listener), `listener/{ListenerContext,ListenerContextManager,MyJdbcListener}.java`,
-  `h2/{H2BaseTest,DataSourceFactory}.java`. `H2DatabaseConfiguration` @ `com.easy.query.h2.config` (sql-h2).
-- 官方文档: `easy-query-doc/src/guide/spring-boot.md` (code-first `syncTableCommand` / `executeWithTransaction`).
-  Skill baseline 3.2.10.
+- H2 without `DB_CLOSE_DELAY=-1`
+- missing `syncTableCommand(...)`
+- dialect mismatch (`H2DatabaseConfiguration` vs MySQL dialect)
+- treating repo listener helpers as public API

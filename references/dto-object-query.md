@@ -9,12 +9,9 @@ Do not use this file as the main guide for:
 - `sql-search` / `EasySearch` / `@EasyCond`: read `easy-search.md`
 - ordinary non-form dynamic query logic: read `query.md`
 
-This file covers one branch of easy-query dynamic query: query/search form
-objects. It is not the general default for all "dynamic query" tasks.
-
-For the common combined shape "search/page form + stable sort + DTO graph
-return", read `search-form-page.md` first. That file exists to avoid mixing
-several broader references for one standard endpoint pattern.
+This is the query/search-form branch, not the default for all dynamic query
+tasks. For the common combined shape "search/page form + stable sort + DTO
+graph return", read `search-form-page.md` first.
 
 ## Core APIs
 
@@ -38,9 +35,7 @@ List<SysUser> users = easyEntityQuery.queryable(SysUser.class)
 ```
 
 This is usually the preferred approach for frontend/admin query forms with many
-optional filters. When the request object already models the search form,
-`whereObject(...)` avoids long repetitive gated DSL chains and keeps filtering
-rules declarative.
+optional filters.
 
 Typical examples:
 
@@ -49,15 +44,8 @@ Typical examples:
 - order list / customer list / bank-card list query forms
 - controller/service `search` or `page` endpoints with many optional request fields
 
-Use this approach when:
-
-- the request DTO is essentially a query form
-- many conditions are optional
-- the filter shape is stable enough to describe with metadata
-- list/search pages need the same condition logic repeatedly
-
-Do not treat this as the default just because the query is "dynamic". If the
-task is not really a search form, prefer normal DSL from `query.md`.
+Use it when the request DTO is really a query form and many conditions are
+optional. Otherwise prefer `query.md`.
 
 It can be combined with DSL in the same query chain. This is often the best
 shape for real business code:
@@ -70,12 +58,8 @@ queryable
     .orderBy(user -> { user.createdTime().desc(); user.id().desc(); });
 ```
 
-Use `whereObject(...)` for the broad query-form conditions, then add explicit
-DSL only for the few conditions that are relation-heavy, computed, or otherwise
-awkward to express with annotations.
-
-That mixed shape is mainly for search endpoints. Do not generalize it to
-arbitrary service-layer query composition.
+Use `whereObject(...)` for the broad form conditions, then add explicit DSL
+only for the awkward relation/computed pieces.
 
 ## Search-Form Filters With Manual Sort
 
@@ -87,9 +71,8 @@ For many admin/search page endpoints, filters are form-like but sorting is only
 - append stable fallback order such as `createdTime desc`, `id desc`
 - then call `selectAutoInclude(ResultDTO.class)` and `toPageResult(...)`
 
-Do not force `orderByObject(...)` just because `whereObject(...)` is being used.
-If the sortable fields are few, manual `orderBy(...)` is often clearer and
-cheaper than introducing `ObjectSort`.
+Do not force `orderByObject(...)` if only a few sortable fields exist; manual
+`orderBy(...)` is often clearer.
 
 ## `@EasyWhereCondition`
 
@@ -107,7 +90,7 @@ Source fields:
 )
 ```
 
-Important condition values:
+High-value condition values:
 
 ```text
 DEFAULT, EQUAL, NOT_EQUAL, GREATER_THAN, LESS_THAN,
@@ -144,14 +127,11 @@ private LocalDateTime createTimeEnd;
 
 Notes:
 
-- Relation paths in `propName` are supported.
-- To-one paths become implicit joins.
-- To-many paths become implicit subqueries.
-- `tableIndex` / `tablesIndex` are for explicit join tables, not implicit joins.
-- `DEFAULT` follows starter config `defaultCondition`; the default behavior may be
-  `LIKE` rather than `CONTAINS`.
-- This style works especially well for frontend query forms where many inputs map
-  one-to-one onto entity fields or relation paths.
+- relation paths in `propName` are supported
+- to-one paths become implicit joins
+- to-many paths become implicit subqueries
+- `tableIndex` / `tablesIndex` are for explicit join tables
+- `DEFAULT` follows starter `defaultCondition`
 
 ## `orderByObject` and `ObjectSort`
 
@@ -170,8 +150,7 @@ List<SysUser> users = easyEntityQuery.queryable(SysUser.class)
     .toList();
 ```
 
-Source docs are strict about mismatched sort fields. If the configured sort field
-does not exist on the supported query/sort object shape, the query may fail fast.
+Mismatched sort fields can fail fast.
 
 ## `ObjectSortBuilder`
 
@@ -186,14 +165,7 @@ builder.allowed(propertyName);
 builder.notAllowed(propertyName);
 ```
 
-Use it for frontend-driven or external sort input that belongs to the same
-search/query form workflow when the request already models sort metadata as an
-`ObjectSort` shape:
-
-- `allowed(...)`: declare sortable fields explicitly
-- `notAllowed(...)`: deny specific fields that still exist on the object shape
-- `tableIndex`: target explicit join tables
-- `orderByMode`: configure null ordering when supported
+Use it when external sort input belongs to the same query-form workflow.
 
 Nested to-one property paths are supported, for example:
 
@@ -203,9 +175,7 @@ builder.orderBy("user.name", true);
 
 ## `anyColumn(...)`
 
-Use `anyColumn(...)` for controlled dynamic property access when a property path
-must be chosen at runtime. This is a general dynamic-query helper, not specific
-to search-form DTOs.
+Use `anyColumn(...)` for controlled runtime property-path access.
 
 ```java
 query.where(card -> {
@@ -217,7 +187,7 @@ query.orderBy(card -> {
 });
 ```
 
-Still validate user-provided property names through an allowlist.
+Still validate property names through an allowlist.
 
 `OrderByModeEnum` is `com.easy.query.core.func.def.enums.OrderByModeEnum`.
 
@@ -228,11 +198,9 @@ already correct.
 
 Rules:
 
-- use relation paths in `propName` only when the entity relation is already modeled correctly
-- prefer explicit DSL when the relation logic is hard to review from annotations alone
-- if the same to-many relation is hit repeatedly, evaluate
-  `@Navigate(subQueryToGroupJoin = true)` or query-level
-  `.subQueryToGroupJoin(...)`
+- use relation paths only when entity relations are already correct
+- prefer explicit DSL when annotation-driven relation logic is hard to review
+- repeated to-many relation hits may justify `subQueryToGroupJoin`
 
 ## When Explicit DSL Is Clearer
 

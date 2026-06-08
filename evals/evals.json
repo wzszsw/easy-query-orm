@@ -1,5 +1,42 @@
 {
   "skill_name": "easy-query",
+  "design": {
+    "version": 1,
+    "goal": "Measure whether the skill routes to verified easy-query APIs without falling back to generic ORM habits, manual SQL, or post-query in-memory workarounds.",
+    "dimensions": [
+      {
+        "id": "setup-and-generation",
+        "purpose": "Proxy generation, Kotlin KSP vs KAPT, starter setup, and Spring integration.",
+        "eval_ids": [0, 1, 2]
+      },
+      {
+        "id": "core-query-and-write",
+        "purpose": "CRUD, dynamic paging filters, transactions, and tests grounded in easy-query APIs.",
+        "eval_ids": [3, 4, 5, 6]
+      },
+      {
+        "id": "implicit-core",
+        "purpose": "Implicit group, partition, joining, boolean relation projection, and structured relation loading.",
+        "eval_ids": [7, 8]
+      },
+      {
+        "id": "implicit-controls",
+        "purpose": "flatElement, subQueryConfigure, filter/configure/mode, join-on filtering, relation distinct, and predicate-to-boolean projection.",
+        "eval_ids": [9, 10, 11, 13, 14]
+      },
+      {
+        "id": "projection-and-vo-assembly",
+        "purpose": "Proxy VO relation projection without selectAutoInclude.",
+        "eval_ids": [12]
+      }
+    ],
+    "pass_policy": {
+      "p0_must_pass_eval_ids": [1, 7, 8, 10, 11],
+      "p1_should_pass_eval_ids": [9, 12, 13, 14],
+      "p2_regression_guard_eval_ids": [0, 2, 3, 4, 5, 6]
+    },
+    "benchmark_focus_eval_ids": [1, 7, 8, 10, 12]
+  },
   "evals": [
     {
       "id": 0,
@@ -90,6 +127,20 @@
       "name": "proxy-relation-set-projection",
       "prompt": "我不用 selectAutoInclude，想直接 select 一个自定义 VOProxy，把用户的 bankCards 投影成 cards 子列表，里面 type 来自 card.code，code 来自 card.bank.name。请给 easy-query Java 示例。",
       "expected_output": "Uses select(user -> new MyUserVOProxy().vo1().set(...).cards().set(user.bankCards(), (self, target) -> { self.type().set(target.code()); self.code().set(target.bank().name()); })) and treats it as a valid relation-driven projection pattern rather than switching to selectAutoInclude or manual post-query mapping.",
+      "files": []
+    },
+    {
+      "id": 13,
+      "name": "relation-configure-alias-and-logic-delete",
+      "prompt": "给我两个 easy-query Java 片段。第一个：User 的 roles 这条隐式关系在子查询里起别名 myRole，再判断是否存在 name like 查询的角色名 且 createTime 在区间内的 role。第二个：User 的 bankCards 这条关系在隐式聚合前关闭逻辑删除，再对 type='123' 的 code 求和并比较。不要改成手写 join。",
+      "expected_output": "First snippet uses roles().configure(r -> r.asAlias(\"myRole\")).any(role -> ...). Second snippet uses bankCards().configure(q -> q.disableLogicDelete()).where(card -> card.type().eq(\"123\")).sum(card -> card.code().toNumber(Integer.class)).eq(...). Must keep the implicit relation form instead of rewriting to explicit joins.",
+      "files": []
+    },
+    {
+      "id": 14,
+      "name": "relation-distinct-aggregate",
+      "prompt": "easy-query 里我想写一个隐式关系聚合：按 User 查询，并返回 books 这条关系去重后的 author.age 求和。请给 Java 代码，要求 distinct 发生在关系子查询内部，而不是外层 select distinct。",
+      "expected_output": "Uses a relation chain like user.books().distinct().sum(book -> book.author().age()) in select/selectColumn and explicitly keeps distinct inside the implicit relation aggregate path instead of rewriting to an outer select distinct.",
       "files": []
     }
   ]

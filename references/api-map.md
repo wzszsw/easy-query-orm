@@ -1,7 +1,6 @@
 # API Map
 
-Use this file only to confirm symbol names and decide which reference to read
- next. Do not treat it as the main coding guide.
+Use this file only to confirm symbol names and choose the next reference.
 
 ## Entry Points
 
@@ -14,15 +13,9 @@ Use this file only to confirm symbol names and decide which reference to read
 
 Common top-level methods:
 
-- `queryable(...)`
-- `insertable(...)`
-- `updatable(...)`
-- `deletable(...)`
-- `savable(...)`
-- `beginTransaction()`
-- `sqlQuery(...)`
-- `sqlQueryMap(...)`
-- `sqlExecute(...)`
+`queryable(...)`, `insertable(...)`, `updatable(...)`, `deletable(...)`,
+`savable(...)`, `beginTransaction()`, `sqlQuery(...)`, `sqlQueryMap(...)`,
+`sqlExecute(...)`
 
 ## Entity and Mapping Symbols
 
@@ -41,39 +34,20 @@ Common top-level methods:
 
 ## Query Chain Symbols
 
-Normal query chain:
-
-- `where(...)`
-- `where(condition, ...)`
-- `whereById(...)`
-- `whereByIds(...)`
-- `orderBy(...)`
-- `orderByAsc(...)`
-- `orderByDesc(...)`
-- `select(...)`
-- `toList()`
-- `firstOrNull()`
-- `singleOrNull()`
-- `findNotNull(...)`
-- `toPageResult(...)`
-- `toChunk(...)`
-- `streamBy(...)`
-
-Read `query.md` first for normal query writing.
+Normal query chain: `where(...)`, `where(condition, ...)`, `whereById(...)`,
+`whereByIds(...)`, `orderBy(...)`, `select(...)`, `toList()`,
+`firstOrNull()`, `singleOrNull()`, `findNotNull(...)`, `toPageResult(...)`,
+`toChunk(...)`, `streamBy(...)`
 
 ## Predicate Symbols
 
 Common operators:
 
-- Compare: `eq` `ne` `gt` `ge` `lt` `le`
-- Like/text: `like` `notLike` `startsWith` `endsWith` `contains`
-- Null/empty: `isNull` `isNotNull` `isEmpty` `isNotEmpty` `isBlank` `isNotBlank`
-- Set: `in` `notIn`
-- Range: `rangeOpenClosed` `rangeOpen` `rangeClosedOpen` `rangeClosed`
-- Composition: `or(() -> ...)` `and(() -> ...)`
-
-Read `query.md` for ordinary conditions. Read `functions-native-sql.md` only if
- you need `sqlSegment`, raw SQL fragments, or typed expression helpers.
+- compare: `eq` `ne` `gt` `ge` `lt` `le`
+- text: `like` `notLike` `startsWith` `endsWith` `contains`
+- null/empty: `isNull` `isNotNull` `isBlank` `isNotBlank`
+- set/range: `in` `notIn` `rangeClosed` and related range helpers
+- composition: `or(() -> ...)` `and(() -> ...)`
 
 ## DTO Query Symbols
 
@@ -95,12 +69,9 @@ Read `query.md` for ordinary conditions. Read `functions-native-sql.md` only if
 
 Typical chain:
 
-- `whereObject(search)`
-- `orderByObject(search)`
+`whereObject(search)` + `orderByObject(search)`
 
-For ordinary backend search/list pages, prefer `whereObject(queryForm)` before
-writing a long manual gated DSL chain. For non-form dynamic query composition,
-read `query.md` first instead.
+For non-form dynamic query composition, read `query.md` instead.
 
 ## Relation and Include Symbols
 
@@ -110,25 +81,37 @@ read `query.md` first instead.
 | `.include2(...)` | Complex nested include paths | `include-structured-loading.md` |
 | `loadInclude(...)` | Load relations after query | `include-structured-loading.md` |
 | `.subQueryToGroupJoin(...)` | To-many subquery group join | `implicit-query.md` |
+| `.subQueryConfigure(...)` | Root-level baseline configuration for later relation subqueries | `implicit-controls.md` |
 | `.asTreeCTE()` | Recursive tree query | `implicit-query.md` |
 | `.leftJoin(...)` / `.innerJoin(...)` | Explicit join | `query-composition.md` |
 
 If the result target is a DTO graph, prefer `selectAutoInclude(...)` before
- `include(...)`.
+`include(...)`.
+
+## Implicit Control Symbols
+
+| Symbol | Purpose | Read Next |
+|--------|---------|-----------|
+| `.filter(...)` on relation path | To-many baseline filter or to-one `JOIN ON` filter | `implicit-controls.md` |
+| `.configure(...)` on relation path | Relation subquery-level options such as alias or logic-delete behavior | `implicit-controls.md` |
+| `.mode(SubQueryModeEnum...)` | Force local subquery strategy | `implicit-controls.md` |
+| `SubQueryModeEnum.DEFAULT` | Leave default strategy | `implicit-controls.md` |
+| `SubQueryModeEnum.SUB_QUERY_ONLY` | Force subquery | `implicit-controls.md` |
+| `SubQueryModeEnum.GROUP_JOIN` | Force group join | `implicit-controls.md` |
+| `.flatElement()` | Flatten to-many path for traversal or `toList(...)` | `implicit-controls.md` |
+| `.notEmptyAll(...)` | Non-empty and every matched row passes | `implicit-controls.md` |
+| `.distinct()` on relation chain | Keep distinctness inside implicit subquery | `implicit-controls.md` |
+| `expression().valueOf(...)` | Project arbitrary predicate as boolean column | `implicit-controls.md` |
 
 ## Select and Projection Symbols
 
 Useful projection helpers:
 
-- `Select.of(...)` (`com.easy.query.core.proxy.sql`)
-- `Select.DRAFT` (`com.easy.query.core.proxy.sql`)
-- `Select.TUPLE` (`com.easy.query.core.proxy.sql`)
-- `Select.PART`
-- `Select.aggregateOf(...)`
-- `FETCHER`
+`Select.of(...)`, `Select.DRAFT`, `Select.TUPLE`, `Select.PART`,
+`Select.aggregateOf(...)`, `FETCHER`
 
-Read `query.md` for normal select, `query-composition.md` for draft/tuple or
- explicit advanced projection, and `select-auto-include.md` for DTO graphs.
+Read `query.md` for normal select, `query-composition.md` for advanced
+projection, and `select-auto-include.md` for DTO graphs.
 
 ## Write, Transaction, and Save Symbols
 
@@ -156,31 +139,9 @@ Read `query.md` for normal select, `query-composition.md` for draft/tuple or
 
 High-impact defaults often referenced in code review:
 
-- `insertStrategy = ONLY_NOT_NULL_COLUMNS`
-- `updateStrategy = ALL_COLUMNS`
-- `defaultCondition = LIKE`
-- `autoIncludeTable = THROW`
-- `relationGroupSize = 512`
-- `includeLimitMode = PARTITION`
+`insertStrategy = ONLY_NOT_NULL_COLUMNS`, `updateStrategy = ALL_COLUMNS`,
+`defaultCondition = LIKE`, `autoIncludeTable = THROW`,
+`relationGroupSize = 512`, `includeLimitMode = PARTITION`
 
 Read `configuration-starter.md` when behavior seems different from the written
- query code.
-
-## Source Hints
-
-These are provenance hints for local/source lookup only:
-
-- `Selectable1`
-- `Filterable1`
-- `Orderable1`
-- `Navigate`
-- `NavigateFlat`
-- `ObjectSortBuilder`
-- `EasyWhereCondition`
-- `EntityIncludeable1`
-- `EntitySavable`
-- `EasySearch`
-- `EasyCond`
-
-If a needed symbol is not listed here or in the task-specific references, check
- the target project before emitting code.
+query code.

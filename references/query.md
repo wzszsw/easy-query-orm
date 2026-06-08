@@ -6,7 +6,7 @@ for explicit joins and advanced projection see `query-composition.md`; for aggre
 
 ## When to use / not
 
-Use for reading data from one table (optionally projected into a DTO). The chain shape is:
+Use for reading data from one table (optionally projected into a DTO). Chain:
 `queryable(Entity) → where → orderBy → select → terminal`.
 
 ## The chain
@@ -28,7 +28,7 @@ val list = easyEntityQuery.queryable(Topic::class.java)
 
 ## Filtering — `where`
 
-Multiple conditions can be chained as separate `where(...)` calls (AND) or grouped in one lambda (also AND):
+Conditions can be chained as separate `where(...)` calls or grouped in one lambda.
 
 ```java
 // chained — AND
@@ -69,12 +69,8 @@ easyEntityQuery.queryable(SysUser.class)
 
 ## Dynamic / optional conditions — use the gated overloads
 
-Never concatenate strings. Each predicate has an overload whose first arg is a boolean gate; when `false`,
-the condition is skipped. There is also a `where(condition, lambda)` form.
-
-This is the general default for non-form dynamic query logic. If the task is
-specifically a search/query form endpoint with many optional request fields,
-read `dto-object-query.md` for the `whereObject(...)` branch instead.
+Never concatenate strings. Predicate overloads accept a boolean gate; when
+`false`, the condition is skipped.
 
 ```java
 // gate per predicate (.eq(condition, value) / .like(condition, value))
@@ -158,8 +154,9 @@ List<Topic> slice = easyEntityQuery.queryable(Topic.class)
         .limit(20, 10)            // skip 20, take 10
         .toList();
 ```
-There is also a gated overload `limit(condition, offset, rows)` (skipped when `condition` is false). Use
-`limit(n)` for "top N"; use `toPageResult(...)` (below) only when you also need the total count.
+There is also a gated overload `limit(condition, offset, rows)`. Use
+`limit(n)` for top-N; use `toPageResult(...)` only when you also need total
+count.
 
 ## Pagination — `toPageResult`
 
@@ -185,8 +182,3 @@ Pagination composes with `select(...)` — call `.toPageResult(...)` after the p
 - Building dynamic filters with string concatenation instead of gated overloads.
 - `count() > 0` for existence → use `any()`.
 
-## Sources
-- 源码验证: `sql-test/.../QueryTest.java`, `.../doc/DocTest.java` (dynamic conditions), `.../dameng/
-  DamengQueryTest.java` (pagination, select-DTO). `EasyPageResult` getData/getTotal verified.
-- 官方文档: `easy-query-doc/src/ability/where.md`, `ability/select/page.md`, `ability/select/order.md`.
-  Skill baseline 3.2.10.

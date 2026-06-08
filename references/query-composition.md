@@ -70,6 +70,19 @@ Use this when:
 This is a real alternative to `selectAutoInclude`, not a fallback hack. Prefer
 it when the mapping logic lives naturally in a proxy result type.
 
+Relation-internal aggregate distinctness:
+
+```java
+List<Draft1<Integer>> rows = easyEntityQuery.queryable(SubJoinUser.class)
+    .select(user -> Select.DRAFT.of(
+        user.books().distinct().sum(book -> book.author().age())
+    ))
+    .toList();
+```
+
+Keep `distinct()` inside the relation chain when the distinctness belongs to
+the implicit subquery itself.
+
 ## Draft and Tuple Return
 
 ```java

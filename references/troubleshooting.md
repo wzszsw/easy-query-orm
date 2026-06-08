@@ -1,31 +1,21 @@
 # Troubleshooting
 
-Use this file as the first stop when easy-query code compiles but behaves
-unexpectedly, or when a familiar API throws in a non-obvious way.
+Use this when easy-query code compiles but behaves unexpectedly, or when a
+familiar API throws in a non-obvious way.
 
-This file is a triage guide, not a full tutorial. For each issue, apply the
-first fix, then read the referenced file if deeper changes are needed.
-
-Do not open this file first for ordinary setup questions such as Kotlin `ksp`
-vs `kapt`, missing `sql-processor`, missing `sql-ksp-processor`, or starter bean
-registration. Use `setup-java.md`, `setup-kotlin.md`, or `setup-spring-boot.md`
+Do not open this first for ordinary setup questions. Use the setup references
 first.
 
 ## Proxy and Build Issues
 
 ### `*Proxy` Not Generated
 
-Symptoms:
-
-- `UserProxy` / `TopicProxy` cannot be found
-- proxy DSL types are unresolved in IDE or compile output
-
 First checks:
 
 - Java uses APT; Kotlin uses KSP, not KAPT
-- entity must have `@EntityProxy`
-- entity must implement `ProxyEntityAvailable<Entity, EntityProxy>`
-- generated source directory must be on the compile/IDE path where required
+- entity has `@EntityProxy`
+- entity implements `ProxyEntityAvailable<Entity, EntityProxy>`
+- generated source directory is on the compile/IDE path
 
 Read next:
 
@@ -35,15 +25,10 @@ Read next:
 
 ### Generated Proxy Looks Stale
 
-Symptoms:
-
-- entity field changed but proxy accessors do not match
-- DTO mapping or relation path still refers to removed fields
-
 First checks:
 
 - rebuild annotation processing / KSP output
-- verify the generated proxy package is the expected one
+- verify the generated proxy package
 - do not hand-edit generated proxy classes
 
 Read next:
@@ -56,18 +41,11 @@ Read next:
 
 ### `selectAutoInclude` Used With Entity Class
 
-Symptom:
-
-- exception similar to `selectAutoInclude should not use database entity objects as return results`
-
 First fix:
 
 ```java
 query.selectAutoInclude(UserDTO.class);
 ```
-
-Do not suppress this unless project configuration intentionally relaxes
-`autoIncludeTable`.
 
 Read next:
 
@@ -78,10 +56,10 @@ Read next:
 
 Common causes:
 
-- `select(Class<TR>)` maps by column/result name and the names do not match
-- DTO nested property lacks the needed `@Navigate`
-- `@NavigateFlat` path alias is missing or wrong
-- generated proxies are stale
+- `select(Class<TR>)` name mismatch
+- missing `@Navigate`
+- wrong `@NavigateFlat` alias
+- stale proxies
 
 First fix:
 
@@ -99,10 +77,6 @@ Read next:
 - `entity-modeling-navigate.md`
 
 ### `flatElement()` Used Inside `select`
-
-Symptom:
-
-- source/runtime rejects `flatElement()` inside result proxy selection
 
 First fix:
 
@@ -138,14 +112,10 @@ Read next:
 
 Common causes:
 
-- the gated condition was skipped
-- `filterConfigure(...)` filtered the value away
-- relation metadata is missing or wrong
-- relation path appears only in an inactive branch
-
-Reminder:
-
-- no active relation path means no implicit join, which is expected behavior
+- gated condition skipped
+- `filterConfigure(...)` removed the value
+- relation metadata missing or wrong
+- relation path only appears in an inactive branch
 
 Read next:
 
@@ -154,11 +124,6 @@ Read next:
 - `implicit-query.md`
 
 ### Too Many To-Many Subqueries
-
-Symptom:
-
-- repeated scalar subqueries
-- slow to-many relation filters or aggregates
 
 First fixes:
 
@@ -193,18 +158,9 @@ Read next:
 
 ### Partition Order Error
 
-Symptom:
+Cause: `@Navigate.partitionOrder` defaults to `PartitionOrderEnum.THROW`.
 
-- first/top-N relation access fails around partition ordering
-
-Cause:
-
-- `@Navigate.partitionOrder` defaults to `PartitionOrderEnum.THROW`
-
-First fix:
-
-- define `orderByProps`
-- or set an explicit partition-order policy
+First fix: define `orderByProps` or set an explicit partition-order policy.
 
 Read next:
 
@@ -212,11 +168,6 @@ Read next:
 - `entity-modeling-navigate.md`
 
 ### `whereObject(...)` / `orderByObject(...)` Field Mismatch
-
-Symptom:
-
-- invalid operation errors because request fields or sort fields do not match the
-  supported query target
 
 First fix:
 
@@ -227,13 +178,8 @@ First fix:
 
 Reminder:
 
-- `whereObject(...)` is for query/search form DTOs with many optional
-  conditions; if the task is not actually a form, switch back to normal DSL
-- the problem is usually the object shape, or using `whereObject(...)` outside
-  its intended search-form scope
-- `whereObject(...)` and explicit `.where(...)` can be mixed in one chain; you do
-  not need to abandon `whereObject(...)` just because one or two conditions are
-  easier to express in DSL
+- `whereObject(...)` is for query/search form DTOs
+- `whereObject(...)` and explicit `.where(...)` can be mixed
 
 Read next:
 
@@ -242,13 +188,7 @@ Read next:
 
 ### `DEFAULT` Behaves Like `LIKE` Instead of `CONTAINS`
 
-Symptom:
-
-- `%` or `_` behaves like SQL wildcard in `@EasyWhereCondition(DEFAULT)`
-
-Cause:
-
-- starter default `defaultCondition` is often `LIKE`
+Cause: starter default `defaultCondition` is often `LIKE`.
 
 First fix:
 
