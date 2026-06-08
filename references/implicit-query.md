@@ -230,6 +230,17 @@ backfill scenarios. Source tests cover:
 - depth/union controls such as `setLimitDeep(...)`, `setUnionAll(false)`, and
   `setDeepColumnName(...)`
 
+Source-backed semantics that matter for answers:
+
+- outer `where(...)` before `asTreeCTE()` filters only the anchor / seed rows
+- recursive rows are not filtered by that outer `where(...)`; use
+  `setChildFilter(...)` for the recursive member
+- if the business needs a true top-rooted menu tree, the root condition must be
+  expressed explicitly in the anchor query, usually on the real root-key
+  column such as `parentId is null` or `parentId = 0`; do not assume the
+  framework will infer that rule for you or that every project exposes a
+  to-one `parent` relation
+
 Source comments also note that `selectAutoInclude` ignores the configured tree
 navigation to avoid treating `children` as an ordinary one-to-many include.
 
@@ -237,6 +248,9 @@ Full tree / 全量菜单树:
 
 ```java
 List<MenuTreeVO> tree = easyEntityQuery.queryable(SysMenu.class)
+    .where(menu -> {
+        menu.parentId().isNull(); // or eq(0), use the project's real root rule
+    })
     .asTreeCTE()
     .selectAutoInclude(MenuTreeVO.class)
     .toTreeList();
@@ -246,17 +260,19 @@ Filtered tree is also valid. For `用户菜单树`, do not default to explicit
 `SysUserRole` / `SysRoleMenu` subqueries when relation metadata already exposes
 the permission path.
 
-Shortest path when reverse relation `SysMenu -> roles -> users` exists and the
-permission data already contains parent/root menus:
+If your permission data already contains parent/root menus, first derive seed
+ids implicitly, then assemble the final tree from that full id set.
+
+Reverse-path seed-id derivation when `SysMenu -> roles -> users` exists:
 
 ```java
-List<MenuTreeVO> tree = easyEntityQuery.queryable(SysMenu.class)
+List<String> seedMenuIds = easyEntityQuery.queryable(SysMenu.class)
     .where(menu -> {
         menu.roles().flatElement().users().flatElement().id().eq(userId);
     })
-    .asTreeCTE()
-    .selectAutoInclude(MenuTreeVO.class)
-    .toTreeList();
+    .select(menu -> menu.id())
+    .distinct()
+    .toList();
 ```
 
 If only the forward path `SysUser -> roles -> menus` is modeled, derive seed
@@ -269,8 +285,23 @@ List<String> seedMenuIds = easyEntityQuery.queryable(SysUser.class)
 ```
 
 If `seedMenuIds` already contains parent/root menus, query `SysMenu` by
-`id.in(seedMenuIds)` and build the tree directly. If only leaf menus are
-assigned (`补齐祖先节点`), backfill ancestors from those seed ids first:
+explicit root rows and let the recursive member pull only the visible ids:
+
+```java
+List<MenuTreeVO> tree = easyEntityQuery.queryable(SysMenu.class)
+    .where(menu -> {
+        menu.id().in(seedMenuIds);
+        menu.parentId().isNull(); // or eq(0), use the project's real root rule
+    })
+    .asTreeCTE(op -> {
+        op.setChildFilter(child -> child.id().in(seedMenuIds));
+    })
+    .selectAutoInclude(MenuTreeVO.class)
+    .toTreeList();
+```
+
+If only leaf menus are assigned (`补齐祖先节点`), backfill ancestors from those
+seed ids first:
 
 ```java
 List<String> ancestorMenuIds = easyEntityQuery.queryable(SysMenu.class)
@@ -284,7 +315,13 @@ List<String> ancestorMenuIds = easyEntityQuery.queryable(SysMenu.class)
     .toList();
 
 List<MenuTreeVO> tree = easyEntityQuery.queryable(SysMenu.class)
-    .where(menu -> menu.id().in(ancestorMenuIds))
+    .where(menu -> {
+        menu.id().in(ancestorMenuIds);
+        menu.parentId().isNull(); // or eq(0), use the project's real root rule
+    })
+    .asTreeCTE(op -> {
+        op.setChildFilter(child -> child.id().in(ancestorMenuIds));
+    })
     .selectAutoInclude(MenuTreeVO.class)
     .toTreeList();
 ```
@@ -293,6 +330,30 @@ When reverse relations exist, `seedMenuIds` can likewise come from a
 `SysMenu` query filtered by `menu.roles().flatElement().users()...`.
 Use manual link-table subqueries only when the project truly does not have the
 needed `@Navigate` metadata.
+
+Direct filtered CTE is a different shape: it returns a subtree rooted at the
+matched seed rows, not a full top-rooted menu tree. Use it only when that is
+the intended result:
+
+```java
+List<MenuTreeVO> subTrees = easyEntityQuery.queryable(SysMenu.class)
+    .where(menu -> {
+        menu.roles().flatElement().users().flatElement().id().eq(userId);
+        menu.name().endsWith("管理");
+    })
+    .asTreeCTE(op -> {
+        op.setChildFilter(child -> child.name().endsWith("管理"));
+    })
+    .selectAutoInclude(MenuTreeVO.class)
+    .toTreeList();
+```
+
+Here:
+
+- outer `where(...)` limits only the seed menus
+- `setChildFilter(...)` is required if descendants must obey the same filter
+- if you need business-rooted trees instead, add the real root predicate
+  explicitly instead of treating the matched seeds as final roots
 
 Use `setChildFilter(...)` when the recursive segment itself must be filtered:
 
