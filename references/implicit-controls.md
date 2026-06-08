@@ -1,7 +1,11 @@
 # Implicit Relation Controls
 
-Use this for the control knobs around implicit relation paths:
+Use this for common quantifier predicates and control knobs around implicit
+relation paths:
 
+- `any(...)`
+- `none(...)`
+- `all(...)`
 - root-level `subQueryConfigure(...)`
 - relation `.filter(...)`
 - relation `.distinct()`
@@ -21,13 +25,16 @@ Global heuristic:
   entity directly with the relation predicate
 - for tree answers, first express the business root rule, then decide whether
   the recursive member also needs relation filtering or ancestor backfill
-- try `flatElement`, relation `any/count/sum`, relation `filter/configure`,
-  before switching to explicit joins or junction-table queries
+- try relation `any/all/none/notEmptyAll/count/sum`, `flatElement`, relation
+  `filter/configure`, before switching to explicit joins or junction-table
+  queries
 
 ## Fast Patterns
 
 If the request looks like one of these, answer with the matching shape first:
 
+- existence / anti-existence / universal / non-empty universal relation check:
+  `root.toMany().any(...)`, `.none(...)`, `.all(...)`, `.notEmptyAll(...)`
 - shared to-many baseline + several `any(...)` checks:
   `.subQueryConfigure(root -> root.relation(), q -> q.where(...))`
 - force relation strategy locally:
@@ -40,6 +47,35 @@ If the request looks like one of these, answer with the matching shape first:
   `root.toMany().distinct().sum(...)`
 - boolean select column from relation-aware predicate:
   `root.expression().valueOf(() -> { ... })`
+
+## Quantifier Relation Predicates
+
+Treat these as first-choice answer shapes for relation-derived business rules
+such as "存在", "全部满足", "一个都没有", and "非空且全部满足".
+
+```java
+easyEntityQuery.queryable(SysUser.class)
+    .where(user -> {
+        user.roles().any(role -> role.name().like("管理员"));
+        user.roles().none(role -> role.name().like("禁用"));
+        user.bankCards()
+            .where(card -> card.type().eq("储蓄卡"))
+            .all(card -> card.code().startsWith("33123"));
+    })
+    .toList();
+```
+
+Semantics to preserve in answers:
+
+- `any(predicate)`: at least one related row matches
+- `none(predicate)`: no related row matches
+- `all(predicate)`: every row in the current relation slice passes; an empty
+  slice can still pass
+- `notEmptyAll(predicate)`: non-empty and every row passes
+
+Prefer these relation predicates over manual joins, explicit junction-table
+queries, or "count then compare" rewrites when `@Navigate` metadata already
+exposes the path.
 
 ## 1. Root-Level `subQueryConfigure(...)`
 

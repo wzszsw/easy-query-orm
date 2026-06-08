@@ -21,8 +21,8 @@
       },
       {
         "id": "implicit-controls",
-        "purpose": "flatElement, subQueryConfigure, filter/configure/mode, join-on filtering, relation distinct, predicate-to-boolean projection, and permission-tree routing.",
-        "eval_ids": [9, 10, 11, 13, 14, 15]
+        "purpose": "any/all/none/notEmptyAll, flatElement, subQueryConfigure, filter/configure/mode, join-on filtering, relation distinct, predicate-to-boolean projection, and permission-tree routing.",
+        "eval_ids": [9, 10, 11, 13, 14, 15, 16]
       },
       {
         "id": "projection-and-vo-assembly",
@@ -32,7 +32,7 @@
     ],
     "pass_policy": {
       "p0_must_pass_eval_ids": [1, 7, 8, 10, 11],
-      "p1_should_pass_eval_ids": [9, 12, 13, 14, 15],
+      "p1_should_pass_eval_ids": [9, 12, 13, 14, 15, 16],
       "p2_regression_guard_eval_ids": [0, 2, 3, 4, 5, 6]
     },
     "benchmark_focus_eval_ids": [1, 7, 8, 10, 12]
@@ -148,6 +148,13 @@
       "name": "permission-menu-tree-via-implicit-path",
       "prompt": "我有 SysUser -> roles -> menus 的导航关系，想查某个 userId 的菜单树。不要手写 SysUserRole / SysRoleMenu 中间表查询，优先用 easy-query 的隐式关系和 flatElement；如果只分配了叶子菜单，还要把祖先节点补齐。给 Java 示例，并说明什么时候才退回中间表查询。",
       "expected_output": "Prefers relation-driven filtering over explicit junction-table subqueries. It must explain the tree-CTE boundary correctly: where(...).asTreeCTE() filters only seed rows, recursive filtering needs setChildFilter(...), and a true menu-tree root rule must be expressed explicitly (for example parentId is null or parentId = 0, depending on the project) rather than assumed. For a tree answer, first express the real root predicate. If parent/root menus are also assigned, keep the permission rule directly on the `SysMenu` relation path in both the anchor and the recursive child filter, for example with menu.roles().flatElement().users().flatElement().id().eq(userId). If only leaf menus are assigned, use asTreeCTE(op -> { op.setUp(true); op.setUnionAll(false); }) on the matched menus to collect ancestor ids, then rebuild the final tree from explicit root rows plus setChildFilter(child -> child.id().in(...)). Must not teach a default 'query ids first, then build tree' template. Explicitly says SysUserRole / SysRoleMenu querying is only a fallback when @Navigate metadata/path is missing.",
+      "files": []
+    },
+    {
+      "id": 16,
+      "name": "quantifier-relation-predicates",
+      "prompt": "帮我用 easy-query 写一个 Java 查询：按 User 查，要求至少有一张 type='储蓄卡' 的银行卡，并且这些储蓄卡的 code 必须全部以 33123 开头；另外还要求不存在任何 type='禁用卡' 的银行卡。不要手写 join。顺便说明 all(...) 和 notEmptyAll(...) 在空关系上的区别。",
+      "expected_output": "Uses relation-driven quantifier predicates rather than manual joins, ideally bankCards().where(card -> card.type().eq(\"储蓄卡\")).notEmptyAll(card -> card.code().startsWith(\"33123\")) plus bankCards().none(card -> card.type().eq(\"禁用卡\")) or an equivalent verified none(...) shape. Must explicitly explain that all(...) can vacuously pass on an empty relation slice, while notEmptyAll(...) additionally requires at least one related row.",
       "files": []
     }
   ]

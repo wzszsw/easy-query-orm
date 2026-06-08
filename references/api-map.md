@@ -103,6 +103,9 @@ If the result target is a DTO graph, prefer `selectAutoInclude(...)` before
 | `SubQueryModeEnum.DEFAULT` | Leave default strategy | `implicit-controls.md` |
 | `SubQueryModeEnum.SUB_QUERY_ONLY` | Force subquery | `implicit-controls.md` |
 | `SubQueryModeEnum.GROUP_JOIN` | Force group join | `implicit-controls.md` |
+| `.any()` / `.any(...)` | Exists / any matched related row | `implicit-controls.md` |
+| `.none()` / `.none(...)` | No related row / no matched related row | `implicit-controls.md` |
+| `.all(...)` | Every row in the current relation slice passes | `implicit-controls.md` |
 | `.flatElement()` | Flatten to-many path for traversal or `toList(...)` | `implicit-controls.md` |
 | `.notEmptyAll(...)` | Non-empty and every matched row passes | `implicit-controls.md` |
 | `.distinct()` on relation chain | Keep distinctness inside implicit subquery | `implicit-controls.md` |

@@ -5,9 +5,9 @@ description: >-
   `EasyQueryClient`, proxy DSL), when the user shows easy-query proxy syntax,
   or when migrating JPA/MyBatis to easy-query. Covers setup, proxy generation,
   Spring Boot, CRUD/query/page/transaction code, implicit relation APIs
-  (`subQueryToGroupJoin`, `subQueryConfigure`, `flatElement`,
-  `first`/`element`/`elements`, `joining`, `anyValue`/`noneValue`,
-  `notEmptyAll`), `@Navigate`/`@NavigateFlat`/`include`/`include2`/
+  (`any`/`all`/`none`, `subQueryToGroupJoin`, `subQueryConfigure`,
+  `flatElement`, `first`/`element`/`elements`, `joining`,
+  `anyValue`/`noneValue`, `notEmptyAll`), `@Navigate`/`@NavigateFlat`/`include`/`include2`/
   `selectAutoInclude`, `EXTRA_AUTO_INCLUDE_CONFIGURE`, proxy VO relation
   `.set(...)`, `whereObject`/`orderByObject`, `EasySearch`, `savable`,
   sharding, code-first DDL, and troubleshooting. Do not use for unrelated
@@ -47,10 +47,11 @@ task; do not read the whole `references/` tree by default.
 1. Classify first: setup, mapping, query, relation loading, write, control
    API, troubleshooting, or review.
 2. Read one core reference first. Add a second only when needed.
-3. For `flatElement`, relation `filter/configure/mode`,
-   `subQueryConfigure`, `notEmptyAll`, `valueOf`, or permission-tree filtering
-   such as `user -> roles -> menus`, read `references/implicit-controls.md`
-   first. If tree assembly / `asTreeCTE` is involved, add
+3. For relation quantifier predicates such as `any/all/none/notEmptyAll`,
+   `flatElement`, relation `filter/configure/mode`, `subQueryConfigure`,
+   `valueOf`, or permission-tree filtering such as `user -> roles -> menus`,
+   read `references/implicit-controls.md` first. If broader implicit
+   partition/joining/tree behavior is involved, add
    `references/implicit-query.md`. If the request names an exact control
    symbol or enum such as `SubQueryModeEnum`, also open
    `references/api-map.md`.
@@ -77,7 +78,7 @@ task; do not read the whole `references/` tree by default.
 | Basic query chain: `where`, order, projection, pagination, terminals | `references/query.md` |
 | Advanced projection / manual subquery / proxy relation `.set(...)` | `references/query-composition.md` |
 | Implicit relation basics: group, partition, joining, tree | `references/implicit-query.md` |
-| Implicit controls: `subQueryConfigure`, `filter/configure/mode`, `flatElement`, `notEmptyAll`, `valueOf`, `SubQueryModeEnum` | `references/implicit-controls.md` |
+| Implicit relation predicates / controls: `any/all/none/notEmptyAll`, `subQueryConfigure`, `filter/configure/mode`, `flatElement`, `valueOf`, `SubQueryModeEnum` | `references/implicit-controls.md` |
 | Permission tree / `user -> roles -> menus` / tree with nested to-many filter | `references/implicit-controls.md` first, then `references/implicit-query.md` |
 | Search/page form endpoint: optional filters + stable sort + DTO graph result | `references/search-form-page.md` |
 | Query/search-form DTO filters/sorts via `whereObject` and `orderByObject` | `references/dto-object-query.md` |

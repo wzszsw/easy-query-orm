@@ -10,9 +10,9 @@ Useful default heuristic: if the business requirement can be stated as
 tree", easy-query usually has a relation-driven form that is shorter and more
 idiomatic than explicit join or junction-table DSL.
 
-Use this for the core implicit feature set. For `subQueryConfigure`,
-`filter/configure/mode`, `flatElement`, `notEmptyAll`, or `valueOf`, read
-`implicit-controls.md`.
+Use this for the core implicit feature set. For quantifier predicates such as
+`any/all/none/notEmptyAll`, `subQueryConfigure`, `filter/configure/mode`,
+`flatElement`, or `valueOf`, read `implicit-controls.md`.
 
 ## What Triggers Implicit SQL
 
