@@ -49,6 +49,20 @@
       "prompt": "easy-query 里，一个 SysUser 有多张 BankCard（一对多），我想查用户的同时把他的银行卡一起加载出来，避免 N+1。怎么定义关系、怎么查？给 Java 代码。",
       "expected_output": "Entity field with @Navigate(value = RelationTypeEnum.OneToMany, selfProperty=..., targetProperty=...), and a query using .include(user -> user.bankCards()).toList(). Explains it avoids N+1. No manual loop querying.",
       "files": []
+    },
+    {
+      "id": 7,
+      "name": "implicit-group-partition-joining",
+      "prompt": "用 easy-query 写一个 Java 查询：返回每个用户的 id，以及他按 openTime 升序取前 2 张银行卡后的 type 拼接字符串；同时再返回一个布尔值表示这个用户是否有任意银行卡。要求使用 easy-query 的隐式关系能力，不要手写 SQL，也不要先查出来再内存处理。",
+      "expected_output": "Uses relation-driven implicit APIs, ideally .subQueryToGroupJoin(user -> user.bankCards()) or verified ALL_SUB_QUERY_GROUP_JOIN behavior when combining multiple to-many operators, then orderBy(...).elements(0,1).joining(card -> card.type(), \",\") plus anyValue() or noneValue(). Must preserve deterministic order and avoid invented SQL or stream post-processing.",
+      "files": []
+    },
+    {
+      "id": 8,
+      "name": "select-auto-include-extra-configure",
+      "prompt": "我想用 easy-query 的 selectAutoInclude 返回一个 UserDTO，里面有 roles 列表。role 这一层要额外过滤 name like 管理员，并额外投影 top3Menus 和 menuCount。顺便回答：如果我先写 include(...) 再 selectAutoInclude(...)，到底谁生效？给我 Java 示例。",
+      "expected_output": "Uses DTO/VO result type rather than entity return type, and a nested static EXTRA_AUTO_INCLUDE_CONFIGURE = RoleProxy.TABLE.EXTRA_AUTO_INCLUDE_CONFIGURE().where(...).select(...). Optionally configures deeper implicit relation expressions. Must explicitly state that handwritten include(...) takes precedence over auto include when both are present.",
+      "files": []
     }
   ]
 }

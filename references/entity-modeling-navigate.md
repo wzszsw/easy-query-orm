@@ -50,6 +50,24 @@ private List<Role> roles;
 `selfProperty` / `targetProperty` define the direct relation columns.
 `mappingClass` plus the two `*MappingProperty` arrays are required for many-to-many.
 
+## Entity vs DTO/VO Navigation
+
+Treat these as two different use cases:
+
+- Entity/table-object navigation: full `@Navigate` metadata matters. Key arrays,
+  `mappingClass`, `required`, `subQueryToGroupJoin`, `orderByProps`, `limit`,
+  and `partitionOrder` are all behavior-bearing.
+- DTO/VO result metadata for `selectAutoInclude`: source comment on
+  `@Navigate` says non-entity objects mainly need `RelationTypeEnum`; extra
+  relation fields may be ignored.
+- Non-entity proxy navigation inside query DSL is stricter. Source code can
+  throw `entityRelationToImplicitProvider is null,Navigate property in non
+  entity plz set supportNonEntity = true.` if the DTO/VO path is used like a
+  queryable relation without verified support.
+
+Use DTO/VO `@Navigate` to describe result graphs. Do not assume it is a full
+replacement for entity-side relation modeling.
+
 ## High-Value `@Navigate` Options
 
 Source fields that most often affect behavior:
@@ -77,7 +95,11 @@ Use them deliberately:
 - `required = true`: allows inner-join style semantics where the related row must exist.
 - `subQueryToGroupJoin = true`: useful for hot to-many filters/aggregates that repeatedly translate to subquery group joins.
 - `orderByProps` / `limit` / `offset`: shape to-many relation loading and partition-style element access.
-- `supportNonEntity = true`: enables DTO/VO-side relation metadata.
+- `supportNonEntity = true`: required when non-entity proxy navigation itself
+  must participate in implicit query DSL behavior; do not add it blindly to
+  every DTO field.
+- `partitionOrder`: source enum choices are `THROW`, `IGNORE`, `NAVIGATE`,
+  `KEY_ASC`, `KEY_DESC`.
 - `ignoreAutoInclude = true`: prevents tree-like relations from being treated as ordinary auto include paths.
 
 ## Query-Level Relation Tuning
@@ -119,9 +141,16 @@ public class UserDTO {
 }
 ```
 
-Use DTO-side `@Navigate` with `selectAutoInclude`, documented DTO query
-patterns, or `@NavigateFlat`. Do not use it as a generic substitute for missing
-entity relations.
+Refine that example before copying it:
+
+- If the field is only result metadata for `selectAutoInclude`, start with
+  `@Navigate(value = RelationTypeEnum.OneToMany)` and add more only when source
+  patterns prove they are consumed.
+- If the DTO/VO path itself will be used in implicit query DSL, then
+  `supportNonEntity = true` becomes relevant.
+
+Do not use DTO-side `@Navigate` as a generic substitute for missing entity
+relations.
 
 ## `@NavigateFlat`
 
@@ -140,6 +169,12 @@ Rules:
 
 - It is for DTO/VO traversal paths, not ordinary entity table objects.
 - The final target must align with the DTO field type.
+- The target should be a collection unless the final single value is a basic
+  type or a database entity.
+- Source comments warn that flattening a VO and also pulling the same-level id
+  incorrectly can throw.
+- The mapped field type must match the entity-path value type because the
+  include processor uses the entity object as the data container.
 - Use `prefix = true` only when the alias is a reusable path prefix.
 
 ## `directMapping`, `@EasyTree`, `@Encryption`

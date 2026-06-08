@@ -1,14 +1,32 @@
 # Implicit Query Capabilities
 
-easy-query's core advantage is relation-driven implicit SQL generation. In docs this includes implicit Join, Subquery, Group, Partition, CaseWhen, and recursive tree queries.
+easy-query's strongest "hidden" feature set is relation-driven implicit SQL.
+The proxy path itself decides whether the framework emits an implicit join,
+correlated subquery, group-join rewrite, partition window, boolean projection,
+or tree query.
+
+Use this file when the question depends on relation navigation behavior rather
+than plain `where/orderBy/select` chaining.
+
+## What Triggers Implicit SQL
+
+- To-one navigation like `card.user().name()` triggers implicit join SQL.
+- To-many navigation methods like `any/none/all/count/sum/max/joining` trigger
+  implicit subquery or group-join SQL.
+- Ranked child access like `first()`, `element(index)`, and
+  `elements(start,end)` triggers implicit partition/window SQL.
+- Boolean relation projection like `anyValue()` and `noneValue()` triggers
+  `CASE WHEN EXISTS ...` style SQL.
+- Tree APIs like `asTreeCTE()` trigger recursive SQL generation.
+
+If a relation is not modeled correctly, these APIs do not degrade gracefully;
+they produce wrong SQL or runtime failures. Verify `@Navigate` first.
 
 ## Relation Modeling Required
 
 The examples below use `Fields.xxx` constants. Those come from Lombok
-`@FieldNameConstants` on the related entity classes. If the project does not use
-that Lombok annotation, replace the `Fields` constants with string literals.
-
-Implicit relation APIs require navigation metadata on entity or DTO fields:
+`@FieldNameConstants` on the related entity classes. If the project does not
+use that Lombok annotation, replace the `Fields` constants with string literals.
 
 ```java
 @Navigate(
@@ -31,11 +49,12 @@ See `relation-query.md` for basic relation shapes and
 
 ## 1. Implicit Join
 
-Use object navigation on to-one relation properties. The framework creates the join only when the condition or select path is active.
+Use object navigation on to-one relation properties. The join appears only when
+the navigated path is actually referenced by `where`, `select`, `orderBy`, and
+similar clauses.
 
 ```java
 List<DocBankCard> cards = easyEntityQuery.queryable(DocBankCard.class)
-    .filterConfigure(NotNullOrEmptyValueFilter.DEFAULT)
     .where(card -> {
         card.user().name().eq(queryName);
         card.bank().name().contains(bankName);
@@ -56,9 +75,13 @@ List<Draft3<String, String, String>> rows = easyEntityQuery.queryable(DocBankCar
     .toList();
 ```
 
-`@Navigate(required = true)` changes eligible to-one implicit joins to inner joins; otherwise to-one navigation generally uses left join for accuracy.
+Join semantics from source:
 
-Explicit and implicit joins can be mixed:
+- `@Navigate(required = true)` changes eligible `ManyToOne` and `OneToOne`
+  implicit joins to inner joins.
+- Without `required = true`, to-one implicit navigation generally uses left
+  join semantics.
+- Explicit joins and implicit joins can be mixed in the same query.
 
 ```java
 easyEntityQuery.queryable(DocBankCard.class)
@@ -73,9 +96,10 @@ easyEntityQuery.queryable(DocBankCard.class)
     ));
 ```
 
-## 2. Implicit Subquery
+## 2. Implicit Subquery and Scalar Relation Operators
 
-Use to-many navigation methods to produce `EXISTS`, scalar subqueries, or aggregate subqueries.
+Use to-many navigation to produce `EXISTS`, scalar subqueries, aggregate
+subqueries, or boolean relation projections.
 
 ```java
 easyEntityQuery.queryable(SysBank.class)
@@ -85,28 +109,68 @@ easyEntityQuery.queryable(SysBank.class)
     });
 ```
 
-Single-condition shorthand:
+High-value to-many operators verified in source/tests:
 
-```java
-bank.bankCards().flatElement().type().eq("DEBIT");
-```
-
-Documented to-many methods:
-
-- `any(predicate)`
+- `any()`, `any(predicate)`
 - `none(predicate)`
 - `all(predicate)`
 - `count()`, `count(column)`
 - `sum(column)`, `avg(column)`, `max(column)`, `min(column)`
-- `joining(column)`
 - `where(predicate)`
 - `distinct()`
+- `orderBy(orderExpression)`
 - `first()`
 - `element(index)`
-- `elements(range)`
+- `elements(start,end)`
+- `joining(column)` and `joining(column, separator)`
 - `anyValue()`
 - `noneValue()`
-- `orderBy(orderExpression)`
+
+`joining(...)` is more capable than the public docs suggest. Source tests show
+it can be combined with:
+
+- `where(...)`
+- `orderBy(...)`
+- `elements(...)`
+- nested to-one navigation in the joined projection, for example
+  `joining(role -> role.m8SaveA().name(), ",")`
+
+Example:
+
+```java
+List<Draft2<String, String>> list = easyEntityQuery.queryable(M8User.class)
+    .subQueryToGroupJoin(user -> user.roles())
+    .select(user -> Select.DRAFT.of(
+        user.id(),
+        user.roles()
+            .where(role -> role.name().startsWith("管理员"))
+            .orderBy(role -> role.name().asc())
+            .elements(0, 5)
+            .joining(role -> role.name(), ",")
+    ))
+    .toList();
+```
+
+Boolean projection example:
+
+```java
+List<Draft2<Boolean, Boolean>> list = easyEntityQuery.queryable(SysUser.class)
+    .select(user -> Select.DRAFT.of(
+        user.bankCards().anyValue(),
+        user.bankCards().noneValue()
+    ))
+    .toList();
+```
+
+Practical rules:
+
+- `first()` is the partition-style "first ranked child" operator.
+- Source tests show `element(index)` is zero-based.
+- Source tests show `elements(start,end)` uses a zero-based, end-inclusive
+  window. For example `elements(0, 5)` becomes row numbers `1..6`.
+- For partition-style operators, require deterministic ordering from
+  `orderBy(...)`, `orderByProps`, or `partitionOrder`; do not assume database
+  natural order.
 
 Select scalar relation aggregate:
 
@@ -119,31 +183,20 @@ List<DocUserVO> users = easyEntityQuery.queryable(DocUser.class)
     .toList();
 ```
 
-Performance note: repeated to-many subqueries can be expensive. Consider implicit Group when many conditions or large tables are involved.
+Performance note: repeated to-many subqueries can get expensive. Convert hot
+paths to implicit Group when the same relation is filtered or aggregated more
+than once.
 
-## 3. Implicit Group
+## 3. Implicit Group / Group Join Conversion
 
-Use `subQueryToGroupJoin` to rewrite eligible to-many subqueries into group join style SQL.
+Use group-join conversion when many-to-many or one-to-many relation subqueries
+would otherwise repeat correlated SQL.
 
-Client signature:
+Available switches:
 
 ```java
 queryable.subQueryToGroupJoin(o -> o.bankCards());
 queryable.subQueryToGroupJoin(condition, o -> o.bankCards());
-```
-
-Proxy DSL source confirms overloads on `EntitySubQueryToGroupJoinable1/2/3`.
-
-Pattern:
-
-```java
-easyEntityQuery.queryable(SysUser.class)
-    .subQueryToGroupJoin(user -> user.bankCards())
-    .where(user -> {
-        user.bankCards().any(card -> card.type().eq("DEBIT"));
-        user.bankCards().count().gt(2L);
-    })
-    .toList();
 ```
 
 Annotation-level default:
@@ -158,20 +211,69 @@ Annotation-level default:
 private List<SysBankCard> bankCards;
 ```
 
-Use when a to-many relation is queried repeatedly or docs/tests show subquery SQL becoming slow on large data.
+Global query behavior from source/tests:
 
-## 4. Implicit Partition
+```java
+queryable.configure(op ->
+    op.getBehavior().add(EasyBehaviorEnum.ALL_SUB_QUERY_GROUP_JOIN)
+);
+```
 
-Use to-many element access or relation limit/order settings when you need ranked child rows such as first child, top N children, or offset/limit relation fetch. `@Navigate` exposes:
+Pattern:
 
+```java
+easyEntityQuery.queryable(SysUser.class)
+    .subQueryToGroupJoin(user -> user.bankCards())
+    .where(user -> {
+        user.bankCards().any(card -> card.type().eq("DEBIT"));
+        user.bankCards().count().gt(2L);
+    })
+    .toList();
+```
+
+Advanced source behaviors:
+
+- Eligible group-join expressions may be auto-merged into one grouped SQL
+  block.
+- If that merge changes the SQL shape in a way the task cares about, source
+  tests use `EasyBehaviorEnum.GROUP_JOIN_NOT_ALLOW_AUTO_MERGE`.
+- Deep nested to-many paths can be configured per branch with
+  `subQueryConfigure(parentPath, query -> query.subQueryToGroupJoin(childPath))`.
+
+Use group-join conversion when:
+
+- the same to-many relation is referenced multiple times in one query
+- the query combines `where + orderBy + aggregate + joining`
+- source/test evidence shows correlated subqueries are too slow
+
+## 4. Implicit Partition / Ranked Child Access
+
+Use partition operators when you need first child, nth child, top-N child
+window, or relation-level limit/offset semantics.
+
+Relevant `@Navigate` fields:
+
+- `orderByProps`
 - `offset`
 - `limit`
-- `orderByProps`
 - `partitionOrder`
 
-`PartitionOrderEnum.THROW` is the default in source. If using partition without order, configure an order or an explicit partition order policy.
+`PartitionOrderEnum` choices from source:
 
-Common shape:
+- `THROW`
+- `IGNORE`
+- `NAVIGATE`
+- `KEY_ASC`
+- `KEY_DESC`
+
+`THROW` is the default. If the query shape needs ranked child access and there
+is no explicit order, decide intentionally:
+
+- add `orderBy(...)` in the query
+- add `orderByProps` on the relation
+- set a non-throw `partitionOrder`
+
+Entity example:
 
 ```java
 @Navigate(
@@ -179,29 +281,51 @@ Common shape:
     selfProperty = Fields.id,
     targetProperty = Child.Fields.parentId,
     orderByProps = @OrderByProperty(property = Child.Fields.createTime, asc = false),
-    limit = 1
+    limit = 1,
+    partitionOrder = PartitionOrderEnum.NAVIGATE
 )
 private List<Child> latestChildren;
 ```
 
-For DTO flattening through to-many, see `@NavigateFlat` in `entity-modeling-navigate.md`.
+Important join semantics from the annotation comment:
 
-## 5. Implicit CaseWhen
+- For `OneToMany` and `ManyToMany`, `required = true` makes implicit group join
+  use inner join semantics.
+- For implicit partition, `required = true` makes `first()` / `element(0)`
+  style access eligible for inner join semantics.
+- Other cases remain left join oriented.
 
-Docs describe implicit CaseWhen for aggregate functions with filters:
+For DTO flattening through to-many relation paths, see `@NavigateFlat` in
+`entity-modeling-navigate.md`.
+
+## 5. Implicit CaseWhen and Boolean/Aggregate Filters
+
+Aggregate filters are the documented proxy-style entry point for implicit
+`CASE WHEN` behavior:
 
 ```java
-o.age().sum().filter(() -> o.name().like("x"))
+group.groupTable().id().count().filter(() -> {
+    group.groupTable().birthday().ge(LocalDateTime.of(2024, 1, 1, 0, 0));
+});
 ```
 
-Source also contains case-when builders:
+Non-group aggregate filters also appear in source README examples:
+
+```java
+user.id().count().filter(() -> {
+    user.address().eq("Beijing");
+});
+```
+
+Source also contains lower-level case-when builders:
 
 - `SQLClientFunc.caseWhenBuilder(...)`
 - `CaseWhenClientBuilder.caseWhen(...).elseEnd(...)`
 - `CaseWhenBuilder.caseWhen(...)`
 - `CaseWhenBuilderExpression.caseWhen(...)`
 
-Use documented aggregate filter style when operating in proxy DSL; use explicit case-when builders only after checking project examples.
+Use the documented aggregate-filter style first. Drop to explicit builders only
+after checking project code or source tests.
 
 ## 6. Recursive Tree
 
@@ -214,9 +338,8 @@ queryable.asTreeCTECustom(codeProperty, parentCodeProperty);
 queryable.asTreeCTECustom(codeProperty, parentCodeProperty, op -> { ... });
 ```
 
-`asTreeCTE` supports database objects. Source comments note `selectAutoInclude` ignores the configured tree navigation to avoid treating `children` as a normal one-to-many include.
-
-Pattern:
+Source comments note that `selectAutoInclude` ignores the configured tree
+navigation to avoid treating `children` as an ordinary one-to-many include.
 
 ```java
 List<MyCommentDTO> tree = easyEntityQuery.queryable(Comment.class)
@@ -225,4 +348,6 @@ List<MyCommentDTO> tree = easyEntityQuery.queryable(Comment.class)
     .toList();
 ```
 
-For DTO child property, mark tree child navigation with `@Navigate(ignoreAutoInclude = true)` when needed.
+If the DTO or VO has a tree child relation, mark that navigation with
+`@Navigate(ignoreAutoInclude = true)` when the auto-include path would conflict
+with tree semantics.

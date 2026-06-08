@@ -5,13 +5,15 @@ description: >-
   easy-query ORM (`com.easy-query`) through `EasyEntityQuery`,
   `EasyQueryClient`, or the generated proxy DSL. Use when tasks involve
   easy-query setup, proxy generation, Spring Boot integration, queries, CRUD,
-  pagination, transactions, `@Navigate`/`include`/`include2`,
-  `selectAutoInclude`, `whereObject`, `orderByObject`, `EasySearch`,
-  `savable`, native SQL, sharding, multi-datasource, code-first DDL, or
-  troubleshooting easy-query-specific API/build issues. Trigger even when the
-  user does not name easy-query but the code clearly uses its proxy DSL or asks
-  to migrate MyBatis/JPA code to easy-query. Do not use for other ORMs or
-  query builders unless converting them to easy-query.
+  pagination, transactions, implicit relation queries (`subQueryToGroupJoin`,
+  `first`/`element`/`elements`, `joining`, `anyValue`/`noneValue`),
+  `@Navigate`/`@NavigateFlat`/`include`/`include2`/`selectAutoInclude`,
+  `EXTRA_AUTO_INCLUDE_CONFIGURE`, `whereObject`, `orderByObject`,
+  `EasySearch`, `savable`, native SQL, sharding, multi-datasource, code-first
+  DDL, or troubleshooting easy-query-specific API/build issues. Trigger even
+  when the user does not name easy-query but the code clearly uses its proxy
+  DSL or asks to migrate MyBatis/JPA code to easy-query. Do not use for other
+  ORMs or query builders unless converting them to easy-query.
 ---
 
 # Easy Query ORM
@@ -52,6 +54,13 @@ task; do not read the whole `references/` tree by default.
    success.
 10. For advanced relation loading, DTO projection, and aggregate persistence,
     follow the dedicated references instead of guessing from the base query DSL.
+11. Separate entity-side relation metadata from DTO/VO-side auto-include
+    metadata. `selectAutoInclude` may use DTO `@Navigate`/`@NavigateFlat`, but
+    non-entity proxy navigation in query DSL needs verified `supportNonEntity`
+    behavior instead of assumption.
+12. For to-many implicit partition APIs such as `first()`, `element(...)`, and
+    `elements(...)`, require deterministic ordering from `orderBy(...)`,
+    `orderByProps`, or an explicit `partitionOrder` policy.
 
 ## Workflow
 
@@ -88,12 +97,12 @@ task; do not read the whole `references/` tree by default.
 | Model advanced `@Navigate` options, `@NavigateFlat`, DTO-side navigation | `references/entity-modeling-navigate.md` |
 | Basic query chain: `where`, order, projection, pagination, terminals | `references/query.md` |
 | Advanced query composition: explicit joins, manual subquery, draft/tuple, native fragments, tracking | `references/query-composition.md` |
-| Implicit relation queries, group joins, tree/partition/case patterns | `references/implicit-query.md` |
+| Implicit relation queries, group joins, nested `subQueryConfigure`, `first/element/elements`, `joining`, tree/partition/case patterns | `references/implicit-query.md` |
 | Search/page form endpoint: optional filters + stable sort + DTO graph result | `references/search-form-page.md` |
 | Query/search-form DTO filters/sorts via `whereObject` and `orderByObject` | `references/dto-object-query.md` |
 | User-management / admin-search / multi-condition search form endpoint | `references/dto-object-query.md` first, then add DSL only where needed |
 | `EasySearch` and `@EasyCond`-driven search/sort | `references/easy-search.md` |
-| `selectAutoInclude`, nested DTO return, auto include extras | `references/select-auto-include.md` |
+| `selectAutoInclude`, DTO-side `@Navigate`/`@NavigateFlat`, `EXTRA_AUTO_INCLUDE_CONFIGURE`, explicit-include precedence | `references/select-auto-include.md` |
 | Structured loading with `include`, `include2`, `loadInclude`, `fillOne/fillMany` | `references/include-structured-loading.md` |
 | Insert/update/delete and write safety semantics | `references/write.md` |
 | Transactions in plain Java or Spring Boot | `references/transaction.md` |

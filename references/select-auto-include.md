@@ -2,6 +2,10 @@
 
 `selectAutoInclude` is a core DTO result API. It combines select mapping with include-style relation loading to build nested DTO/VO result shapes.
 
+Source tests show it is not "just select": the root query runs first, then
+easy-query issues include-like follow-up relation queries keyed by hidden
+relation columns such as `__relation__id`.
+
 ## Core Signatures
 
 Client source:
@@ -34,6 +38,19 @@ List<SysBankDTO> list = easyEntityQuery.queryable(SysBank.class)
 ```
 
 The DTO describes the returned object graph. It can include nested objects and lists when the shape has matching navigation metadata.
+
+## Execution Shape
+
+What source/tests show:
+
+- The root query selects DTO scalar columns plus relation key columns needed for
+  later assembly.
+- Nested relation data is fetched by separate include-style batched queries.
+- Deep DTO graphs can therefore produce multiple SQL statements; this is normal.
+- Relation batching follows starter `relationGroupSize`, whose default is `512`.
+
+Use `include-structured-loading.md` if you need to compare this execution model
+against handwritten `include/include2/loadInclude/fillMany`.
 
 ## Extra Select Pattern
 
@@ -79,7 +96,18 @@ public class UserDTO {
 }
 ```
 
-If the DTO relation property has different field names or a path through entity relations, use the patterns from `entity-modeling-navigate.md`.
+Important distinction from source:
+
+- For DTO/VO metadata used only by `selectAutoInclude`, the `@Navigate`
+  annotation comment says defining `RelationTypeEnum` is the essential part and
+  extra relation fields on non-entity objects may be ignored.
+- If the DTO/VO proxy itself is navigated inside query DSL rather than only
+  used as result metadata, verify `supportNonEntity = true` behavior in
+  `entity-modeling-navigate.md`; otherwise runtime may throw
+  `entityRelationToImplicitProvider is null...`.
+
+If the DTO relation property has different field names or a path through entity
+relations, use the patterns from `entity-modeling-navigate.md`.
 
 ## Flattened Paths with NavigateFlat
 
@@ -99,6 +127,7 @@ Source constraints:
 - Target must be a collection unless the single value is a basic type or database entity.
 - Field type must match the entity path value because the include processor uses the entity as data container.
 - If a `@NavigateFlat` VO and a same-level id are requested together incorrectly, source comments say it can error.
+- `prefix = true` lets the alias act as a reusable path prefix instead of the full terminal path.
 
 ## Extra Auto Include Configure
 
@@ -123,7 +152,17 @@ private static final ExtraAutoIncludeConfigure EXTRA_AUTO_INCLUDE_CONFIGURE =
         .select(post -> Select.of(post.title().as("title")));
 ```
 
-Use this when nested DTO relation includes need custom filtering, sorting, `subQueryToGroupJoin`, or extra selected values.
+Additional source-backed behavior:
+
+- `.configure(queryable -> { ... })` can apply query-level behaviors such as
+  `orderBy(...)` or `ALL_SUB_QUERY_GROUP_JOIN`.
+- `.ignoreNavigateConfigure()` tells auto include to ignore relation settings
+  inherited from `@Navigate`, such as `orderByProps`, `limit`, or `offset`.
+- This hook is most useful from the second level onward, where DTO class DSL is
+  otherwise too limited.
+
+Use this when nested DTO relation includes need custom filtering, custom sort,
+`subQueryToGroupJoin`, or extra selected values.
 
 ## Tree CTE Interaction
 
@@ -142,6 +181,10 @@ Use `@Navigate(ignoreAutoInclude = true)` on tree child relation if the DTO shap
 
 Docs say `selectAutoInclude` automatically performs include according to DTO information. If explicit include is already written, the handwritten include wins.
 
+Source tests confirm this precedence. Use explicit `include(...)` first when
+you need handcrafted `where/orderBy/limit` on a relation and still want
+`selectAutoInclude` to assemble the DTO graph.
+
 ## Practical Checklist
 
 Before writing `selectAutoInclude`:
@@ -149,5 +192,8 @@ Before writing `selectAutoInclude`:
 - Result class is a DTO/VO, not a database entity.
 - Entity and DTO have matching column/property mapping or explicit `@Navigate`/`@NavigateFlat`.
 - To-many lists have enough key metadata for association.
-- Extra nested filters use `EXTRA_AUTO_INCLUDE_CONFIGURE`, not ad hoc post-processing.
+- Extra nested filters or nested extra projections use
+  `EXTRA_AUTO_INCLUDE_CONFIGURE`, not ad hoc post-processing.
 - Tree child relation is ignored appropriately when using `asTreeCTE`.
+- Expect multiple SQL statements for deep graphs; this is include-style
+  structured loading, not one joined mega-select.
