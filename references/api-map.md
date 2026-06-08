@@ -82,7 +82,12 @@ For non-form dynamic query composition, read `query.md` instead.
 | `loadInclude(...)` | Load relations after query | `include-structured-loading.md` |
 | `.subQueryToGroupJoin(...)` | To-many subquery group join | `implicit-query.md` |
 | `.subQueryConfigure(...)` | Root-level baseline configuration for later relation subqueries | `implicit-controls.md` |
-| `.asTreeCTE()` | Recursive tree query | `implicit-query.md` |
+| `.asTreeCTE()` / `.asTreeCTECustom(...)` | Recursive tree query | `implicit-query.md` |
+| `TreeCTEConfigurer.setUp(true)` | Upward recursion / ancestor backfill | `implicit-query.md` |
+| `TreeCTEConfigurer.setChildFilter(...)` | Filter the recursive member, not just the seed rows | `implicit-query.md` |
+| `TreeCTEConfigurer.setLimitDeep(...)` | Limit recursion depth | `implicit-query.md` |
+| `TreeCTEConfigurer.setUnionAll(false)` | Use `UNION` instead of `UNION ALL` | `implicit-query.md` |
+| `TreeCTEConfigurer.setDeepColumnName(...)` / `setDeepInCustomSelect(true)` | Control or retain depth column in tree results | `implicit-query.md` |
 | `.leftJoin(...)` / `.innerJoin(...)` | Explicit join | `query-composition.md` |
 
 If the result target is a DTO graph, prefer `selectAutoInclude(...)` before

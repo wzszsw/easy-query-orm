@@ -215,16 +215,89 @@ see `implicit-controls.md`.
 
 ## 6. Recursive Tree
 
-Tree CTE APIs include `asTreeCTE()` and `asTreeCTECustom(...)`. Source comments
-note that `selectAutoInclude` ignores the configured tree navigation to avoid
-treating `children` as an ordinary one-to-many include.
+Tree CTE APIs include `asTreeCTE()` and `asTreeCTECustom(...)`. Do not narrow
+them to "full tree only". They also fit `菜单树`, `用户菜单树`, and ancestor
+backfill scenarios. Source tests cover:
+
+- seed filtering before `asTreeCTE()`
+- recursive-member filtering via `TreeCTEConfigurer.setChildFilter(...)`
+- upward recursion via `TreeCTEConfigurer.setUp(true)` for ancestor backfill
+- depth/union controls such as `setLimitDeep(...)`, `setUnionAll(false)`, and
+  `setDeepColumnName(...)`
+
+Source comments also note that `selectAutoInclude` ignores the configured tree
+navigation to avoid treating `children` as an ordinary one-to-many include.
+
+Full tree / 全量菜单树:
 
 ```java
-List<MyCommentDTO> tree = easyEntityQuery.queryable(Comment.class)
+List<MenuTreeVO> tree = easyEntityQuery.queryable(SysMenu.class)
     .asTreeCTE()
-    .selectAutoInclude(MyCommentDTO.class)
-    .toList();
+    .selectAutoInclude(MenuTreeVO.class)
+    .toTreeList();
 ```
+
+Filtered tree is also valid. For a `用户菜单树`, if your permission data already
+includes the parent menus or root seeds, filter the anchor set first and then
+recurse:
+
+```java
+List<MenuTreeVO> tree = easyEntityQuery.queryable(SysMenu.class)
+    .where(menu -> menu.id().in(
+        easyEntityQuery.queryable(SysUserMenu.class)
+            .where(link -> link.userId().eq(userId))
+            .select(link -> link.menuId())
+    ))
+    .asTreeCTE()
+    .selectAutoInclude(MenuTreeVO.class)
+    .toTreeList();
+```
+
+If only leaf menus are assigned and ancestors or parent menus must be
+backfilled (`补齐祖先节点`), use upward recursion first:
+
+```java
+List<String> visibleMenuIds = easyEntityQuery.queryable(SysMenu.class)
+    .where(menu -> menu.id().in(
+        easyEntityQuery.queryable(SysUserMenu.class)
+            .where(link -> link.userId().eq(userId))
+            .select(link -> link.menuId())
+    ))
+    .asTreeCTE(op -> {
+        op.setUp(true);
+        op.setUnionAll(false);
+    })
+    .select(menu -> menu.id())
+    .distinct()
+    .toList();
+
+List<MenuTreeVO> tree = easyEntityQuery.queryable(SysMenu.class)
+    .where(menu -> menu.id().in(visibleMenuIds))
+    .selectAutoInclude(MenuTreeVO.class)
+    .toTreeList();
+```
+
+Use `setChildFilter(...)` when the recursive segment itself must be filtered:
+
+```java
+List<SysMenu> tree = easyEntityQuery.queryable(SysMenu.class)
+    .where(menu -> menu.id().eq(rootId))
+    .asTreeCTE(op -> {
+        op.setChildFilter(child -> child.name().like(keyword));
+    })
+    .toTreeList();
+```
+
+Important caveat from source behavior:
+
+- `setUp(true)` is correct for ancestor backfill / 补祖先节点.
+- When multiple leaf seeds share ancestors, `toTreeList()` may preserve
+  multiple overlapping ancestor paths instead of auto-merging them into one
+  unique tree.
+- `setUnionAll(false)` switches to `UNION`, but it does not guarantee a single
+  merged ancestor tree when the same node appears at different depths.
+- For a final unique `user menu tree` / `用户菜单树`, first collect distinct IDs
+  upward, then query only that ID set and build the final tree.
 
 If the DTO or VO has a tree child relation, mark that navigation with
 `@Navigate(ignoreAutoInclude = true)` when the auto-include path would conflict
