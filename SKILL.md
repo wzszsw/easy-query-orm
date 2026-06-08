@@ -31,10 +31,12 @@ task; do not read the whole `references/` tree by default.
    `scripts/search_references.py` first.
 4. easy-query leans heavily on relation metadata. If the requirement can be
    derived from an existing relation path, prefer the relation-driven form
-   first: implicit navigation, `flatElement`, relation aggregate/predicate, or
-   tree anchoring from relation-derived ids. Fall back to explicit join,
-   junction-table query, or post-query assembly only when the needed
-   `@Navigate` path is missing or clearly insufficient.
+   first: implicit navigation, `flatElement`, relation aggregate/predicate, or,
+   for tree backfill / final dedup only, id anchoring derived from a relation
+   predicate. Do not normalize answers into "query ids first" when the target
+   entity can already be filtered directly through the relation path. Fall back
+   to explicit join, junction-table query, or post-query assembly only when
+   the needed `@Navigate` path is missing or clearly insufficient.
 5. Prefer gated DSL for optional filters. Use `whereObject(...)` only for
    search-form DTOs.
 6. Keep paging stable with explicit `orderBy(...)` and a tie-breaker.
@@ -98,6 +100,9 @@ task; do not read the whole `references/` tree by default.
 - Reject non-easy-query syntax unless the task is explicit migration.
 - Prefer relation-driven answers before explicit join or link-table queries when
   an existing `@Navigate` path can express the requirement.
+- When the target entity is already reachable through the relation path, do not
+  degrade the answer into "query source rows -> collect ids -> `.in(...)`"
+  unless tree backfill or final tree merging truly requires it.
 - Prefer `singleOrNull()` for unique business keys.
 - Push filter/sort/page/aggregate work into DSL.
 - Use DTO/VO result types for `selectAutoInclude`.
