@@ -260,53 +260,37 @@ Filtered tree is also valid. For `用户菜单树`, do not default to explicit
 `SysUserRole` / `SysRoleMenu` subqueries when relation metadata already exposes
 the permission path.
 
-Do not turn `seedMenuIds` into a default answer template. If the current query
-is already on `SysMenu`, keep the permission rule on the `SysMenu` relation
-path first. Introduce an intermediate id query / id list only when tree
-reconstruction really needs it, such as ancestor backfill (`补齐祖先节点`) or
-final unique-tree merging.
+For tree answers, start by expressing the project's real root rule. Then split
+the guidance into two cases.
 
 If permission data already contains parent/root menus and the reverse path
-`SysMenu -> roles -> users` exists, keep the relation-driven filter on
-`SysMenu` and reuse it only as the recursive visibility condition:
+`SysMenu -> roles -> users` exists, keep the permission rule directly on the
+`SysMenu` relation path:
 
 ```java
-EntityQueryable<StringProxy, String> visibleMenuIdQuery = easyEntityQuery.queryable(SysMenu.class)
-    .where(menu -> {
-        menu.roles().flatElement().users().flatElement().id().eq(userId);
-    })
-    .select(menu -> new StringProxy(menu.id()))
-    .distinct();
-
 List<MenuTreeVO> tree = easyEntityQuery.queryable(SysMenu.class)
     .where(menu -> {
-        menu.id().in(visibleMenuIdQuery);
         menu.parentId().isNull(); // or eq(0), use the project's real root rule
+        menu.roles().flatElement().users().flatElement().id().eq(userId);
     })
     .asTreeCTE(op -> {
-        op.setChildFilter(child -> child.id().in(visibleMenuIdQuery));
+        op.setChildFilter(child -> {
+            child.roles().flatElement().users().flatElement().id().eq(userId);
+        });
     })
     .selectAutoInclude(MenuTreeVO.class)
     .toTreeList();
 ```
 
-Here, `.in(visibleMenuIdQuery)` is only carrying the relation-derived visible
-set into the tree recursion. It is not a recommendation to answer menu
-questions by first querying `SysUser` rows into `seedMenuIds`.
-
-If only leaf menus are assigned (`补齐祖先节点`), backfill ancestors first. This is
-the case where an intermediate id set is justified.
+If only leaf menus are assigned (`补齐祖先节点`), the direct tree above will miss
+those parent/root rows. In that case, first backfill ancestors upward, then
+rebuild the final tree from explicit root rows:
 
 ```java
-EntityQueryable<StringProxy, String> visibleMenuIdQuery = easyEntityQuery.queryable(SysMenu.class)
+List<String> ancestorMenuIds = easyEntityQuery.queryable(SysMenu.class)
     .where(menu -> {
         menu.roles().flatElement().users().flatElement().id().eq(userId);
     })
-    .select(menu -> new StringProxy(menu.id()))
-    .distinct();
-
-List<String> ancestorMenuIds = easyEntityQuery.queryable(SysMenu.class)
-    .where(menu -> menu.id().in(visibleMenuIdQuery))
     .asTreeCTE(op -> {
         op.setUp(true);
         op.setUnionAll(false);
@@ -326,20 +310,6 @@ List<MenuTreeVO> tree = easyEntityQuery.queryable(SysMenu.class)
     .selectAutoInclude(MenuTreeVO.class)
     .toTreeList();
 ```
-
-If only the forward path `SysUser -> roles -> menus` is modeled and the reverse
-path on `SysMenu` is absent, deriving visible menu ids via relation traversal
-is still acceptable for the backfill step:
-
-```java
-List<String> visibleMenuIds = easyEntityQuery.queryable(SysUser.class)
-    .where(user -> user.id().eq(userId))
-    .toList(user -> user.roles().flatElement().menus().flatElement().id());
-```
-
-Use that only as a relation-driven helper for `补齐祖先节点` or final tree
-dedup/merge. Do not present it as the default menu-query style when a direct
-`SysMenu` relation predicate already exists.
 
 Use manual link-table subqueries only when the project truly does not have the
 needed `@Navigate` metadata.

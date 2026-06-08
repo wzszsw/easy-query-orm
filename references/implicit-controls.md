@@ -18,11 +18,11 @@ Global heuristic:
 - if existing `@Navigate` metadata already exposes the business path, answer
   with the relation path first
 - if the target entity is already on that path, prefer querying the target
-  entity directly with the relation predicate; do not first query source rows
-  into an id list unless later tree backfill / dedup truly needs it
+  entity directly with the relation predicate
+- for tree answers, first express the business root rule, then decide whether
+  the recursive member also needs relation filtering or ancestor backfill
 - try `flatElement`, relation `any/count/sum`, relation `filter/configure`,
-  or tree anchoring from relation-derived ids before switching to explicit
-  joins or junction-table queries
+  before switching to explicit joins or junction-table queries
 
 ## Fast Patterns
 
@@ -221,8 +221,9 @@ easyEntityQuery.queryable(SysMenu.class)
 ```
 
 When you are already querying `SysMenu`, treat this as the preferred permission
-filter shape. Do not default to `SysUser -> roles -> menus -> ids -> .in(...)`
-unless a later tree/backfill step truly needs an intermediate id set.
+filter shape. If the user asks for a tree, first add the explicit root
+predicate, then decide whether `setChildFilter(...)` or ancestor backfill is
+also needed.
 
 Common `toList(...)` flattening shape:
 
