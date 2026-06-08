@@ -83,6 +83,27 @@ Join semantics from source:
   join semantics.
 - Explicit joins and implicit joins can be mixed in the same query.
 
+To-one relation `.filter(...)` is a separate capability:
+
+```java
+easyEntityQuery.queryable(DocBankCard.class)
+    .where(card -> {
+        card.bank().filter(bank -> {
+            bank.name().contains("工商银行");
+        });
+    })
+    .toList();
+```
+
+Source behavior:
+
+- If the current proxy is a relation table, `.filter(...)` pushes predicates to
+  join `ON`, not normal `WHERE`.
+- If the current proxy is not a relation table, it behaves like normal filter
+  logic in the current predicate context.
+- This is the correct way to express extra join-on filtering without dropping to
+  manual joins.
+
 ```java
 easyEntityQuery.queryable(DocBankCard.class)
     .leftJoin(DocBank.class, (card, bank) -> card.bankId().eq(bank.id()))
@@ -114,9 +135,11 @@ High-value to-many operators verified in source/tests:
 - `any()`, `any(predicate)`
 - `none(predicate)`
 - `all(predicate)`
+- `notEmptyAll(predicate)`
 - `count()`, `count(column)`
 - `sum(column)`, `avg(column)`, `max(column)`, `min(column)`
 - `where(predicate)`
+- `filter(predicate)`
 - `distinct()`
 - `orderBy(orderExpression)`
 - `first()`
@@ -168,6 +191,9 @@ Practical rules:
 - Source tests show `element(index)` is zero-based.
 - Source tests show `elements(start,end)` uses a zero-based, end-inclusive
   window. For example `elements(0, 5)` becomes row numbers `1..6`.
+- `notEmptyAll(predicate)` means "relation is non-empty and every matched row
+  satisfies the predicate". Source tests show it expands to `EXISTS` plus a
+  negated `EXISTS`, not a naive `COUNT = COUNT`.
 - For partition-style operators, require deterministic ordering from
   `orderBy(...)`, `orderByProps`, or `partitionOrder`; do not assume database
   natural order.
@@ -246,6 +272,74 @@ Use group-join conversion when:
 - the query combines `where + orderBy + aggregate + joining`
 - source/test evidence shows correlated subqueries are too slow
 
+## 3.1 Shared Relation Baselines: `subQueryConfigure`, `filter`, `mode`
+
+Three different knobs are easy to confuse:
+
+### `subQueryConfigure(...)`
+
+Use this on the root query when later uses of the same relation should inherit a
+common configuration.
+
+```java
+easyEntityQuery.queryable(SysUser.class)
+    .subQueryConfigure(s -> s.bankCards(), q -> q.where(card -> card.code().eq("1")))
+    .where(user -> {
+        user.bankCards().any(card -> card.type().eq("11"));
+        user.bankCards().any(card -> card.type().eq("22"));
+    });
+```
+
+Source tests show it can carry:
+
+- `where(...)`
+- `orderBy(...)`
+- `filterConfigure(...)`
+- nested `subQueryToGroupJoin(...)`
+
+Use it when the same relation path is reused across multiple predicates,
+aggregates, or order clauses and the baseline filter should stay centralized.
+
+### relation `.filter(...)`
+
+`filter(...)` is different from `.where(...)`. It installs an independent
+relation baseline condition for subsequent subqueries on that relation.
+
+```java
+user.bankCards().filter(card -> {
+    card.bank().name().eq("银行");
+    card.type().like("45678");
+});
+```
+
+Source behavior to remember:
+
+- It can include both relation joins and normal property predicates.
+- Multiple `filter(...)` calls on the same relation do not compose safely as a
+  general pattern; source comment says only the last configured baseline is
+  accepted.
+- It is especially useful before repeated `sum/max/min/joining/count` calls.
+
+### relation `.mode(SubQueryModeEnum)`
+
+Use `mode(...)` when the relation execution strategy must be forced.
+
+`SubQueryModeEnum` values from source:
+
+- `DEFAULT`
+- `SUB_QUERY_ONLY`
+- `GROUP_JOIN`
+
+Example:
+
+```java
+user.roles().mode(SubQueryModeEnum.GROUP_JOIN);
+user.roles().flatElement().menus().any(menu -> menu.route().eq("/admin"));
+```
+
+Use this when the automatic rewrite strategy is not the SQL shape you want and
+you need a local override instead of a broad query behavior flag.
+
 ## 4. Implicit Partition / Ranked Child Access
 
 Use partition operators when you need first child, nth child, top-N child
@@ -298,6 +392,44 @@ Important join semantics from the annotation comment:
 For DTO flattening through to-many relation paths, see `@NavigateFlat` in
 `entity-modeling-navigate.md`.
 
+## 4.1 `flatElement` and Deep To-Many Traversal
+
+`flatElement()` is the shortest path for traversing to-many relations as if the
+collection were temporarily flattened.
+
+Common `where` shape:
+
+```java
+easyEntityQuery.queryable(Province.class)
+    .where(p -> {
+        p.cities().flatElement().areas().flatElement().name().eq("上城区");
+    })
+    .toList();
+```
+
+Use cases proven in source tests:
+
+- one-level to-many shorthand:
+  `bank.bankCards().flatElement().type().eq("DEBIT")`
+- multi-level to-many traversal:
+  `user.roles().flatElement().menus().flatElement().path().contains("/admin")`
+- flattening a root query result:
+  `queryable.toList(x -> x.schoolTeachers().flatElement())`
+- flattening with partial fetch:
+  `toList(x -> x.schoolTeachers().flatElement().schoolClasses().flatElement(z -> z.FETCHER.name().id()))`
+
+Critical restriction from proxy source:
+
+- `flatElement` is not allowed inside `select(...)`.
+- If the user wants flattened relation rows, prefer `toList(...)` with
+  `flatElement(...)` instead of trying to force it into `select(...)`.
+
+Mental model:
+
+- In `where(...)`, `flatElement()` behaves like an implicit `any`-style
+  traversal path.
+- In `toList(...)`, it can flatten relation rows into the returned list shape.
+
 ## 5. Implicit CaseWhen and Boolean/Aggregate Filters
 
 Aggregate filters are the documented proxy-style entry point for implicit
@@ -326,6 +458,29 @@ Source also contains lower-level case-when builders:
 
 Use the documented aggregate-filter style first. Drop to explicit builders only
 after checking project code or source tests.
+
+## 5.1 Predicate-to-Boolean Projection with `expression().valueOf(...)`
+
+When `anyValue()` / `noneValue()` are too narrow and you need an arbitrary
+predicate rendered as a boolean select column, use `expression().valueOf(...)`.
+
+```java
+List<Draft1<Boolean>> rows = easyEntityQuery.queryable(M8Province.class)
+    .select(m -> Select.DRAFT.of(
+        m.expression().valueOf(() -> {
+            m.id().le(
+                m.cities().where(c -> {
+                    c.name().isNotNull();
+                    c.id().isNotNull();
+                }).count()
+            );
+        })
+    ))
+    .toList();
+```
+
+This is the verified escape hatch when the boolean expression is relation-aware
+but does not map cleanly to `anyValue()` or `noneValue()`.
 
 ## 6. Recursive Tree
 

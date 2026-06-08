@@ -63,6 +63,34 @@
       "prompt": "我想用 easy-query 的 selectAutoInclude 返回一个 UserDTO，里面有 roles 列表。role 这一层要额外过滤 name like 管理员，并额外投影 top3Menus 和 menuCount。顺便回答：如果我先写 include(...) 再 selectAutoInclude(...)，到底谁生效？给我 Java 示例。",
       "expected_output": "Uses DTO/VO result type rather than entity return type, and a nested static EXTRA_AUTO_INCLUDE_CONFIGURE = RoleProxy.TABLE.EXTRA_AUTO_INCLUDE_CONFIGURE().where(...).select(...). Optionally configures deeper implicit relation expressions. Must explicitly state that handwritten include(...) takes precedence over auto include when both are present.",
       "files": []
+    },
+    {
+      "id": 9,
+      "name": "flat-element-and-select-boundary",
+      "prompt": "easy-query 里我想按隐式关系把 User 的 roles 展开，再把 roles 的 menus 继续展开，只返回最终菜单 path 列表。给我 Java 代码，并说明为什么不要把 flatElement 写进 select(...)。",
+      "expected_output": "Uses toList(x -> x.roles().flatElement().menus().flatElement().path()) or another verified flatElement-in-toList pattern. Must explicitly avoid select(...flatElement...) and explain that proxy source disallows flatElement inside select, recommending toList(...) for flattened relation rows.",
+      "files": []
+    },
+    {
+      "id": 10,
+      "name": "subquery-configure-filter-mode",
+      "prompt": "帮我用 easy-query 写一个隐式关系查询：User 的 bankCards 这条关系统一先限制 code='1'，然后判断是否存在 type='11' 和 type='22'；另外给一个变体，强制 roles 这条关系用 GROUP_JOIN 模式去判断是否有 menu.route='/admin'。给 Java 代码。",
+      "expected_output": "Uses subQueryConfigure(user -> user.bankCards(), q -> q.where(card -> card.code().eq(\"1\"))) before multiple any(...) calls, and a separate example using roles().mode(SubQueryModeEnum.GROUP_JOIN) with roles().flatElement().menus().any(...). Must not replace these with manual joins or post-query filtering.",
+      "files": []
+    },
+    {
+      "id": 11,
+      "name": "to-one-filter-on-join",
+      "prompt": "easy-query 里我想查 BankCard，但只联到 name 包含“工商银行”的 Bank；要求保持隐式关系写法，不要手写 join。请给 Java 代码，并说明这个 filter 条件落在 join on 还是 where。",
+      "expected_output": "Uses bankCard.bank().filter(bank -> bank.name().contains(\"工商银行\")) inside where(...) and explicitly explains that for relation tables this filter is pushed into JOIN ON rather than ordinary WHERE. Must not rewrite to manual leftJoin/innerJoin.",
+      "files": []
+    },
+    {
+      "id": 12,
+      "name": "proxy-relation-set-projection",
+      "prompt": "我不用 selectAutoInclude，想直接 select 一个自定义 VOProxy，把用户的 bankCards 投影成 cards 子列表，里面 type 来自 card.code，code 来自 card.bank.name。请给 easy-query Java 示例。",
+      "expected_output": "Uses select(user -> new MyUserVOProxy().vo1().set(...).cards().set(user.bankCards(), (self, target) -> { self.type().set(target.code()); self.code().set(target.bank().name()); })) and treats it as a valid relation-driven projection pattern rather than switching to selectAutoInclude or manual post-query mapping.",
+      "files": []
     }
   ]
 }

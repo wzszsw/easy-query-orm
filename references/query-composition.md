@@ -46,6 +46,30 @@ Useful proxy assignment methods:
 - `setExpression`
 - `selectAll`
 
+Relation collection projection without `selectAutoInclude`:
+
+```java
+List<MyUserVO> list = easyEntityQuery.queryable(SysUser.class)
+    .select(user -> new MyUserVOProxy()
+        .vo1().set(user.name())
+        .vo2().set(user.id())
+        .cards().set(user.bankCards().where(card -> card.type().eq("储蓄卡")), (self, target) -> {
+            self.type().set(target.code());
+            self.code().set(target.bank().name());
+        }))
+    .toList();
+```
+
+Use this when:
+
+- the return type is a custom proxy VO, not a DTO class driven by
+  `selectAutoInclude`
+- a child collection needs custom field mapping
+- you want relation-driven secondary loading without manual post-processing
+
+This is a real alternative to `selectAutoInclude`, not a fallback hack. Prefer
+it when the mapping logic lives naturally in a proxy result type.
+
 ## Draft and Tuple Return
 
 ```java

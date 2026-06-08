@@ -6,14 +6,16 @@ description: >-
   `EasyQueryClient`, or the generated proxy DSL. Use when tasks involve
   easy-query setup, proxy generation, Spring Boot integration, queries, CRUD,
   pagination, transactions, implicit relation queries (`subQueryToGroupJoin`,
-  `first`/`element`/`elements`, `joining`, `anyValue`/`noneValue`),
+  `subQueryConfigure`, `flatElement`, `first`/`element`/`elements`, `joining`,
+  `anyValue`/`noneValue`, `notEmptyAll`),
   `@Navigate`/`@NavigateFlat`/`include`/`include2`/`selectAutoInclude`,
-  `EXTRA_AUTO_INCLUDE_CONFIGURE`, `whereObject`, `orderByObject`,
-  `EasySearch`, `savable`, native SQL, sharding, multi-datasource, code-first
-  DDL, or troubleshooting easy-query-specific API/build issues. Trigger even
-  when the user does not name easy-query but the code clearly uses its proxy
-  DSL or asks to migrate MyBatis/JPA code to easy-query. Do not use for other
-  ORMs or query builders unless converting them to easy-query.
+  `EXTRA_AUTO_INCLUDE_CONFIGURE`, proxy DTO relation projection with
+  `.set(user.relation(), ...)`, `whereObject`, `orderByObject`, `EasySearch`,
+  `savable`, native SQL, sharding, multi-datasource, code-first DDL, or
+  troubleshooting easy-query-specific API/build issues. Trigger even when the
+  user does not name easy-query but the code clearly uses its proxy DSL or asks
+  to migrate MyBatis/JPA code to easy-query. Do not use for other ORMs or
+  query builders unless converting them to easy-query.
 ---
 
 # Easy Query ORM
@@ -96,8 +98,8 @@ task; do not read the whole `references/` tree by default.
 | Declare entity relations and fix `@Navigate` direction/cardinality | `references/relation-query.md` |
 | Model advanced `@Navigate` options, `@NavigateFlat`, DTO-side navigation | `references/entity-modeling-navigate.md` |
 | Basic query chain: `where`, order, projection, pagination, terminals | `references/query.md` |
-| Advanced query composition: explicit joins, manual subquery, draft/tuple, native fragments, tracking | `references/query-composition.md` |
-| Implicit relation queries, group joins, nested `subQueryConfigure`, `first/element/elements`, `joining`, tree/partition/case patterns | `references/implicit-query.md` |
+| Advanced query composition: explicit joins, manual subquery, proxy `.set(...)` relation projection, draft/tuple, native fragments, tracking | `references/query-composition.md` |
+| Implicit relation queries, `flatElement`, group joins, nested `subQueryConfigure`, `filter`/`mode`, `first/element/elements`, `joining`, tree/partition/case patterns | `references/implicit-query.md` |
 | Search/page form endpoint: optional filters + stable sort + DTO graph result | `references/search-form-page.md` |
 | Query/search-form DTO filters/sorts via `whereObject` and `orderByObject` | `references/dto-object-query.md` |
 | User-management / admin-search / multi-condition search form endpoint | `references/dto-object-query.md` first, then add DSL only where needed |
