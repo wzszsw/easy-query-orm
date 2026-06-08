@@ -47,13 +47,12 @@ task; do not read the whole `references/` tree by default.
    API, troubleshooting, or review.
 2. Read one core reference first. Add a second only when needed.
 3. For `flatElement`, relation `filter/configure/mode`,
-   `subQueryConfigure`, `notEmptyAll`, or `valueOf`, read
-   `references/implicit-controls.md` first. If the request names an exact
-   control symbol or enum such as `SubQueryModeEnum`, also open
+   `subQueryConfigure`, `notEmptyAll`, `valueOf`, or permission-tree filtering
+   such as `user -> roles -> menus`, read `references/implicit-controls.md`
+   first. If tree assembly / `asTreeCTE` is involved, add
+   `references/implicit-query.md`. If the request names an exact control
+   symbol or enum such as `SubQueryModeEnum`, also open
    `references/api-map.md`.
-   For `用户菜单树`, permission tree, or `user -> roles -> menus` filtering,
-   read `references/implicit-controls.md` first, then add
-   `references/implicit-query.md`.
 4. For search-form page endpoints with filters + sort + paging + DTO graph,
    read `references/search-form-page.md` first.
 5. For setup or proxy-generation problems, read only the matching setup file

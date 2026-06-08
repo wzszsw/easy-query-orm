@@ -243,16 +243,6 @@ Mental model:
 - in `where(...)`: implicit any-style traversal
 - in `toList(...)`: flatten returned relation rows
 
-Practical rule:
-
-- If relation metadata already exposes the business path, prefer
-  `flatElement()` + navigation over hand-writing `SysUserRole` /
-  `SysRoleMenu` junction-table subqueries.
-- For a permission tree, that usually means filtering `SysMenu` by
-  `menu.roles().flatElement().users()...` when reverse relations exist, or
-  collecting menu ids from `SysUser.roles().flatElement().menus()...` when only
-  the forward path exists.
-
 ## 7. `notEmptyAll(...)`
 
 Use `notEmptyAll(...)` for "non-empty and every matched row passes".

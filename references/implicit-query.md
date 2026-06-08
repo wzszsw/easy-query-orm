@@ -246,7 +246,8 @@ Filtered tree is also valid. For `用户菜单树`, do not default to explicit
 `SysUserRole` / `SysRoleMenu` subqueries when relation metadata already exposes
 the permission path.
 
-Preferred when `SysMenu -> roles -> users` reverse relations exist:
+Shortest path when reverse relation `SysMenu -> roles -> users` exists and the
+permission data already contains parent/root menus:
 
 ```java
 List<MenuTreeVO> tree = easyEntityQuery.queryable(SysMenu.class)
@@ -258,57 +259,22 @@ List<MenuTreeVO> tree = easyEntityQuery.queryable(SysMenu.class)
     .toTreeList();
 ```
 
-If only the forward path `SysUser -> roles -> menus` is modeled, prefer the
-implicit navigation path over manual junction-table querying:
+If only the forward path `SysUser -> roles -> menus` is modeled, derive seed
+menu ids implicitly instead of querying junction tables:
 
 ```java
-List<String> visibleMenuIds = easyEntityQuery.queryable(SysUser.class)
+List<String> seedMenuIds = easyEntityQuery.queryable(SysUser.class)
     .where(user -> user.id().eq(userId))
     .toList(user -> user.roles().flatElement().menus().flatElement().id());
-
-List<MenuTreeVO> tree = easyEntityQuery.queryable(SysMenu.class)
-    .where(menu -> menu.id().in(visibleMenuIds))
-    .asTreeCTE()
-    .selectAutoInclude(MenuTreeVO.class)
-    .toTreeList();
 ```
 
-Use manual link-table subqueries only when the project truly does not have the
-needed `@Navigate` metadata.
-
-If only leaf menus are assigned and ancestors or parent menus must be
-backfilled (`补齐祖先节点`), use upward recursion first. The same preference
-applies: anchor with implicit navigation when possible:
+If `seedMenuIds` already contains parent/root menus, query `SysMenu` by
+`id.in(seedMenuIds)` and build the tree directly. If only leaf menus are
+assigned (`补齐祖先节点`), backfill ancestors from those seed ids first:
 
 ```java
-List<String> visibleMenuIds = easyEntityQuery.queryable(SysMenu.class)
-    .where(menu -> {
-        menu.roles().flatElement().users().flatElement().id().eq(userId);
-    })
-    .asTreeCTE(op -> {
-        op.setUp(true);
-        op.setUnionAll(false);
-    })
-    .select(menu -> menu.id())
-    .distinct()
-    .toList();
-
-List<MenuTreeVO> tree = easyEntityQuery.queryable(SysMenu.class)
-    .where(menu -> menu.id().in(visibleMenuIds))
-    .selectAutoInclude(MenuTreeVO.class)
-    .toTreeList();
-```
-
-If reverse relations are missing, the forward-path variant is still better than
-manual junction-table SQL:
-
-```java
-List<String> visibleMenuIds = easyEntityQuery.queryable(SysUser.class)
-    .where(user -> user.id().eq(userId))
-    .toList(user -> user.roles().flatElement().menus().flatElement().id());
-
 List<String> ancestorMenuIds = easyEntityQuery.queryable(SysMenu.class)
-    .where(menu -> menu.id().in(visibleMenuIds))
+    .where(menu -> menu.id().in(seedMenuIds))
     .asTreeCTE(op -> {
         op.setUp(true);
         op.setUnionAll(false);
@@ -322,6 +288,11 @@ List<MenuTreeVO> tree = easyEntityQuery.queryable(SysMenu.class)
     .selectAutoInclude(MenuTreeVO.class)
     .toTreeList();
 ```
+
+When reverse relations exist, `seedMenuIds` can likewise come from a
+`SysMenu` query filtered by `menu.roles().flatElement().users()...`.
+Use manual link-table subqueries only when the project truly does not have the
+needed `@Navigate` metadata.
 
 Use `setChildFilter(...)` when the recursive segment itself must be filtered:
 
