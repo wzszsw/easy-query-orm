@@ -13,6 +13,14 @@ Use this for the control knobs around implicit relation paths:
 
 Read `implicit-query.md` only for the broader feature set.
 
+Global heuristic:
+
+- if existing `@Navigate` metadata already exposes the business path, answer
+  with the relation path first
+- try `flatElement`, relation `any/count/sum`, relation `filter/configure`,
+  or tree anchoring from relation-derived ids before switching to explicit
+  joins or junction-table queries
+
 ## Fast Patterns
 
 If the request looks like one of these, answer with the matching shape first:
@@ -199,6 +207,16 @@ easyEntityQuery.queryable(Province.class)
     .toList();
 ```
 
+Permission-path shape:
+
+```java
+easyEntityQuery.queryable(SysMenu.class)
+    .where(menu -> {
+        menu.roles().flatElement().users().flatElement().id().eq(userId);
+    })
+    .toList();
+```
+
 Common `toList(...)` flattening shape:
 
 ```java
@@ -212,6 +230,7 @@ Verified uses:
 - multi-level to-many traversal
 - flattened `toList(...)` rows
 - partial flattened fetch
+- permission filters such as `user -> roles -> menus` or `menu -> roles -> users`
 
 Critical restriction from proxy source:
 
@@ -223,6 +242,16 @@ Mental model:
 
 - in `where(...)`: implicit any-style traversal
 - in `toList(...)`: flatten returned relation rows
+
+Practical rule:
+
+- If relation metadata already exposes the business path, prefer
+  `flatElement()` + navigation over hand-writing `SysUserRole` /
+  `SysRoleMenu` junction-table subqueries.
+- For a permission tree, that usually means filtering `SysMenu` by
+  `menu.roles().flatElement().users()...` when reverse relations exist, or
+  collecting menu ids from `SysUser.roles().flatElement().menus()...` when only
+  the forward path exists.
 
 ## 7. `notEmptyAll(...)`
 

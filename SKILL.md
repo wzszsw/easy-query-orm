@@ -29,11 +29,17 @@ task; do not read the whole `references/` tree by default.
    uses KSP, not KAPT.
 3. Never invent easy-query API names. Search `references/api-map.md` or
    `scripts/search_references.py` first.
-4. Prefer gated DSL for optional filters. Use `whereObject(...)` only for
+4. easy-query leans heavily on relation metadata. If the requirement can be
+   derived from an existing relation path, prefer the relation-driven form
+   first: implicit navigation, `flatElement`, relation aggregate/predicate, or
+   tree anchoring from relation-derived ids. Fall back to explicit join,
+   junction-table query, or post-query assembly only when the needed
+   `@Navigate` path is missing or clearly insufficient.
+5. Prefer gated DSL for optional filters. Use `whereObject(...)` only for
    search-form DTOs.
-5. Keep paging stable with explicit `orderBy(...)` and a tie-breaker.
-6. Treat row count `0` as meaningful.
-7. Distinguish entity relation metadata from DTO/VO auto-include metadata.
+6. Keep paging stable with explicit `orderBy(...)` and a tie-breaker.
+7. Treat row count `0` as meaningful.
+8. Distinguish entity relation metadata from DTO/VO auto-include metadata.
 
 ## Workflow
 
@@ -45,6 +51,9 @@ task; do not read the whole `references/` tree by default.
    `references/implicit-controls.md` first. If the request names an exact
    control symbol or enum such as `SubQueryModeEnum`, also open
    `references/api-map.md`.
+   For `用户菜单树`, permission tree, or `user -> roles -> menus` filtering,
+   read `references/implicit-controls.md` first, then add
+   `references/implicit-query.md`.
 4. For search-form page endpoints with filters + sort + paging + DTO graph,
    read `references/search-form-page.md` first.
 5. For setup or proxy-generation problems, read only the matching setup file
@@ -69,6 +78,7 @@ task; do not read the whole `references/` tree by default.
 | Advanced projection / manual subquery / proxy relation `.set(...)` | `references/query-composition.md` |
 | Implicit relation basics: group, partition, joining, tree | `references/implicit-query.md` |
 | Implicit controls: `subQueryConfigure`, `filter/configure/mode`, `flatElement`, `notEmptyAll`, `valueOf`, `SubQueryModeEnum` | `references/implicit-controls.md` |
+| Permission tree / `user -> roles -> menus` / tree with nested to-many filter | `references/implicit-controls.md` first, then `references/implicit-query.md` |
 | Search/page form endpoint: optional filters + stable sort + DTO graph result | `references/search-form-page.md` |
 | Query/search-form DTO filters/sorts via `whereObject` and `orderByObject` | `references/dto-object-query.md` |
 | User-management / admin-search / multi-condition search form endpoint | `references/dto-object-query.md` first, then add DSL only where needed |
@@ -87,6 +97,8 @@ task; do not read the whole `references/` tree by default.
 ## Review Checks
 
 - Reject non-easy-query syntax unless the task is explicit migration.
+- Prefer relation-driven answers before explicit join or link-table queries when
+  an existing `@Navigate` path can express the requirement.
 - Prefer `singleOrNull()` for unique business keys.
 - Push filter/sort/page/aggregate work into DSL.
 - Use DTO/VO result types for `selectAutoInclude`.
