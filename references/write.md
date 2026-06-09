@@ -10,6 +10,7 @@ Use this reference for core mutation APIs:
 - `setColumns(...)` / `setIgnoreColumns(...)` / `whereColumns(...)`
 - `mapInsertable(...)` / `mapUpdatable(...)`
 - `batch()`
+- `batch(false)`
 
 Do not use this as the main guide for:
 
@@ -33,6 +34,8 @@ Do not use this as the main guide for:
   `allowDeleteStatement(true)`
 - Dynamic-table / raw-column write:
   `mapInsertable(...)` / `mapUpdatable(...)`
+- Force JDBC batch path for insert/update/delete/save collections:
+  `.batch()` / `.batch(true)`
 
 ## 1. Insert
 
@@ -364,17 +367,59 @@ Use map writes when:
 
 ## 5. Batch Semantics
 
-`batch()` can greatly improve insert/update throughput, but driver behavior is
-not uniform.
+`batch()` is not just a vague "bulk mode". Current source shows:
+
+- `batch()` is a default method that calls `batch(true)`
+- `batch(boolean use)` toggles execution behavior flags on the current
+  expression
+- when batch execution is active, the JDBC path uses
+  `PreparedStatement.addBatch()` plus `PreparedStatement.executeBatch()`
+
+So for mutation answers, you can state precisely:
+
+- `batch()` and `batch(true)` enable the JDBC batch execution path
+- `batch(false)` explicitly disables that path for the current chain
+
+### What happens underneath
+
+Source-backed execution shape:
+
+1. `AbstractSQLExecuteRows.batch(boolean use)` sets expression behavior to
+   `EXECUTE_BATCH` or `EXECUTE_NO_BATCH`
+2. execution creation can group compatible units by datasource + SQL text
+3. `EasyJdbcExecutorUtil.execute(...)` calls `ps.addBatch()`
+4. batched groups flush via `ps.executeBatch()`
+
+This means batch is closer to "use JDBC batch API for this write chain" than
+to "always rewrite to one multi-values SQL statement".
 
 Practical rules:
 
+- treat `batch()` as an execution-mode switch, not a promise about exact SQL
+  text shape
+- inserts/updates with mixed SQL shapes may still be split into several batch
+  groups
+- compatible SQL can be grouped before batch execution; incompatible shapes do
+  not magically merge
 - do not rely on exact returned affected-row counts under batch mode unless the
   driver is known to provide them
 - on MySQL, `rewriteBatchedStatements=true` is a common prerequisite for real
-  batch performance
+  `executeBatch()`-backed performance; without it, docs warn MySQL may still
+  execute effectively one by one
 - when mixed null/non-null shapes exist and strategy is not `ALL_COLUMNS`,
   easy-query can group compatible SQL shapes for batch execution
+
+### Why row counts get weird
+
+JDBC batch results are driver-dependent. In practice you may see totals derived
+from special `executeBatch()` return codes such as "success but count unknown".
+
+So:
+
+- do not use batch row counts as strong business invariants
+- do not combine `batch()` with `executeRows(expectRows, ...)` unless the
+  driver behavior is already verified for that path
+- use batch primarily for throughput, not concurrency assertions
 
 ## 6. Optimistic Lock and Row-Count Semantics
 
@@ -438,6 +483,7 @@ row".
 - Using `onConflictThen(...)` without considering null conflict columns or the
   MySQL second-parameter caveat
 - Trusting batch affected-row counts as exact business truth
+- Treating `batch()` as "one SQL" instead of "JDBC batch API execution mode"
 - Using map write with property names instead of column names
 - Treating `executeRows() == 0` as success
 - Calling physical delete without both a real condition and
@@ -453,6 +499,10 @@ row".
   `ProxyEntityConflictThenable`,
   `SQLConflictThenable`,
   `SQLExecuteStrategyEnum`,
+  `SQLBatchExecute`,
+  `AbstractSQLExecuteRows`,
+  `EasyJdbcExecutorUtil`,
+  `BaseExecutionCreator`,
   `Deletable`,
   `WithVersionable`,
   `ConfigureVersionable`

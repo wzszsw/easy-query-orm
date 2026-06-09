@@ -237,6 +237,9 @@ most one secondary reference when a boundary rule below says it is needed.
 - For map writes, keys are column names, not entity property names.
 - Do not trust batch affected-row counts as exact business success across all
   drivers.
+- State `batch()` semantics precisely: `batch()` equals `batch(true)`, it
+  enables the JDBC batch execution path for the current chain, and
+  `batch(false)` disables it.
 - For correlated explicit subqueries, prefer
   `expression().subQueryable(...)` over an independently created root query
   unless detached composition is intentional.

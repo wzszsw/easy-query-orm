@@ -180,7 +180,7 @@ projection, and `select-auto-include.md` for DTO graphs.
 | `setIgnoreColumns(...)` | Exclude selected object-update columns from `SET` | `write.md` |
 | `whereColumns(...)` | Choose object-update or object-delete key columns | `write.md` |
 | `columnConfigure(...)` | Per-column custom SQL generation during insert/update | `write.md` |
-| `batch()` | Force batch execution path | `write.md` |
+| `batch()` / `batch(true)` / `batch(false)` | Toggle JDBC batch execution behavior on the current write chain | `write.md` |
 | `withVersion(...)` / `ignoreVersion()` | Version handling | `write.md` |
 | `disableLogicDelete()` / `enableLogicDelete()` / `useLogicDelete(boolean)` | Toggle logic-delete filtering/behavior on the current chain | `logic-delete.md` |
 | `tableLogicDelete(() -> false)` | Disable logic delete for the nearest joined table in the current expression | `logic-delete.md` |

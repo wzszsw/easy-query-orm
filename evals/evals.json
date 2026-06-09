@@ -115,7 +115,8 @@
         "purpose": "Object update vs expression update, SQL strategy, conflict writes, map writes, and batch/write-safety boundaries.",
         "eval_ids": [
           34,
-          35
+          35,
+          36
         ]
       }
     ],
@@ -135,7 +136,8 @@
         28,
         30,
         32,
-        34
+        34,
+        36
       ],
       "p1_should_pass_eval_ids": [
         9,
@@ -178,7 +180,8 @@
       28,
       30,
       32,
-      34
+      34,
+      36
     ]
   },
   "evals": [
@@ -432,6 +435,13 @@
       "name": "conflict-write-and-map-update",
       "prompt": "帮我补两个 easy-query Java 片段。第一个：按 `code` 冲突时更新 `updateTime` 和 `title`，不存在则插入，用当前的 upsert API，不要写先查再改。第二个：用 `mapUpdatable` 更新动态表 `user_archive_2024` 的 `update_time`，按 `id` 命中。顺便说明 `onConflictThen(...)` 在冲突列可能为 null 时要注意什么，以及 map 写入的 key 应该写属性名还是列名。",
       "expected_output": "Must use `insertable(...).onConflictThen(...)` rather than check-then-write logic, and for proxy DSL should show a conflict selector like `o -> o.FETCHER.updateTime().title()` plus a constraint selector such as `o -> o.FETCHER.code()`. It must explicitly explain that if the conflict property may be omitted by insert strategy, `setSQLStrategy(SQLExecuteStrategyEnum.ALL_COLUMNS)` may be required. The map example must use `mapUpdatable(map).asTable(\"user_archive_2024\").whereColumns(\"id\")...executeRows()` and explicitly state that map keys are column names, not entity property names.",
+      "files": []
+    },
+    {
+      "id": 36,
+      "name": "batch-jdbc-semantics",
+      "prompt": "请你解释 easy-query 里的 `batch()`、`batch(true)`、`batch(false)` 在写入链上的含义。要求结合源码说清楚它到底是不是底层走 JDBC batch API，以及为什么返回受影响行数不能被当成强业务断言。顺便给一个 insertable 和一个 updatable 的 Java 例子。",
+      "expected_output": "Must explicitly state that `batch()` is the default shorthand for `batch(true)`, that the current source toggles batch behavior on the expression and the execution path ultimately uses JDBC `PreparedStatement.addBatch()` / `executeBatch()`, and that `batch(false)` disables that path. It must explain driver-dependent batch counts and why they are unsafe as strong business invariants. Should show both an insert and an update example using `.batch().executeRows()`. Mentioning MySQL `rewriteBatchedStatements=true` as a practical prerequisite is expected.",
       "files": []
     }
   ]
