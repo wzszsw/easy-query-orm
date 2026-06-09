@@ -14,6 +14,9 @@ Use this for the core implicit feature set. For quantifier predicates such as
 `any/all/none/notEmptyAll`, `subQueryConfigure`, `filter/configure/mode`,
 `flatElement`, or `valueOf`, read `implicit-controls.md`.
 
+For manual/explicit `where/select/from/join` subquery shapes, derived tables,
+or CTE promotion, read `subquery-explicit.md`.
+
 ## What Triggers Implicit SQL
 
 - To-one navigation like `card.user().name()` triggers implicit join SQL.

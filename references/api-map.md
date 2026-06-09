@@ -14,8 +14,8 @@ Use this file only to confirm symbol names and choose the next reference.
 Common top-level methods:
 
 `queryable(...)`, `insertable(...)`, `updatable(...)`, `deletable(...)`,
-`savable(...)`, `beginTransaction()`, `sqlQuery(...)`, `sqlQueryMap(...)`,
-`sqlExecute(...)`
+`mapInsertable(...)`, `mapUpdatable(...)`, `savable(...)`,
+`beginTransaction()`, `sqlQuery(...)`, `sqlQueryMap(...)`, `sqlExecute(...)`
 
 ## Entity and Mapping Symbols
 
@@ -109,6 +109,9 @@ For non-form dynamic query composition, read `query.md` instead.
 | `.include(...)` | Load entity relations | `include-structured-loading.md` |
 | `.include2(...)` | Complex nested include paths | `include-structured-loading.md` |
 | `loadInclude(...)` | Load relations after query | `include-structured-loading.md` |
+| `expression().subQueryable(Entity.class)` | Context-aware explicit subquery bound to the current expression | `subquery-explicit.md` |
+| `expression().subQuery(query)` | Wrap a query as a scalar subquery expression | `subquery-explicit.md` |
+| `exists(query)` / `notExists(query)` | Explicit subquery predicate on the current expression | `subquery-explicit.md` |
 | `.subQueryToGroupJoin(...)` | To-many subquery group join | `implicit-query.md` |
 | `.subQueryConfigure(...)` | Root-level baseline configuration for later relation subqueries | `implicit-controls.md` |
 | `.asTreeCTE()` / `.asTreeCTECustom(...)` | Recursive tree query | `implicit-query.md` |
@@ -144,6 +147,15 @@ If the result target is a DTO graph, prefer `selectAutoInclude(...)` before
 | `.distinct()` on relation chain | Keep distinctness inside implicit subquery | `implicit-controls.md` |
 | `expression().valueOf(...)` | Project arbitrary predicate as boolean column | `implicit-controls.md` |
 
+## Explicit Subquery Symbols
+
+| Symbol | Purpose | Read Next |
+|--------|---------|-----------|
+| `.in(query)` / `.notIn(query)` | Compare a column to a projected subquery result set | `subquery-explicit.md` |
+| `DSLColumnSet.setSubQuery(query)` | Assign a scalar subquery to a proxy projection field | `subquery-explicit.md` |
+| `.toCteAs()` | Promote a queryable to a named CTE stage | `subquery-explicit.md`, `ap-analytics.md` |
+| `.leftJoin(queryable, ...)` | Join a grouped/manual derived-table subquery | `subquery-explicit.md`, `query-composition.md` |
+
 ## Select and Projection Symbols
 
 Useful projection helpers:
@@ -161,6 +173,14 @@ projection, and `select-auto-include.md` for DTO graphs.
 | `insertable(...)` | Insert rows | `write.md` |
 | `updatable(...)` | Update rows | `write.md` |
 | `deletable(...)` | Delete rows | `write.md` |
+| `mapInsertable(...)` | Insert column-value map rows | `write.md` |
+| `mapUpdatable(...)` | Update column-value map rows | `write.md` |
+| `onConflictThen(...)` | Conflict/upsert handling on insert | `write.md` |
+| `setSQLStrategy(...)` | Control insert/update column emission strategy | `write.md`, `configuration-starter.md` |
+| `setIgnoreColumns(...)` | Exclude selected object-update columns from `SET` | `write.md` |
+| `whereColumns(...)` | Choose object-update or object-delete key columns | `write.md` |
+| `columnConfigure(...)` | Per-column custom SQL generation during insert/update | `write.md` |
+| `batch()` | Force batch execution path | `write.md` |
 | `withVersion(...)` / `ignoreVersion()` | Version handling | `write.md` |
 | `disableLogicDelete()` / `enableLogicDelete()` / `useLogicDelete(boolean)` | Toggle logic-delete filtering/behavior on the current chain | `logic-delete.md` |
 | `tableLogicDelete(() -> false)` | Disable logic delete for the nearest joined table in the current expression | `logic-delete.md` |

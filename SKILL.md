@@ -6,14 +6,17 @@ description: >-
   or when migrating JPA/MyBatis to easy-query. Covers setup, proxy generation,
   missing `*Proxy` troubleshooting, AP / OLAP-style analytics,
   `groupBy` / `having`, conditional aggregate filters, implicit
-  `subQueryToGroupJoin`, CTE / UNION / window functions, Maven APT / Kotlin
+  `subQueryToGroupJoin`, explicit `exists/notExists/in/notIn`, derived-table
+  subquery, CTE / UNION / window functions, Maven APT / Kotlin
   KSP diagnosis, `annotationProcessorPaths`, generated-sources visibility, ValueConverter / ValueAutoConverter / TypeHandler, Interceptor, LogicDelete, Spring Boot, CRUD/query/page/transaction code, implicit relation APIs
   (`any`/`all`/`none`, `subQueryToGroupJoin`, `subQueryConfigure`,
   `flatElement`, `first`/`element`/`elements`, `joining`,
   `anyValue`/`noneValue`, `notEmptyAll`), `@Navigate`/`@NavigateFlat`/`include`/`include2`/
   `selectAutoInclude`, `EXTRA_AUTO_INCLUDE_CONFIGURE`, proxy VO relation
   `.set(...)`, `whereObject`/`orderByObject`, `EasySearch`, `savable`,
-  sharding, code-first DDL, and troubleshooting. Do not use for unrelated
+  sharding, code-first DDL, `onConflictThen`, `mapInsertable/mapUpdatable`,
+  `setSQLStrategy`, `setIgnoreColumns/whereColumns`, and troubleshooting. Do
+  not use for unrelated
   ORMs.
 ---
 
@@ -80,9 +83,11 @@ most one secondary reference when a boundary rule below says it is needed.
   defaults and behavior drift.
 - Query stack:
   `query.md` is for ordinary root DSL; `query-composition.md` is for explicit
-  joins, manual subqueries, advanced projection, and proxy VO relation
-  `.set(...)`; `functions-native-sql.md` is only for function helpers or raw
-  SQL fragments.
+  joins, advanced projection, and proxy VO relation
+  `.set(...)`;
+  `subquery-explicit.md` is for explicit `where/select/from/join` subqueries,
+  derived tables, and `toCteAs()`;
+  `functions-native-sql.md` is only for function helpers or raw SQL fragments.
 - Relation metadata vs result loading:
   `relation-query.md` is for `@Navigate` direction/cardinality;
   `entity-modeling-navigate.md` is for advanced navigate metadata,
@@ -148,9 +153,15 @@ most one secondary reference when a boundary rule below says it is needed.
 
 - Ordinary filter/order/select/page/terminal query chains:
   `references/query.md`.
-- Explicit joins, advanced projection, draft/tuple, manual subquery, or proxy
-  VO relation `.set(...)`:
+- Explicit joins, advanced projection, draft/tuple, or proxy VO relation
+  `.set(...)`:
   `references/query-composition.md`.
+- Explicit `where/select/from/join` subquery, `exists/notExists/in/notIn`,
+  `expression().subQueryable(...)`, `setSubQuery(...)`, derived table, or
+  `toCteAs()`:
+  `references/subquery-explicit.md`.
+  Pair with `references/implicit-query.md` only when a relation-driven
+  alternative or `subQueryToGroupJoin(...)` tradeoff matters.
 - SQL functions, expression helpers, or native SQL fragments:
   `references/functions-native-sql.md`.
 - Implicit relation capabilities: implicit join, scalar subquery, group join,
@@ -176,7 +187,9 @@ most one secondary reference when a boundary rule below says it is needed.
 
 ### Write & Cross-Cutting
 
-- Insert/update/delete semantics, optimistic lock, physical delete safety:
+- Insert/update/delete semantics, conflict write, map write,
+  `setSQLStrategy`, `setIgnoreColumns`, `whereColumns`, `columnConfigure`,
+  optimistic lock, physical delete safety:
   `references/write.md`.
 - Plain transaction API or Spring `@Transactional`:
   `references/transaction.md`.
@@ -220,6 +233,21 @@ most one secondary reference when a boundary rule below says it is needed.
   in-memory metrics.
 - Keep grouped projections group-aware: non-key fields should come from
   aggregate expressions, grouped proxy access, or explicit window outputs.
+- Distinguish expression update from object update; do not blindly answer
+  every update request with `updatable(entity).executeRows()`.
+- When using `updatable(entity).setColumns(...)`, mention `whereColumns(...)`
+  when the write condition must stay explicit.
+- Do not recommend `onConflictThen(...)` without calling out constraint-column
+  selection semantics and the `ALL_COLUMNS` caveat when conflict columns may
+  be omitted by strategy.
+- For map writes, keys are column names, not entity property names.
+- Do not trust batch affected-row counts as exact business success across all
+  drivers.
+- For correlated explicit subqueries, prefer
+  `expression().subQueryable(...)` over an independently created root query
+  unless detached composition is intentional.
+- Do not leave a bare subquery type fragment in `where(...)`; end it as
+  `exists`, `notExists`, `in`, `notIn`, or scalar comparison.
 - Do not recommend `JdbcTypeHandler` when an in-memory `ValueConverter` is
   sufficient.
 - Do not recommend `ValueConverter` alone when the real problem is JDBC
@@ -236,6 +264,8 @@ most one secondary reference when a boundary rule below says it is needed.
 - Mention `tableLogicDelete(...)` and relation
   `.configure(q -> q.disableLogicDelete())` when only part of a query graph
   should ignore logical delete.
+- Do not assume outer logic-delete toggles or arbitrary custom `ValueFilter`
+  automatically propagate to independent explicit subqueries.
 - For Spring Boot starter answers, do not claim `easy-query.enable: true` is
   mandatory unless the project version proves a different condition
   implementation.

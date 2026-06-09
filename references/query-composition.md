@@ -4,6 +4,9 @@ Read this after `query.md` when the task needs more than ordinary filter/order/p
 chains. This file only covers the advanced composition pieces that are easy to
 misremember.
 
+For explicit `where/select/from/join` subquery shapes, derived tables, or CTE
+promotion, read `subquery-explicit.md`.
+
 ## Advanced Projection
 
 Partial entity fields:
@@ -111,6 +114,9 @@ exists, prefer the relation query form from `implicit-query.md` and keep
 `relation-query.md` for relation metadata itself.
 
 ## Manual Subquery
+
+Full explicit-subquery routing now lives in `subquery-explicit.md`. Keep this
+section as the quick scalar example only.
 
 Manual scalar subquery pattern:
 
