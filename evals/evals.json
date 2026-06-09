@@ -7,35 +7,102 @@
       {
         "id": "setup-and-generation",
         "purpose": "Proxy generation, missing proxy troubleshooting, Kotlin KSP vs KAPT, starter setup, and Spring integration.",
-        "eval_ids": [0, 1, 2, 18]
+        "eval_ids": [
+          0,
+          1,
+          2,
+          18
+        ]
       },
       {
         "id": "core-query-and-write",
         "purpose": "CRUD, dynamic paging filters, transactions, and tests grounded in easy-query APIs.",
-        "eval_ids": [3, 4, 5, 6]
+        "eval_ids": [
+          3,
+          4,
+          5,
+          6
+        ]
       },
       {
         "id": "implicit-core",
         "purpose": "Implicit group, partition, joining, boolean relation projection, and structured relation loading.",
-        "eval_ids": [7, 8, 17]
+        "eval_ids": [
+          7,
+          8,
+          17
+        ]
       },
       {
         "id": "implicit-controls",
         "purpose": "any/all/none/notEmptyAll, flatElement, subQueryConfigure, filter/configure/mode, join-on filtering, relation distinct, predicate-to-boolean projection, and permission-tree routing.",
-        "eval_ids": [9, 10, 11, 13, 14, 15, 16]
+        "eval_ids": [
+          9,
+          10,
+          11,
+          13,
+          14,
+          15,
+          16
+        ]
       },
       {
         "id": "projection-and-vo-assembly",
         "purpose": "Proxy VO relation projection without selectAutoInclude.",
-        "eval_ids": [12]
+        "eval_ids": [
+          12
+        ]
+      },
+      {
+        "id": "ap-analytics",
+        "purpose": "Explicit groupBy/having, conditional aggregates, implicit group joins for metrics, CTE/window analytics, and UNION-based report shaping.",
+        "eval_ids": [
+          19,
+          20,
+          21
+        ]
       }
     ],
     "pass_policy": {
-      "p0_must_pass_eval_ids": [1, 7, 8, 10, 11, 18],
-      "p1_should_pass_eval_ids": [9, 12, 13, 14, 15, 16, 17],
-      "p2_regression_guard_eval_ids": [0, 2, 3, 4, 5, 6]
+      "p0_must_pass_eval_ids": [
+        1,
+        7,
+        8,
+        10,
+        11,
+        18,
+        19,
+        20
+      ],
+      "p1_should_pass_eval_ids": [
+        9,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        21
+      ],
+      "p2_regression_guard_eval_ids": [
+        0,
+        2,
+        3,
+        4,
+        5,
+        6
+      ]
     },
-    "benchmark_focus_eval_ids": [1, 7, 8, 10, 12, 17]
+    "benchmark_focus_eval_ids": [
+      1,
+      7,
+      8,
+      10,
+      12,
+      17,
+      19,
+      20
+    ]
   },
   "evals": [
     {
@@ -170,6 +237,28 @@
       "prompt": "我的 easy-query 项目里一直提示 `package com.foo.entity.proxy does not exist`，`UserProxy` 没生成。项目是 Java Maven，多模块，已经引了 `sql-processor`。另外 `maven-compiler-plugin` 里还配过 `annotationProcessorPaths`，本地 JDK 21，Lombok 比较老。不要直接给我一份新 pom，我要的是一套排查顺序和原因判断。",
       "expected_output": "Must diagnose by layer instead of jumping to a pom snippet: identify Java APT path, explain that `@EntityProxy` is the generation trigger and `ProxyEntityAvailable` is not the switch, call out that existing `annotationProcessorPaths` can hide easy-query unless `sql-processor` is explicitly listed there, require checking the module that actually compiles the entities, require checking generated output under target/generated-sources/annotations, and explicitly say the visible missing-proxy error may be secondary to the first real processor/compile failure such as old Lombok on JDK 21 (`javacTree`/`JCImport`/`NoSuchFieldError`).",
       "files": []
+    },
+    {
+      "id": 19,
+      "name": "explicit-group-having-conditional-aggregate",
+      "prompt": "帮我用 easy-query 写一个 Java 报表查询：按 companyId 分组统计用户数、近30天新增用户数、最大生日、平均年龄，只保留用户数大于 10 的公司。不要手写 SQL，也不要用 Java Stream 再分组。",
+      "expected_output": "Uses explicit group-aware DSL: groupBy(user -> GroupKeys.of(user.companyId())), grouped projection via key1()/group.groupTable(), conditional aggregate filter syntax such as count().filter(() -> ...), and aggregate-level having(...) instead of post-query regrouping or manual SQL.",
+      "files": []
+    },
+    {
+      "id": 20,
+      "name": "cte-window-topn-analytics",
+      "prompt": "我想用 easy-query 做一个分析查询：先按 bankId + uid 聚合出每个用户在该银行的卡数，再给每个 bankId 内的用户按卡数倒序打排名，只保留每个 bankId 排名第 3 的用户，最后再回表查这些用户。要求用 easy-query 的 CTE / 窗口能力，不要手写窗口 SQL。",
+      "expected_output": "Uses a grouped stage plus a window stage in easy-query DSL, such as GroupKeys.of(...) with rowNumberOver().partitionBy(...).orderByDescending(...), then CTE/view-style filtering on the rank column before joining or querying back users. Must keep deterministic partition ordering and avoid raw SQL strings.",
+      "files": []
+    },
+    {
+      "id": 21,
+      "name": "union-shaped-report-query",
+      "prompt": "有两份 easy-query 数据源分支：一份来自 Topic，一份来自 Blog，我想统一投影成同一个报表行模型，然后 union all 之后再按 id 过滤。请给 Java 代码。不要先查两次再在内存里 merge。",
+      "expected_output": "Uses a same-shaped result type for all branches, then unionAll(...) on entity queryables and downstream filtering on the merged query. Must not fall back to Java Stream concat/merge or raw SQL union strings.",
+      "files": []
     }
   ]
 }
+
