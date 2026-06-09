@@ -2,22 +2,16 @@
 name: easy-query-orm
 description: >-
   Use when Java/Kotlin code uses easy-query (`EasyEntityQuery`,
-  `EasyQueryClient`, proxy DSL), when the user shows easy-query proxy syntax,
-  or when migrating JPA/MyBatis to easy-query. Covers setup, proxy generation,
-  missing `*Proxy` troubleshooting, AP / OLAP-style analytics,
-  `groupBy` / `having`, conditional aggregate filters, implicit
-  `subQueryToGroupJoin`, explicit `exists/notExists/in/notIn`, derived-table
-  subquery, CTE / UNION / window functions, Maven APT / Kotlin
-  KSP diagnosis, `annotationProcessorPaths`, generated-sources visibility, ValueConverter / ValueAutoConverter / TypeHandler, Interceptor, LogicDelete, Spring Boot, CRUD/query/page/transaction code, implicit relation APIs
-  (`any`/`all`/`none`, `subQueryToGroupJoin`, `subQueryConfigure`,
-  `flatElement`, `first`/`element`/`elements`, `joining`,
-  `anyValue`/`noneValue`, `notEmptyAll`), `@Navigate`/`@NavigateFlat`/`include`/`include2`/
-  `selectAutoInclude`, `EXTRA_AUTO_INCLUDE_CONFIGURE`, proxy VO relation
-  `.set(...)`, `whereObject`/`orderByObject`, `EasySearch`, `savable`,
-  sharding, code-first DDL, `onConflictThen`, `mapInsertable/mapUpdatable`,
-  `setSQLStrategy`, `setIgnoreColumns/whereColumns`, and troubleshooting. Do
-  not use for unrelated
-  ORMs.
+  `EasyQueryClient`, proxy DSL) or when migrating JPA/MyBatis to easy-query.
+  Covers setup and missing `*Proxy` troubleshooting, Spring Boot
+  starter/config, CRUD and mutation APIs (`insertable/updatable/deletable`,
+  `onConflictThen`, `mapInsertable/mapUpdatable`, `setSQLStrategy`,
+  version/logic delete), search-form DTO query (`whereObject`,
+  `orderByObject`, `EasySearch`), relation metadata/loading (`@Navigate`,
+  `include`, `selectAutoInclude`), implicit and explicit
+  subquery/group-join/CTE/window/UNION analytics, `savable`, sharding,
+  code-first DDL, and verified API lookup/troubleshooting. Do not use for
+  unrelated ORMs.
 ---
 
 # Easy Query ORM
