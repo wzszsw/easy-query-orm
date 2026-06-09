@@ -212,14 +212,10 @@ most one secondary reference when a boundary rule below says it is needed.
   `references/transaction.md`.
 - Aggregate graph save with `savable(...)`:
   `references/savable-aggregate.md`.
-- Savable execution model, `savePath`, `ignoreRoot`, `removeRoot`,
-  `IGNORE_NULL` / `IGNORE_EMPTY` / `IGNORE_LOGIC_DELETE`, or batch on save:
-  `references/savable-execution.md`.
-- Savable relation rules, one-to-one/one-to-many/many-to-many/many-to-one,
-  cascade, or ownership transfer:
-  `references/savable-relation-rules.md`.
-- Savable child key safety / `saveEntitySetPrimaryKey(...)`:
-  `references/savable-key-safety.md`.
+- If the savable question is explicitly about execution preconditions,
+  `savePath`, root controls, ownership/cascade, or child key safety, start at
+  `references/savable-aggregate.md` and follow its router instead of opening
+  all savable references at once.
 - Value conversion, auto conversion, enum/json mapping, `JdbcTypeHandler`,
   PostgreSQL `jsonb`:
   `references/value-conversion-type-handler.md`.

@@ -27,7 +27,7 @@ Common top-level methods:
 | `@Column(conversion=...)` | Field-level `ValueConverter` mapping | `value-conversion-type-handler.md` |
 | `@Column(typeHandler=...)` | Field-level JDBC type handler override | `value-conversion-type-handler.md` |
 | `@Enumerated` | Built-in enum-name auto conversion trigger | `value-conversion-type-handler.md` |
-| `@Version` | Optimistic lock | `write.md` |
+| `@Version` | Optimistic lock | `write-update.md`, `write-delete.md` |
 | `@LogicDelete` | Logic-delete column and strategy binding | `logic-delete.md` |
 | `@Navigate` | Relation metadata | `relation-query.md`, `entity-modeling-navigate.md` |
 | `@NavigateFlat` | DTO/VO path flattening | `entity-modeling-navigate.md` |
@@ -242,7 +242,6 @@ query code.
 | `StarterConfigurer` | Spring Boot hook for replacing internal bootstrap services (`com.easy.query.core.bootstrapper`) | `spring-boot-starter.md` |
 | `JdbcTypeHandlerReplaceConfigurer` | Declares global JDBC handler type binding/replacement under starter | `spring-boot-starter.md`, `value-conversion-type-handler.md` |
 | `SpringBootStarterBuilder.buildClient(...)` | Default starter client-construction path | `spring-boot-starter.md` |
-| `@EasyQueryTrack` | Opens tracking scope on Spring public methods | `spring-boot-starter.md` |
 | `EasyQueryTrackProperties` | `easy-query-track.*` property holder | `spring-boot-starter.md` |
 
 Starter property switches commonly worth naming precisely:
