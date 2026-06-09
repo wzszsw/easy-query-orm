@@ -2,6 +2,10 @@
 
 Use this reference when returning object graphs, loading relations after a query, or choosing between `include`, `include2`, `fillOne/fillMany`, and `selectAutoInclude`.
 
+Do not use this as the main DTO/VO structured-return guide. For
+`selectAutoInclude(ResultDTO.class)` as the primary answer shape, read
+`select-auto-include.md` first.
+
 ## Decision Guide
 
 - Use `selectAutoInclude(ResultDTO.class)` for structured DTO/VO result graphs. It is the strongest structured return path and can infer relation loading from DTO shape.

@@ -1,11 +1,13 @@
 # Setup — Kotlin (KSP)
 
-How to wire easy-query into a Kotlin project. Kotlin uses **KSP** for proxy generation — **not KAPT**.
-The runtime API is identical to Java; only the build setup and the lambda surface differ.
+How to wire easy-query into a Kotlin project. Kotlin uses **KSP** for proxy
+generation — **not KAPT**. The runtime API is identical to Java; only the
+build setup and the lambda surface differ.
 
-If the problem is "cannot find `UserProxy`" or "proxy not generated", start and
-stop in this file unless the entity annotations themselves are obviously wrong.
-You should not need `troubleshooting.md` for the first pass.
+If the problem is "cannot find `UserProxy`", "proxy not generated", or KSP
+does not appear to run, start with
+`proxy-generation-troubleshooting.md` first, then return here for the concrete
+Gradle wiring.
 
 ## When to use / not
 

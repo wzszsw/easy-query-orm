@@ -7,6 +7,13 @@ property semantics, extension bean registration, `StarterConfigurer`,
 This file is source-backed from the current `sql-springboot-starter` module.
 Prefer it over older docs when they conflict.
 
+Boundary:
+
+- `setup-spring-boot.md` is the first stop for dependency, yml, and basic bean
+  injection
+- `configuration-starter.md` is property-defaults/property-impact only
+- this file is the starter-internals and extension-registration guide
+
 ## What the starter auto-configures
 
 The starter registers three auto-configuration classes:

@@ -1,12 +1,16 @@
 # Starter Configuration and Defaults
 
-Use this reference when easy-query behavior differs from expected code because of Spring Boot starter properties.
+Use this reference when easy-query behavior differs from expected code because
+of Spring Boot starter properties.
 
 Source evidence: `EasyQueryProperties` annotated with `@ConfigurationProperties(prefix = "easy-query")`.
 
 For auto-configuration topology, collected Spring beans, `StarterConfigurer`,
 `@EasyQueryTrack`, or multi-datasource behavior, add
 `spring-boot-starter.md`.
+
+Do not use this as the main Spring Boot setup file. It is the property-impact
+companion, not the starter topology guide.
 
 ## Condition Semantics
 

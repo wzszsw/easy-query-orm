@@ -1,8 +1,11 @@
 # Advanced features
 
-Aggregate/groupBy, code-first DDL, sharding, and multi-datasource. These are layer-3 topics — the snippets
-here are verified entry points; for deep configuration follow the doc pointers in each Sources line and
-confirm against the user's version.
+Use this file for code-first DDL, sharding, multi-datasource scope, and a
+small set of runtime-level advanced APIs.
+
+Do not use this as the main AP/reporting guide. For grouped metrics,
+conditional aggregates, CTE/window analytics, or UNION-shaped reports, read
+`ap-analytics.md` first.
 
 ## Aggregate + groupBy + projection
 

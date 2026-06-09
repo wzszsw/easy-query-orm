@@ -3,6 +3,12 @@
 Read this after `entity-mapping.md` when the task depends on advanced relation
 metadata rather than plain mapping.
 
+Boundary:
+
+- plain `@Navigate` direction/cardinality: `relation-query.md`
+- relation-driven predicates/subqueries/tree behavior: `implicit-query.md`
+- DTO/VO structured return assembly: `select-auto-include.md`
+
 ## Relation Shapes
 
 Examples use `Fields.xxx` constants from Lombok `@FieldNameConstants`, for

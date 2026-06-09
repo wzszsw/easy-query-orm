@@ -21,10 +21,10 @@ description: >-
 
 Write compilable easy-query code from verified patterns.
 
-This file is the index. Load only the one or two references that match the
-task; do not read the whole `references/` tree by default.
+Use this file only as the router. Open one primary reference first. Add at
+most one secondary reference when a boundary rule below says it is needed.
 
-## Core Rules
+## Operating Rules
 
 1. Default to `EasyEntityQuery` and proxy DSL unless the project clearly uses
    weak-typed `EasyQueryClient`.
@@ -54,102 +54,153 @@ task; do not read the whole `references/` tree by default.
 9. Keep paging stable with explicit `orderBy(...)` and a tie-breaker.
 10. Treat row count `0` as meaningful.
 11. Distinguish entity relation metadata from DTO/VO auto-include metadata.
+12. If the project version differs from the reference version, prefer the
+    project and say which API or behavior may have moved.
 
-## Workflow
+## Triage
 
-1. Classify first: setup, mapping, query, AP analytics, relation loading,
-   write, control API, troubleshooting, or review.
-2. Read one core reference first. Add a second only when needed.
-3. For relation quantifier predicates such as `any/all/none/notEmptyAll`,
-   `flatElement`, relation `filter/configure/mode`, `subQueryConfigure`,
-   `valueOf`, or permission-tree filtering such as `user -> roles -> menus`,
-   read `references/implicit-controls.md` first. If broader implicit
-   partition/joining/tree behavior is involved, add
-   `references/implicit-query.md`. If the request names an exact control
-   symbol or enum such as `SubQueryModeEnum`, also open
-   `references/api-map.md`.
-4. For ranked-child / partition-style requests such as `first()`,
-   `element(index)`, `elements(start,end)`, `partition by`, `第一条子记录`,
-   `第一张开户银行卡`, or top-N child windows, read
-   `references/implicit-query.md` first, then `references/api-map.md` if the
-   exact symbol is unclear.
-5. For report/dashboard/AP work with dimensions + metrics, grouped
-   aggregates, conditional aggregates, ranked snapshots, CTE, UNION, or
-   window functions, read `references/ap-analytics.md` first. If repeated
-   to-many relation metrics are involved, add `references/implicit-query.md`.
-6. For form-object filtering and sorting with `whereObject(...)`,
-   `@EasyWhereCondition`, range/in/notIn, `MULTI_OR`, relation-path filters,
-   or `COLLECTION_EQUAL_OR`, read `references/dto-object-query.md` first. Use
-   `references/easy-search.md` only when `sql-search` / `EasySearch` /
-   `@EasyCond` is actually in play.
-7. For value conversion, enum/json mapping, `@Column(conversion=...)`,
-   `ValueAutoConverter`, `@Enumerated`, `@Column(typeHandler=...)`, JDBC
-   binding overrides, or PostgreSQL `jsonb`, read
-   `references/value-conversion-type-handler.md` first.
-8. For multi-tenant filters, data-permission filters, audit/default field
-   filling, expression-update auto-set columns, `useInterceptor(...)`,
-   `noInterceptor(...)`, or `ProtectedInterceptor`, read
-   `references/interceptor.md` first.
-9. For `@LogicDelete`, `disableLogicDelete()`, `enableLogicDelete()`,
-   `useLogicDelete(boolean)`, `tableLogicDelete(...)`, custom delete
-   strategies, or physical-delete escape hatches, read
-   `references/logic-delete.md` first.
-10. For Spring Boot starter auto-configuration, property semantics,
-   `StarterConfigurer`, `EasyQueryInitializeOption`, `@EasyQueryTrack`,
-   multi-datasource starter limits, or bean registration issues, read
-   `references/spring-boot-starter.md` first. Add
-   `references/setup-spring-boot.md` for starter dependency/basic wiring and
-   `references/configuration-starter.md` for default-property impact.
-11. For search-form page endpoints with filters + sort + paging + DTO graph,
-   read `references/search-form-page.md` first.
-12. For missing `*Proxy`, `package ...proxy does not exist`, APT/KSP not
-   running, `annotationProcessorPaths`, generated-sources visibility, or
-   `javacTree`/Lombok/JDK compatibility issues, read
-   `references/proxy-generation-troubleshooting.md` first, then the matching
-   setup file.
-13. For setup or proxy-generation problems, read only the matching setup file
-   after the troubleshooting reference:
-   - Kotlin / `ksp` / `kapt` / missing `*Proxy`: `references/setup-kotlin.md`
-   - Plain Java / Maven / APT / missing `*Proxy`: `references/setup-java.md`
-   - Spring Boot dependency/basic wiring: `references/setup-spring-boot.md`
-14. Search before emitting code when the exact symbol is unclear.
+1. Classify first: setup/runtime, mapping/modeling, query/search,
+   relation/implicit, write/cross-cutting, AP/reporting, troubleshooting, or
+   review.
+2. Open one primary reference from `Routing by Area`.
+3. Add one secondary reference only when a `Pair with ...` clause applies.
+4. Use `references/api-map.md` only when the exact symbol or package name is
+   unclear.
+5. Use `references/troubleshooting.md` only after a primary feature reference
+   is already known, or when code compiles but behaves differently from the
+   expected feature semantics.
 
-## Routing Table
+## Canonical Boundaries
 
-| Task | Read |
-|------|------|
-| Troubleshoot missing `*Proxy`, `package ...proxy does not exist`, APT/KSP not firing, `annotationProcessorPaths`, generated-sources visibility, `javacTree`, Lombok/JDK processor clashes | `references/proxy-generation-troubleshooting.md` first, then `references/setup-java.md` or `references/setup-kotlin.md` |
-| AP / OLAP-style analytics: dashboard/report metrics, dimensions, grouped aggregates, `having`, conditional aggregate filters, ranked snapshots, CTE, UNION, window functions | `references/ap-analytics.md` first; add `references/implicit-query.md` when repeated to-many relation metrics or relation-derived dimensions are involved |
-| Set up Kotlin + KSP + entity/proxy generation | `references/setup-kotlin.md` |
-| Set up plain Java + Maven/APT + proxy generation | `references/setup-java.md` |
-| Integrate with Spring Boot starter, fix bean/config registration, explain `StarterConfigurer` / `EasyQueryInitializeOption` / `@EasyQueryTrack`, or analyze multi-datasource starter boundaries | `references/spring-boot-starter.md` first; add `references/setup-spring-boot.md` for dependency/basic wiring |
-| Check starter defaults, `easy-query.enable` / `build` semantics, or behavior-affecting config | `references/spring-boot-starter.md` first, then `references/configuration-starter.md` |
-| Define entity annotations and proxy model | `references/entity-mapping.md` |
-| Declare entity relations and fix `@Navigate` direction/cardinality | `references/relation-query.md` |
-| Model advanced `@Navigate` options, `@NavigateFlat`, DTO-side navigation | `references/entity-modeling-navigate.md` |
-| Basic query chain: `where`, order, projection, pagination, terminals | `references/query.md` |
-| Advanced projection / manual subquery / proxy relation `.set(...)` | `references/query-composition.md` |
-| Implicit relation basics: group, partition, joining, tree | `references/implicit-query.md` |
-| Implicit relation predicates / controls: `any/all/none/notEmptyAll`, `subQueryConfigure`, `filter/configure/mode`, `flatElement`, `valueOf`, `SubQueryModeEnum` | `references/implicit-controls.md` |
-| Ranked child / `partition by` / `first()` / `element()` / `elements()` / top-N child window | `references/implicit-query.md` first, then `references/api-map.md` |
-| Permission tree / `user -> roles -> menus` / tree with nested to-many filter | `references/implicit-controls.md` first, then `references/implicit-query.md` |
-| Value conversion / enum / JSON / jsonb / `ValueConverter` / `ValueAutoConverter` / `@Enumerated` / `@Column(typeHandler=...)` / `JdbcTypeHandler` | `references/value-conversion-type-handler.md` |
-| Interceptor / multi-tenant / data-permission / audit fill / `useInterceptor` / `noInterceptor` / `ProtectedInterceptor` | `references/interceptor.md` |
-| Logic delete / `@LogicDelete` / `disableLogicDelete` / `tableLogicDelete` / custom logic-delete strategy / physical-delete escape hatch | `references/logic-delete.md` |
-| Search/page form endpoint: optional filters + stable sort + DTO graph result | `references/search-form-page.md` |
-| Query/search-form DTO filters/sorts via `whereObject`, `orderByObject`, `@EasyWhereCondition`, `MULTI_OR`, range/in/notIn, relation-path filters, or `COLLECTION_EQUAL_OR` | `references/dto-object-query.md` |
-| User-management / admin-search / multi-condition search form endpoint | `references/dto-object-query.md` first, then add DSL only where needed |
-| `EasySearch` and `@EasyCond`-driven search/sort | `references/easy-search.md` |
-| `selectAutoInclude`, DTO-side `@Navigate`/`@NavigateFlat`, extras, include precedence | `references/select-auto-include.md` |
-| Structured loading with `include`, `include2`, `loadInclude`, `fillOne/fillMany` | `references/include-structured-loading.md` |
-| Insert/update/delete and write safety semantics | `references/write.md` |
-| Transactions in plain Java or Spring Boot | `references/transaction.md` |
-| Aggregate root save with `savable` | `references/savable-aggregate.md` |
-| SQL functions, expressions, native SQL fragments | `references/functions-native-sql.md` |
-| Code-first DDL, sharding, multi-datasource | `references/advanced.md` |
-| Unit tests for repositories/services and SQL behavior | `references/testing.md` |
-| Exact symbol/package lookup | `references/api-map.md` |
-| Common easy-query pitfalls and constraints | `references/troubleshooting.md` |
+- Spring Boot stack:
+  `setup-spring-boot.md` is for dependency/basic wiring and bean injection;
+  `spring-boot-starter.md` is for auto-configuration topology, collected
+  extension beans, `StarterConfigurer`, `@EasyQueryTrack`, and
+  multi-datasource starter limits; `configuration-starter.md` is for property
+  defaults and behavior drift.
+- Query stack:
+  `query.md` is for ordinary root DSL; `query-composition.md` is for explicit
+  joins, manual subqueries, advanced projection, and proxy VO relation
+  `.set(...)`; `functions-native-sql.md` is only for function helpers or raw
+  SQL fragments.
+- Relation metadata vs result loading:
+  `relation-query.md` is for `@Navigate` direction/cardinality;
+  `entity-modeling-navigate.md` is for advanced navigate metadata,
+  DTO-side navigation, and `@NavigateFlat`;
+  `include-structured-loading.md` is for entity relation loading;
+  `select-auto-include.md` is for DTO/VO structured return.
+- Implicit relation stack:
+  `implicit-query.md` is for capabilities such as implicit join, group join,
+  ranked child, and tree;
+  `implicit-controls.md` is for quantifiers and control knobs such as
+  `any/all/none/notEmptyAll/filter/configure/mode/subQueryConfigure/flatElement`.
+- Search-form stack:
+  `search-form-page.md` is for end-to-end page endpoints;
+  `dto-object-query.md` is for
+  `whereObject/orderByObject/@EasyWhereCondition` semantics;
+  `easy-search.md` is only for `sql-search` / `EasySearch` / `@EasyCond`.
+
+## Routing By Area
+
+### Setup & Runtime
+
+- Missing `*Proxy`, `package ...proxy does not exist`, APT/KSP not firing,
+  generated-sources visibility, `annotationProcessorPaths`, `javacTree`,
+  Lombok/JDK processor crashes:
+  `references/proxy-generation-troubleshooting.md`.
+  Pair with `references/setup-java.md`, `references/setup-kotlin.md`, or
+  `references/setup-spring-boot.md`.
+- Plain Java + Maven/APT wiring and manual bootstrap:
+  `references/setup-java.md`.
+- Kotlin + Gradle + KSP wiring:
+  `references/setup-kotlin.md`.
+- Spring Boot dependency/basic wiring/client injection:
+  `references/setup-spring-boot.md`.
+  Pair with `references/spring-boot-starter.md` only for starter internals.
+- Spring Boot starter topology, `EasyQueryInitializeOption`,
+  `StarterConfigurer`, collected extension beans, `@EasyQueryTrack`,
+  multi-datasource starter limits:
+  `references/spring-boot-starter.md`.
+  Pair with `references/configuration-starter.md` only for property impact.
+- Starter defaults, `easy-query.enable` / `easy-query.build`, or behavior
+  drift from code:
+  `references/configuration-starter.md`.
+- Code-first DDL, sharding, multi-datasource runtime scope:
+  `references/advanced.md`.
+
+### Mapping & Result Shape
+
+- Entity annotations, `@EntityProxy`, `@Column`, `@Version`, `@LogicDelete`:
+  `references/entity-mapping.md`.
+- Fix `@Navigate` cardinality/direction or a missing relation path:
+  `references/relation-query.md`.
+- Advanced relation metadata, DTO-side navigation, `@NavigateFlat`,
+  navigate extras:
+  `references/entity-modeling-navigate.md`.
+- Entity graph loading with `include`, `include2`, `loadInclude`,
+  `fillOne/fillMany`:
+  `references/include-structured-loading.md`.
+- DTO/VO structured return with `selectAutoInclude`, extras, and include
+  override precedence:
+  `references/select-auto-include.md`.
+
+### Read Query & Search
+
+- Ordinary filter/order/select/page/terminal query chains:
+  `references/query.md`.
+- Explicit joins, advanced projection, draft/tuple, manual subquery, or proxy
+  VO relation `.set(...)`:
+  `references/query-composition.md`.
+- SQL functions, expression helpers, or native SQL fragments:
+  `references/functions-native-sql.md`.
+- Implicit relation capabilities: implicit join, scalar subquery, group join,
+  ranked child, tree:
+  `references/implicit-query.md`.
+- Quantifiers and relation control knobs such as
+  `any/all/none/notEmptyAll/subQueryConfigure/filter/configure/mode/flatElement/valueOf`:
+  `references/implicit-controls.md`.
+  Pair with `references/implicit-query.md` when partition/tree/group-join
+  behavior matters.
+- AP/reporting, grouped aggregates, conditional metrics, CTE/window, UNION:
+  `references/ap-analytics.md`.
+  Pair with `references/implicit-query.md` for repeated to-many relation
+  metrics or relation-derived dimensions.
+- Search/page form endpoints with optional filters, stable sort, and DTO graph
+  return:
+  `references/search-form-page.md`.
+- `whereObject(...)`, `orderByObject(...)`, `@EasyWhereCondition`,
+  relation-path filters, `ObjectSortBuilder`, `WhereObjectQueryExecutor`:
+  `references/dto-object-query.md`.
+- `EasySearch`, `@EasyCond`, `sql-search` operator inference:
+  `references/easy-search.md`.
+
+### Write & Cross-Cutting
+
+- Insert/update/delete semantics, optimistic lock, physical delete safety:
+  `references/write.md`.
+- Plain transaction API or Spring `@Transactional`:
+  `references/transaction.md`.
+- Aggregate graph save with `savable(...)`:
+  `references/savable-aggregate.md`.
+- Value conversion, auto conversion, enum/json mapping, `JdbcTypeHandler`,
+  PostgreSQL `jsonb`:
+  `references/value-conversion-type-handler.md`.
+- Interceptors, tenant/audit/data-permission,
+  `useInterceptor(...)` / `noInterceptor(...)`:
+  `references/interceptor.md`.
+- Logic delete strategies, toggles, table-local disable, physical delete
+  escape hatch:
+  `references/logic-delete.md`.
+
+### Support
+
+- Exact symbol/package lookup or "does this API name exist":
+  `references/api-map.md`.
+- Unit test shapes for repositories/services or SQL-shape assertions:
+  `references/testing.md`.
+- Common non-obvious failure modes after the primary feature path is already
+  known:
+  `references/troubleshooting.md`.
 
 ## Review Checks
 
@@ -169,16 +220,32 @@ task; do not read the whole `references/` tree by default.
   in-memory metrics.
 - Keep grouped projections group-aware: non-key fields should come from
   aggregate expressions, grouped proxy access, or explicit window outputs.
-
-- Do not recommend `JdbcTypeHandler` when an in-memory `ValueConverter` is sufficient.
-- Do not recommend `ValueConverter` alone when the real problem is JDBC binding/driver behavior such as PostgreSQL `jsonb` `PGobject` writes.
-- Prefer interceptor abstraction for cross-cutting tenant, audit, and data-permission rules instead of repeating ad hoc where/set logic in every service.
-- State `useInterceptor(...)` / `noInterceptor(...)` semantics precisely: `useInterceptor(name)` does not mean “only this one”, and `ProtectedInterceptor` survives global `noInterceptor()` unless removed by `noInterceptor(name)`.
-- Separate soft-delete semantics from physical delete semantics; do not teach `disableLogicDelete()` as a harmless default.
-- Mention `tableLogicDelete(...)` and relation `.configure(q -> q.disableLogicDelete())` when only part of a query graph should ignore logical delete.
-- For Spring Boot starter answers, do not claim `easy-query.enable: true` is mandatory unless the project version proves a different condition implementation.
-- For Spring Boot extension registration, do not claim a plain `JdbcTypeHandler` bean auto-binds globally; mention `JdbcTypeHandlerReplaceConfigurer`.
-- For Spring Boot multi-datasource answers, mention that the default starter build path injects a single `DataSource`; recommend `@Primary` only when a single default client is acceptable, otherwise use custom beans or `easy-query.build=false`.
+- Do not recommend `JdbcTypeHandler` when an in-memory `ValueConverter` is
+  sufficient.
+- Do not recommend `ValueConverter` alone when the real problem is JDBC
+  binding/driver behavior such as PostgreSQL `jsonb` `PGobject` writes.
+- Prefer interceptor abstraction for cross-cutting tenant, audit, and
+  data-permission rules instead of repeating ad hoc where/set logic in every
+  service.
+- State `useInterceptor(...)` / `noInterceptor(...)` semantics precisely:
+  `useInterceptor(name)` does not mean “only this one”, and
+  `ProtectedInterceptor` survives global `noInterceptor()` unless removed by
+  `noInterceptor(name)`.
+- Separate soft-delete semantics from physical delete semantics; do not teach
+  `disableLogicDelete()` as a harmless default.
+- Mention `tableLogicDelete(...)` and relation
+  `.configure(q -> q.disableLogicDelete())` when only part of a query graph
+  should ignore logical delete.
+- For Spring Boot starter answers, do not claim `easy-query.enable: true` is
+  mandatory unless the project version proves a different condition
+  implementation.
+- For Spring Boot extension registration, do not claim a plain
+  `JdbcTypeHandler` bean auto-binds globally; mention
+  `JdbcTypeHandlerReplaceConfigurer`.
+- For Spring Boot multi-datasource answers, remember that the default starter
+  build path injects a single `DataSource`; recommend `@Primary` only when one
+  default client is acceptable, otherwise use custom beans or
+  `easy-query.build=false`.
 ## Evidence Policy
 
 Order of truth:
@@ -197,8 +264,4 @@ and the next concrete check or fix. For AP/reporting, state the
 `dimension -> metric -> filter -> rank/union/cte` shape before dropping into
 code when that framing prevents wrong SQL structure. Cite a reference only for
 non-obvious API, SQL-shape, or version caveat.
-
-
-
-
 

@@ -4,6 +4,15 @@
 "auto-select root + include-style relation assembly", not "single joined
 select".
 
+Do not use this as the main guide for:
+
+- entity-return relation loading with `include(...)` / `include2(...)`
+- `whereObject(...)` / `orderByObject(...)` metadata rules
+- ordinary projection without DTO graph assembly
+
+Read `include-structured-loading.md`, `dto-object-query.md`, or `query.md`
+instead for those cases.
+
 ## Basic Pattern
 
 ```java

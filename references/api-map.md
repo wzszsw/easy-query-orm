@@ -9,7 +9,7 @@ Use this file only to confirm symbol names and choose the next reference.
 | `EasyEntityQuery` | Default strong-typed proxy DSL client (`com.easy.query.api.proxy.client`) | `query.md` |
 | `DefaultEasyEntityQuery` | Concrete `EasyEntityQuery` implementation (`com.easy.query.api.proxy.client`) | `setup-java.md`, `setup-kotlin.md` |
 | `EasyQueryClient` | Weak-typed core client (`com.easy.query.core.api.client`) | local project first |
-| `EasyQueryBootstrapper` | Bootstrap/build the client | `setup-java.md`, `setup-kotlin.md`, `setup-spring-boot.md` |
+| `EasyQueryBootstrapper` | Bootstrap/build the client | `setup-java.md`, `setup-kotlin.md`, `setup-spring-boot.md`, `spring-boot-starter.md` |
 
 Common top-level methods:
 
@@ -173,7 +173,7 @@ projection, and `select-auto-include.md` for DTO graphs.
 
 | Symbol | Purpose | Read Next |
 |--------|---------|-----------|
-| `groupBy(...)` / `GroupKeys.of(...)` | Group query (`com.easy.query.core.proxy.sql.GroupKeys`) | `advanced.md` |
+| `groupBy(...)` / `GroupKeys.of(...)` | Group query (`com.easy.query.core.proxy.sql.GroupKeys`) | `ap-analytics.md`, `advanced.md` |
 | `getDatabaseCodeFirst()` | Code-first DDL | `advanced.md` |
 | `applyShardingInitializer(...)` | Sharding registration | `advanced.md` |
 | `EasyMultiEntityQuery.executeScope(...)` | Multi-datasource scope | `advanced.md` |
