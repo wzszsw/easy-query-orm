@@ -170,24 +170,46 @@ projection, and `select-auto-include.md` for DTO graphs.
 
 | Symbol | Purpose | Read Next |
 |--------|---------|-----------|
-| `insertable(...)` | Insert rows | `write.md` |
-| `updatable(...)` | Update rows | `write.md` |
-| `deletable(...)` | Delete rows | `write.md` |
-| `mapInsertable(...)` | Insert column-value map rows | `write.md` |
-| `mapUpdatable(...)` | Update column-value map rows | `write.md` |
-| `onConflictThen(...)` | Conflict/upsert handling on insert | `write.md` |
-| `setSQLStrategy(...)` | Control insert/update column emission strategy | `write.md`, `configuration-starter.md` |
-| `setIgnoreColumns(...)` | Exclude selected object-update columns from `SET` | `write.md` |
-| `whereColumns(...)` | Choose object-update or object-delete key columns | `write.md` |
-| `columnConfigure(...)` | Per-column custom SQL generation during insert/update | `write.md` |
+| `insertable(...)` | Insert rows | `write-insert-upsert.md` |
+| `updatable(...)` | Update rows | `write-update.md` |
+| `deletable(...)` | Delete rows | `write-delete.md` |
+| `mapInsertable(...)` | Insert column-value map rows | `write-insert-upsert.md` |
+| `mapUpdatable(...)` | Update column-value map rows | `write-update.md` |
+| `onConflictThen(...)` | Conflict/upsert handling on insert | `write-insert-upsert.md` |
+| `setSQLStrategy(...)` | Control insert/update column emission strategy | `write-insert-upsert.md`, `write-update.md`, `configuration-starter.md` |
+| `setIgnoreColumns(...)` | Exclude selected object-update columns from `SET` | `write-update.md` |
+| `whereColumns(...)` | Choose object-update or object-delete key columns | `write-update.md`, `write-delete.md` |
+| `columnConfigure(...)` | Per-column custom SQL generation during insert/update | `write-insert-upsert.md`, `write-update.md` |
 | `batch()` / `batch(true)` / `batch(false)` | Toggle JDBC batch execution behavior on the current write chain | `write.md` |
-| `withVersion(...)` / `ignoreVersion()` | Version handling | `write.md` |
+| `withVersion(...)` / `ignoreVersion()` | Version handling | `write-update.md`, `write-delete.md` |
 | `disableLogicDelete()` / `enableLogicDelete()` / `useLogicDelete(boolean)` | Toggle logic-delete filtering/behavior on the current chain | `logic-delete.md` |
 | `tableLogicDelete(() -> false)` | Disable logic delete for the nearest joined table in the current expression | `logic-delete.md` |
 | `disableLogicDelete()` / `allowDeleteStatement(true)` | Physical delete opt-in | `logic-delete.md` |
 | `beginTransaction()` | Plain transaction API returning `Transaction` (`com.easy.query.core.basic.jdbc.tx`) | `transaction.md` |
 | `@Transactional` | Spring transaction boundary | `transaction.md` |
-| `savable(...)` | Aggregate graph save | `savable-aggregate.md` |
+| `savable(...)` | Aggregate graph save router | `savable-aggregate.md` |
+
+## Savable Symbols
+
+| Symbol | Purpose | Read Next |
+|--------|---------|-----------|
+| `.savePath(...)` | Limit savable processing to selected value-object paths | `savable-execution.md` |
+| `.ignoreRoot()` | Skip root save operations | `savable-execution.md` |
+| `.removeRoot()` | Remove root and loaded included graph | `savable-execution.md` |
+| `.configure(s -> s.getSaveBehavior().add(...))` | Advanced savable behavior flags | `savable-execution.md`, `savable-relation-rules.md` |
+| `SaveBehaviorEnum.ALLOW_OWNERSHIP_CHANGE` | Permit value-object ownership reassignment | `savable-relation-rules.md` |
+| `SaveBehaviorEnum.IGNORE_NULL` / `IGNORE_EMPTY` / `IGNORE_LOGIC_DELETE` | Advanced savable behavior switches | `savable-execution.md` |
+| `easyEntityQuery.saveEntitySetPrimaryKey(entity)` | Assign safe backend keys for request-built child rows | `savable-key-safety.md` |
+
+## Tracking Symbols
+
+| Symbol | Purpose | Read Next |
+|--------|---------|-----------|
+| `.asTracking()` | Mark query results for diff update tracking | `write-tracking.md` |
+| `.asNoTracking()` | Explicitly opt out of tracking on the current query | `write-tracking.md` |
+| `easyEntityQuery.addTracking(entity)` | Manually add an entity to the current tracking context | `write-tracking.md` |
+| `TrackManager.begin()` / `release()` | Manual tracking scope lifecycle | `write-tracking.md` |
+| `@EasyQueryTrack` | Framework-managed tracking scope for public methods | `write-tracking.md`, `spring-boot-starter.md` |
 
 ## Advanced Symbols
 

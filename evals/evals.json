@@ -112,11 +112,20 @@
       },
       {
         "id": "write-mutation-depth",
-        "purpose": "Object update vs expression update, SQL strategy, conflict writes, map writes, and batch/write-safety boundaries.",
+        "purpose": "Insert/upsert, object update vs expression update, delete safety, SQL strategy, map writes, batch semantics, and diff-update tracking boundaries.",
         "eval_ids": [
           34,
           35,
-          36
+          36,
+          37
+        ]
+      },
+      {
+        "id": "savable-aggregate",
+        "purpose": "Savable transaction/tracking prerequisites, savePath/root controls, relation ownership/cascade rules, and child-key safety.",
+        "eval_ids": [
+          38,
+          39
         ]
       }
     ],
@@ -137,7 +146,9 @@
         30,
         32,
         34,
-        36
+        36,
+        37,
+        38
       ],
       "p1_should_pass_eval_ids": [
         9,
@@ -154,7 +165,8 @@
         29,
         31,
         33,
-        35
+        35,
+        39
       ],
       "p2_regression_guard_eval_ids": [
         0,
@@ -181,7 +193,9 @@
       30,
       32,
       34,
-      36
+      36,
+      37,
+      38
     ]
   },
   "evals": [
@@ -442,6 +456,27 @@
       "name": "batch-jdbc-semantics",
       "prompt": "请你解释 easy-query 里的 `batch()`、`batch(true)`、`batch(false)` 在写入链上的含义。要求结合源码说清楚它到底是不是底层走 JDBC batch API，以及为什么返回受影响行数不能被当成强业务断言。顺便给一个 insertable 和一个 updatable 的 Java 例子。",
       "expected_output": "Must explicitly state that `batch()` is the default shorthand for `batch(true)`, that the current source toggles batch behavior on the expression and the execution path ultimately uses JDBC `PreparedStatement.addBatch()` / `executeBatch()`, and that `batch(false)` disables that path. It must explain driver-dependent batch counts and why they are unsafe as strong business invariants. Should show both an insert and an update example using `.batch().executeRows()`. Mentioning MySQL `rewriteBatchedStatements=true` as a practical prerequisite is expected.",
+      "files": []
+    },
+    {
+      "id": 37,
+      "name": "tracking-diff-update-boundary",
+      "prompt": "我想让 easy-query 对对象更新走差异更新，不是全字段更新。请你给出 Spring Boot 和纯 Java 两种写法，并说明 `asTracking()`、`addTracking(...)`、`TrackManager.begin()`、`@EasyQueryTrack` 各自的职责边界。顺便解释为什么只写 `asTracking()` 还不够。",
+      "expected_output": "Must explain that diff update needs both an active tracking context and a tracked entity. It should show a Spring Boot method using `@EasyQueryTrack` plus `asTracking()` or `addTracking(...)`, and a plain Java example using `TrackManager.begin()` / `release()`. It must distinguish query-side tracking (`asTracking()`), manual entity registration (`addTracking(...)`), and context lifecycle (`TrackManager` / `@EasyQueryTrack`), and explicitly state that `asTracking()` alone is insufficient without an active tracking scope.",
+      "files": []
+    },
+    {
+      "id": 38,
+      "name": "savable-required-context-and-savepath",
+      "prompt": "请你系统说明 easy-query 的 `savable(...)` 使用前提，并给一个安全的 Spring Boot 示例。要求说清楚为什么事务和 tracking 不是可选项，以及 `savePath(...)`、`ignoreRoot()`、`removeRoot()`、`disableLogicDelete()` 各自解决什么问题。不要把它说成普通 insert/update 的替代品。",
+      "expected_output": "Must explicitly state that current source requires both an active transaction and a non-null current track context before savable execution, and should show a Spring Boot example using `@Transactional` plus `@EasyQueryTrack`. It must explain `savePath(...)` as a value-object path limiter, `ignoreRoot()` as skipping root save operations, `removeRoot()` as root-removal workflow, and `disableLogicDelete()`/`useLogicDelete(false)` as savable-level logic-delete bypass. It should not describe savable as the default answer for simple row writes.",
+      "files": []
+    },
+    {
+      "id": 39,
+      "name": "savable-ownership-and-key-safety",
+      "prompt": "我有一个一对多保存接口，前端会传子项 id，还有一个对象所属权变更场景：某个值对象要从 A 父对象转到 B 父对象。请你结合 easy-query 源码说明两个问题：1）为什么不能盲信前端子项 id，`saveEntitySetPrimaryKey(...)` 该怎么用；2）为什么默认不允许所有权变更，什么时候才用 `SaveBehaviorEnum.ALLOW_OWNERSHIP_CHANGE`。如果关系是 many-to-one，再顺手说明为什么 `savable(child)` 不会递归保存 parent。",
+      "expected_output": "Must explain that request-built child ids are unsafe in savable flows and show a tracked-context-safe use of `easyEntityQuery.saveEntitySetPrimaryKey(child)` so non-tracked child rows get backend-assigned keys. It must explain that ownership reassignment is blocked by default by source save logic and only allowed intentionally through `.configure(s -> s.getSaveBehavior().add(SaveBehaviorEnum.ALLOW_OWNERSHIP_CHANGE))`. It should also explicitly state the many-to-one boundary: `savable(valueObject)` copies aggregate-root relation keys but does not recursively save/detach the aggregate root parent.",
       "files": []
     }
   ]

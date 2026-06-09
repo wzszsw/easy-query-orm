@@ -167,7 +167,7 @@ r.cardCount().setSQL("IFNULL({0},1)", c -> c.expression(user.age()));
 Prefer typed DSL functions first. Only drop to SQL fragments for dialect-specific
 behavior or APIs not covered by easy-query.
 
-## Chunking, Streaming, Tracking
+## Chunking and Streaming
 
 Useful large-result helpers:
 
@@ -176,18 +176,4 @@ query.toChunk(size, rows -> { ... });
 query.streamBy(stream -> stream.count(), 1000);
 ```
 
-Tracking for differential update:
-
-```java
-TrackManager trackManager = easyEntityQuery.getRuntimeContext().getTrackManager();
-try {
-    trackManager.begin();
-    User user = easyEntityQuery.queryable(User.class).asTracking().findNotNull(id);
-    user.setName("new");
-    easyEntityQuery.updatable(user).executeRows();
-} finally {
-    trackManager.release();
-}
-```
-
-Spring can use `@EasyQueryTrack` where configured.
+For differential update tracking, read `write-tracking.md`.

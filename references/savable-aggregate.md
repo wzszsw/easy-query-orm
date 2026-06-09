@@ -1,151 +1,64 @@
 # Savable Aggregate Root
 
-Use this reference when saving object graphs with `easyEntityQuery.savable(...)`.
+Use this file as the `savable(...)` router.
+
+Open one specialized reference first:
+
+- required context, save behaviors, `savePath`, `ignoreRoot`, `removeRoot`,
+  logic-delete toggle, batch:
+  `savable-execution.md`
+- aggregate root vs value object rules, one-to-one / one-to-many /
+  many-to-many / many-to-one semantics, cascade, ownership change:
+  `savable-relation-rules.md`
+- child id safety and `saveEntitySetPrimaryKey(...)`:
+  `savable-key-safety.md`
 
 ## When to Use
 
-Use `savable` when a create/update flow needs to persist an aggregate root and its value-object relations as one object graph. It is especially valuable for one-to-many and many-to-many changes where manual diffing would otherwise require finding inserted, updated, and deleted children.
+Use `savable(...)` when a create/update/delete flow needs to persist an
+aggregate root and its value-object graph by diff rather than by hand-written
+insert/update/delete orchestration.
 
-Do not use `savable` as a generic replacement for simple insert/update. For one-row changes, ordinary `insertable` or `updatable` is easier to reason about.
+Do not use it as a generic replacement for simple one-row insert/update. For
+ordinary row mutations, prefer the write references.
 
-Doc evidence: `easy-query-doc/src/savable/README.md`, `one2one.md`, `one2many.md`, `many2many.md`, `ownership.md`, `remove-root.md`, `set-save-key.md`.
+## High-Value Source Truth
 
-## Core API
+Current source makes `savable(...)` stricter than many people assume:
 
-Source signatures from `EntitySavable`:
+- constructing the savable chain already requires a transaction
+- it also requires a non-null current tracking context
+- update-style save logic depends on tracked entity state, not just the current
+  object graph values
 
-```java
-easyEntityQuery.savable(entity).executeCommand();
-easyEntityQuery.savable(entities).executeCommand();
+That means a valid `savable(...)` answer must treat transaction + tracking as
+first-class prerequisites, not optional polish.
 
-easyEntityQuery.savable(entity)
-    .savePath(root -> Include.path(root.children()))
-    .executeCommand();
+## Decision Guide
 
-easyEntityQuery.savable(entity)
-    .ignoreRoot()
-    .executeCommand();
+- Need the "how do I call `savable(...)` safely" answer:
+  `savable-execution.md`
+- Need to understand why a relation is or is not saved recursively:
+  `savable-relation-rules.md`
+- Need to prevent frontend child ids from corrupting inserts:
+  `savable-key-safety.md`
+- Need only ordinary insert/update/delete:
+  `write-insert-upsert.md`, `write-update.md`, `write-delete.md`
 
-easyEntityQuery.savable(entity)
-    .removeRoot()
-    .executeCommand();
+## Pairing Rules
 
-easyEntityQuery.savable(entity)
-    .disableLogicDelete()
-    .executeCommand();
+- `savable` + diff update / `@EasyQueryTrack` confusion:
+  add `write-tracking.md`
+- `savable` + transaction confusion:
+  add `transaction.md`
+- `savable` + logic-delete behavior:
+  add `logic-delete.md`
 
-easyEntityQuery.savable(entity)
-    .configure(c -> c.getSaveBehavior().add(SaveBehaviorEnum.ALLOW_OWNERSHIP_CHANGE))
-    .executeCommand();
-```
+## Read next
 
-Source evidence: `EntitySavable`, `SaveConfigurer`, `Include.path(...)`.
-
-## Required Context
-
-For update/diff saves:
-
-- Load the aggregate root in a tracking context.
-- Include or load the relations that should participate in the diff.
-- Execute `savable(...).executeCommand()` inside a transaction.
-
-Typical Spring shape:
-
-```java
-@Transactional(rollbackFor = Exception.class)
-@EasyQueryTrack
-public void update(String id, UpdateRequest request) {
-    SaveUser user = easyEntityQuery.queryable(SaveUser.class)
-        .include(u -> u.addresses())
-        .whereById(id)
-        .singleNotNull();
-
-    mergeRequestIntoTrackedEntity(user, request);
-
-    easyEntityQuery.savable(user).executeCommand();
-}
-```
-
-Manual tracking shape:
-
-```java
-TrackManager trackManager = easyEntityQuery.getRuntimeContext().getTrackManager();
-try {
-    trackManager.begin();
-    SaveRoot root = easyEntityQuery.queryable(SaveRoot.class)
-        .include(r -> r.items())
-        .findNotNull(id);
-
-    mutate(root);
-
-    try (Transaction tx = easyEntityQuery.beginTransaction()) {
-        easyEntityQuery.savable(root).executeCommand();
-        tx.commit();
-    }
-} finally {
-    trackManager.release();
-}
-```
-
-Docs warn that a modified object must be tracked; do not build a fresh object from the request and expect diff update semantics.
-
-## Aggregate and Value Object Rules
-
-Docs define ownership from relation keys:
-
-- If table `A` is related to table `B` by `A` primary key, `A` is the aggregate root and `B` is the value object.
-- If current navigation target property is the target table primary key, the current object is a value object of the target aggregate root.
-- Many-to-one save is special: saving the value object does not save/detach the aggregate root navigation; it mainly uses the aggregate root id to set relation keys.
-
-For many-to-many:
-
-- `cascade = CascadeTypeEnum.DELETE` lets `savable` automatically insert/delete the mapping table when it is pure relation data.
-- If the mapping table has business fields, use `cascade = CascadeTypeEnum.NO_ACTION` for the many-to-many relation and model a separate one-to-many relation to the mapping entity.
-
-## cascade Choices
-
-`@Navigate(cascade = ...)` controls detach behavior:
-
-- `AUTO`: default behavior; often set-null for detach, but many-to-many mapping handling may be ambiguous.
-- `NO_ACTION`: detach does nothing; application handles it.
-- `SET_NULL`: detach clears relation key on the target row.
-- `DELETE`: detach deletes the value object. This is the usual choice for true value objects and pure many-to-many mapping rows.
-
-Use `DELETE` only when the child row is owned by the aggregate root and should not survive detachment.
-
-## savePath
-
-Use `savePath` to limit saved value-object paths:
-
-```java
-easyEntityQuery.savable(root)
-    .savePath(r -> Include.path(r.items(), r.profile()))
-    .executeCommand();
-```
-
-`savePath` is for value-object paths. Source/tests reject aggregate-root paths with an error like: value type is aggregate root, save path limit only supports value object.
-
-## removeRoot
-
-Use `removeRoot()` to remove the aggregate root and its included graph:
-
-```java
-easyEntityQuery.savable(root)
-    .removeRoot()
-    .executeCommand();
-```
-
-Docs say `removeRoot` sets navigation properties to null and deletes paths loaded for this operation. Treat it as a deletion workflow and wrap it in a transaction.
-
-## Save Key Safety
-
-Docs include `set-save-key` guidance because child primary keys from clients can be wrong or unsafe. For request-driven child collections, validate or derive child keys before merging into tracked collections. Do not trust arbitrary child ids from the frontend.
-
-## Common Failure Modes
-
-- Missing `@EasyQueryTrack` or manual `TrackManager.begin()` around the loaded entity.
-- Calling `savable` without a transaction.
-- Mutating a newly constructed request object instead of a tracked database object.
-- Expecting `ManyToOne` navigation saves to recursively save/detach the aggregate root.
-- Using `cascade = DELETE` on a child that can exist independently.
-- Using `savePath` on aggregate-root navigation instead of value-object navigation.
+- execution model:
+  `savable-execution.md`
+- relation rules:
+  `savable-relation-rules.md`
+- key safety:
+  `savable-key-safety.md`

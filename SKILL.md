@@ -6,7 +6,7 @@ description: >-
   Covers setup and missing `*Proxy` troubleshooting, Spring Boot
   starter/config, CRUD and mutation APIs (`insertable/updatable/deletable`,
   `onConflictThen`, `mapInsertable/mapUpdatable`, `setSQLStrategy`,
-  version/logic delete), search-form DTO query (`whereObject`,
+  version/logic delete), diff update tracking, search-form DTO query (`whereObject`,
   `orderByObject`, `EasySearch`), relation metadata/loading (`@Navigate`,
   `include`, `selectAutoInclude`), implicit and explicit
   subquery/group-join/CTE/window/UNION analytics, `savable`, sharding,
@@ -98,6 +98,20 @@ most one secondary reference when a boundary rule below says it is needed.
   `dto-object-query.md` is for
   `whereObject/orderByObject/@EasyWhereCondition` semantics;
   `easy-search.md` is only for `sql-search` / `EasySearch` / `@EasyCond`.
+- Write stack:
+  `write.md` is the mutation overview and batch semantics router;
+  `write-insert-upsert.md` is insert/upsert/map insert;
+  `write-update.md` is update/object update/map update/version;
+  `write-delete.md` is delete/physical delete safety;
+  `write-tracking.md` is diff update tracking and `@EasyQueryTrack`.
+- Savable stack:
+  `savable-aggregate.md` is the savable overview router;
+  `savable-execution.md` is transaction/tracking prerequisites, `savePath`,
+  root controls, and save behaviors;
+  `savable-relation-rules.md` is aggregate-root/value-object/cascade/
+  ownership modeling;
+  `savable-key-safety.md` is `saveEntitySetPrimaryKey(...)` and frontend child
+  id safety.
 
 ## Routing By Area
 
@@ -181,14 +195,30 @@ most one secondary reference when a boundary rule below says it is needed.
 
 ### Write & Cross-Cutting
 
-- Insert/update/delete semantics, conflict write, map write,
-  `setSQLStrategy`, `setIgnoreColumns`, `whereColumns`, `columnConfigure`,
-  optimistic lock, physical delete safety:
+- Mutation overview, write-path selection, and batch execution semantics:
   `references/write.md`.
+- Insert/upsert/map insert/insert `columnConfigure(...)`:
+  `references/write-insert-upsert.md`.
+- Update/object update/map update/`setColumns`/`setIgnoreColumns`/
+  `whereColumns`/optimistic lock:
+  `references/write-update.md`.
+- Delete / physical delete safety / version-aware delete:
+  `references/write-delete.md`.
+- Diff update tracking / `TrackManager` / `asTracking` / `addTracking` /
+  `@EasyQueryTrack`:
+  `references/write-tracking.md`.
 - Plain transaction API or Spring `@Transactional`:
   `references/transaction.md`.
 - Aggregate graph save with `savable(...)`:
   `references/savable-aggregate.md`.
+- Savable execution model, `savePath`, `ignoreRoot`, `removeRoot`,
+  `IGNORE_NULL` / `IGNORE_EMPTY` / `IGNORE_LOGIC_DELETE`, or batch on save:
+  `references/savable-execution.md`.
+- Savable relation rules, one-to-one/one-to-many/many-to-many/many-to-one,
+  cascade, or ownership transfer:
+  `references/savable-relation-rules.md`.
+- Savable child key safety / `saveEntitySetPrimaryKey(...)`:
+  `references/savable-key-safety.md`.
 - Value conversion, auto conversion, enum/json mapping, `JdbcTypeHandler`,
   PostgreSQL `jsonb`:
   `references/value-conversion-type-handler.md`.
@@ -231,6 +261,14 @@ most one secondary reference when a boundary rule below says it is needed.
   every update request with `updatable(entity).executeRows()`.
 - When using `updatable(entity).setColumns(...)`, mention `whereColumns(...)`
   when the write condition must stay explicit.
+- Do not claim `asTracking()` alone enables diff update; mention the tracking
+  context requirement (`@EasyQueryTrack` or manual `TrackManager.begin()`).
+- Do not explain `savable(...)` as if transaction or track context were
+  optional; current source requires both before execution.
+- Do not teach `savable(...)` as a generic recursive save for aggregate-root
+  navigations such as many-to-one parent objects.
+- Do not recommend `ALLOW_OWNERSHIP_CHANGE` casually; it changes ownership
+  safety semantics.
 - Do not recommend `onConflictThen(...)` without calling out constraint-column
   selection semantics and the `ALL_COLUMNS` caveat when conflict columns may
   be omitted by strategy.
