@@ -1,11 +1,13 @@
 # Setup — Spring Boot
 
-The starter auto-configures `EasyQueryClient` and `EasyEntityQuery` from your `DataSource`. You inject
-`EasyEntityQuery` and use it directly.
+The starter auto-configures `EasyQueryClient` and `EasyEntityQuery` from your
+Spring-managed `DataSource`. You inject `EasyEntityQuery` and use it directly.
 
 Use this file first for Spring bean registration, starter dependency, or
-`easy-query.enable` / `easy-query.database` problems. For Kotlin proxy
-generation itself, jump straight to `setup-kotlin.md`.
+`easy-query.database` problems. For starter conditions, auto-collected
+components, `StarterConfigurer`, `@EasyQueryTrack`, or multi-datasource
+behavior, read `spring-boot-starter.md` first. For Kotlin proxy generation
+itself, jump straight to `setup-kotlin.md`.
 
 ## When to use / not
 
@@ -36,7 +38,10 @@ for Java**, **KSP (`sql-ksp-processor`) for Kotlin** (Kotlin Spring projects sho
 
 ## 2. application.yml
 
-The config prefix is `easy-query`. You must set `enable: true` and the `database` dialect.
+The config prefix is `easy-query`. In current starter source,
+`easy-query.enable` is optional unless you want to turn the starter off with
+`false`. The important property for successful client construction is the
+database dialect.
 
 ```yaml
 spring:
@@ -47,7 +52,7 @@ spring:
     password: root
 
 easy-query:
-  enable: true              # required — the starter is off by default
+  enable: true              # optional in current source; explicit false disables starter
   database: mysql           # dialect: mysql / h2 / pgsql / mssql / oracle ...
   name-conversion: underlined   # camel field -> snake column (myProp -> my_prop); default
   print-sql: true           # log generated SQL
@@ -55,8 +60,10 @@ easy-query:
   delete-throw: true        # throw on an unconditional delete instead of silently running it
 ```
 
-`enable` defaults to `false` — if you forget it, no beans are created and injection fails. `name-conversion:
-underlined` is the default mapping (override per-column with `@Column("custom_name")`).
+Current source uses `@ConditionalOnProperty(matchIfMissing = true)` on
+`easy-query.enable`, so missing `enable` still allows auto-configuration.
+`name-conversion: underlined` is the default mapping (override per-column with
+`@Column("custom_name")`).
 
 ## 3. Inject and use
 
@@ -100,15 +107,24 @@ class TopicService(private val easyEntityQuery: EasyEntityQuery) {
 Prefer Spring's declarative transactions — `@Transactional` on the service method participates in the host
 transaction; don't also open a manual `beginTransaction()` inside it. See `transaction.md`.
 
+If the project uses tracking-diff save/update features, add the Spring AOP
+dependency and use `@EasyQueryTrack` on the public service method. The switch
+for disabling that aspect is `easy-query-track.enable: false`, not the older
+`easy-query.default-track`.
+
 ## Common mistakes
 
-- Omitting `easy-query.enable: true` → beans not registered, `EasyEntityQuery` injection fails.
+- Omitting `easy-query.database` or leaving it on the unknown default → starter throws `Please select the correct database dialect`.
+- Setting `easy-query.enable: false` → starter bootstrap beans are disabled.
+- Setting `easy-query.build: false` without defining replacement `EasyQueryClient` / `EasyEntityQuery` beans.
 - `easy-query.database` not matching the `sql-*` dialect artifact on the classpath.
 - Adding `@Transactional` *and* a manual `beginTransaction()` in the same method (double transaction).
 - Forgetting the proxy processor (APT/KSP) — entities compile but proxies are missing.
+- Having multiple `DataSource` beans but expecting the default starter to choose the right one automatically.
+- Registering a plain `JdbcTypeHandler` bean and expecting starter global binding without `JdbcTypeHandlerReplaceConfigurer`.
 
 ## Sources
 - 官方文档: `easy-query-doc/src/guide/spring-boot.md` (application.yml, code-first, navigate).
-- 源码验证: `EasyQueryProperties` @ `com.easy.query.sql.starter.config` (keys: enable, database,
-  name-conversion, print-sql, print-nav-sql, delete-throw); auto-config registers `EasyQueryClient` and
-  `EasyEntityQuery` beans. Starter artifact `sql-springboot-starter`. Skill baseline 3.2.10.
+- 源码验证: `EasyQueryStarterAutoConfiguration`, `EasyQueryStarterBuildAutoConfiguration`,
+  `SpringBootStarterBuilder`, `EasyQueryProperties`,
+  `EasyQueryTrackAopConfiguration` @ `sql-extension/sql-springboot-starter`.

@@ -94,19 +94,25 @@ task; do not read the whole `references/` tree by default.
    `useLogicDelete(boolean)`, `tableLogicDelete(...)`, custom delete
    strategies, or physical-delete escape hatches, read
    `references/logic-delete.md` first.
-10. For search-form page endpoints with filters + sort + paging + DTO graph,
+10. For Spring Boot starter auto-configuration, property semantics,
+   `StarterConfigurer`, `EasyQueryInitializeOption`, `@EasyQueryTrack`,
+   multi-datasource starter limits, or bean registration issues, read
+   `references/spring-boot-starter.md` first. Add
+   `references/setup-spring-boot.md` for starter dependency/basic wiring and
+   `references/configuration-starter.md` for default-property impact.
+11. For search-form page endpoints with filters + sort + paging + DTO graph,
    read `references/search-form-page.md` first.
-11. For missing `*Proxy`, `package ...proxy does not exist`, APT/KSP not
+12. For missing `*Proxy`, `package ...proxy does not exist`, APT/KSP not
    running, `annotationProcessorPaths`, generated-sources visibility, or
    `javacTree`/Lombok/JDK compatibility issues, read
    `references/proxy-generation-troubleshooting.md` first, then the matching
    setup file.
-12. For setup or proxy-generation problems, read only the matching setup file
+13. For setup or proxy-generation problems, read only the matching setup file
    after the troubleshooting reference:
    - Kotlin / `ksp` / `kapt` / missing `*Proxy`: `references/setup-kotlin.md`
    - Plain Java / Maven / APT / missing `*Proxy`: `references/setup-java.md`
-   - Spring Boot bean/config/starter issues: `references/setup-spring-boot.md`
-13. Search before emitting code when the exact symbol is unclear.
+   - Spring Boot dependency/basic wiring: `references/setup-spring-boot.md`
+14. Search before emitting code when the exact symbol is unclear.
 
 ## Routing Table
 
@@ -116,8 +122,8 @@ task; do not read the whole `references/` tree by default.
 | AP / OLAP-style analytics: dashboard/report metrics, dimensions, grouped aggregates, `having`, conditional aggregate filters, ranked snapshots, CTE, UNION, window functions | `references/ap-analytics.md` first; add `references/implicit-query.md` when repeated to-many relation metrics or relation-derived dimensions are involved |
 | Set up Kotlin + KSP + entity/proxy generation | `references/setup-kotlin.md` |
 | Set up plain Java + Maven/APT + proxy generation | `references/setup-java.md` |
-| Integrate with Spring Boot starter or fix bean/config registration | `references/setup-spring-boot.md` |
-| Check starter defaults and behavior-affecting config | `references/configuration-starter.md` |
+| Integrate with Spring Boot starter, fix bean/config registration, explain `StarterConfigurer` / `EasyQueryInitializeOption` / `@EasyQueryTrack`, or analyze multi-datasource starter boundaries | `references/spring-boot-starter.md` first; add `references/setup-spring-boot.md` for dependency/basic wiring |
+| Check starter defaults, `easy-query.enable` / `build` semantics, or behavior-affecting config | `references/spring-boot-starter.md` first, then `references/configuration-starter.md` |
 | Define entity annotations and proxy model | `references/entity-mapping.md` |
 | Declare entity relations and fix `@Navigate` direction/cardinality | `references/relation-query.md` |
 | Model advanced `@Navigate` options, `@NavigateFlat`, DTO-side navigation | `references/entity-modeling-navigate.md` |
@@ -168,9 +174,11 @@ task; do not read the whole `references/` tree by default.
 - Do not recommend `ValueConverter` alone when the real problem is JDBC binding/driver behavior such as PostgreSQL `jsonb` `PGobject` writes.
 - Prefer interceptor abstraction for cross-cutting tenant, audit, and data-permission rules instead of repeating ad hoc where/set logic in every service.
 - State `useInterceptor(...)` / `noInterceptor(...)` semantics precisely: `useInterceptor(name)` does not mean “only this one”, and `ProtectedInterceptor` survives global `noInterceptor()` unless removed by `noInterceptor(name)`.
-
 - Separate soft-delete semantics from physical delete semantics; do not teach `disableLogicDelete()` as a harmless default.
 - Mention `tableLogicDelete(...)` and relation `.configure(q -> q.disableLogicDelete())` when only part of a query graph should ignore logical delete.
+- For Spring Boot starter answers, do not claim `easy-query.enable: true` is mandatory unless the project version proves a different condition implementation.
+- For Spring Boot extension registration, do not claim a plain `JdbcTypeHandler` bean auto-binds globally; mention `JdbcTypeHandlerReplaceConfigurer`.
+- For Spring Boot multi-datasource answers, mention that the default starter build path injects a single `DataSource`; recommend `@Primary` only when a single default client is acceptable, otherwise use custom beans or `easy-query.build=false`.
 ## Evidence Policy
 
 Order of truth:

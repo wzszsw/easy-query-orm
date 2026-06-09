@@ -93,6 +93,14 @@
           28,
           29
         ]
+      },
+      {
+        "id": "spring-boot-starter",
+        "purpose": "Starter auto-configuration topology, property semantics, collected Spring beans, StarterConfigurer, tracking AOP, and multi-datasource/manual-build boundaries.",
+        "eval_ids": [
+          30,
+          31
+        ]
       }
     ],
     "pass_policy": {
@@ -108,7 +116,8 @@
         22,
         24,
         26,
-        28
+        28,
+        30
       ],
       "p1_should_pass_eval_ids": [
         9,
@@ -122,7 +131,8 @@
         23,
         25,
         27,
-        29
+        29,
+        31
       ],
       "p2_regression_guard_eval_ids": [
         0,
@@ -145,7 +155,8 @@
       22,
       24,
       26,
-      28
+      28,
+      30
     ]
   },
   "evals": [
@@ -167,7 +178,7 @@
       "id": 2,
       "name": "java-spring-crud-service",
       "prompt": "Spring Boot 项目，用的 easy-query。帮我写一个 UserService，包含：按手机号查唯一用户、新增用户、按 id 更新用户名。实体叫 SysUser（表 t_sys_user，字段 id 主键、username、phone）。顺便告诉我 application.yml 要配什么。",
-      "expected_output": "A @Service injecting EasyEntityQuery, using singleOrNull() for the unique phone lookup, insertable(...).executeRows(), updatable(SysUser.class).setColumns(...).where(id).executeRows(). application.yml with easy-query.enable=true, database, name-conversion. No JPA/MyBatis.",
+      "expected_output": "A @Service injecting EasyEntityQuery, using singleOrNull() for the unique phone lookup, insertable(...).executeRows(), updatable(SysUser.class).setColumns(...).where(id).executeRows(). application.yml with `easy-query.database`, `name-conversion`, and other relevant starter keys; it may mention `easy-query.enable` explicitly, but it must not claim that current starter source requires `enable=true` to load by default. No JPA/MyBatis.",
       "files": []
     },
     {
@@ -357,6 +368,20 @@
       "name": "custom-logic-delete-strategy",
       "prompt": "我想做一个 easy-query 自定义逻辑删除策略：未删除时 deletedTime 为 null，删除时写当前时间，同时额外写 deletedUserId；实体字段上通过 `@LogicDelete(strategy = CUSTOM, strategyName = ...)` 绑定。请给 Java 代码，并说明为什么在 getDeletedSQLExpression 里不能先把 now 提取成局部变量再返回 lambda。顺便说明配置级逻辑删除策略和字段绑定策略有什么区别。",
       "expected_output": "Uses AbstractLogicDeleteStrategy with getPredicateFilterExpression/getDeletedSQLExpression/getStrategy, registration through QueryConfiguration.applyLogicDeleteStrategy(...), field binding through @LogicDelete(strategy = LogicDeleteStrategyEnum.CUSTOM, strategyName = ...), and explicitly explains the delayed-lambda capture pitfall for timestamps/thread-local values. Should also distinguish field-bound custom strategy from AbstractConfigurationLogicDeleteStrategy driven by apply(entityClass).",
+      "files": []
+    },
+    {
+      "id": 30,
+      "name": "springboot-starter-autoconfig-and-components",
+      "prompt": "我们项目用 easy-query 的 Spring Boot starter。请你从源码角度说明三件事：1）starter 到底自动装配了哪些核心 bean；2）`easy-query.enable`、`easy-query.build`、`easy-query-track.enable` 分别控制什么；3）如果我写了 `Interceptor`、`LogicDeleteStrategy`、`ValueConverter`、`JdbcTypeHandler` 这些扩展，哪些只加 `@Component` 就会生效，哪些还要额外处理？不要只贴 yml，要讲清楚自动注册机制。",
+      "expected_output": "Must describe the current source topology: `EasyQueryStarterAutoConfiguration`, `EasyQueryStarterBuildAutoConfiguration`, `EasyQueryTrackAopConfiguration`; explain that `easy-query.enable` and `easy-query.build` both use conditional `matchIfMissing=true` semantics so explicit false disables while missing still matches, and that `easy-query-track.enable` controls tracking AOP. Must explain `EasyQueryInitializeOption` bean collection by type, that `Interceptor`/`LogicDeleteStrategy`/`ValueConverter` beans are auto-applied, and that a plain `JdbcTypeHandler` bean is not enough for global binding without `JdbcTypeHandlerReplaceConfigurer`.",
+      "files": []
+    },
+    {
+      "id": 31,
+      "name": "springboot-multids-custom-build-and-track",
+      "prompt": "Spring Boot 里我有两个 DataSource，想给 easy-query 分别建两个 client，还想替换默认的 NameConversion，并且只让某个 service 方法对 `db1` 这个 client 开启 `@EasyQueryTrack`。请你结合源码说清楚默认 starter 为什么不适合直接硬上、多数据源时该怎么处理、`StarterConfigurer` 该放在哪一层、以及 `@EasyQueryTrack(tag=...)` 是按什么匹配的。",
+      "expected_output": "Must explain that the default starter build path injects a single `DataSource`, so multiple datasources need either one `@Primary` default client or manual bean construction with `@Qualifier`; should recommend `easy-query.build=false` and custom `EasyQueryClient` / `EasyEntityQuery` beans when multiple clients are needed. Must place `StarterConfigurer` correctly as the service-replacement hook used during `SpringBootStarterBuilder.buildClient(...)`, and explain that `@EasyQueryTrack(tag=\"db1\")` matches `EasyQueryClient` bean names, blank tag means all clients, comma-separated tags select several. Should mention `easy-query-track.enable` / Spring AOP presence as part of the setup boundary.",
       "files": []
     }
   ]

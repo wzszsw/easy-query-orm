@@ -189,4 +189,23 @@ High-impact defaults often referenced in code review:
 Read `configuration-starter.md` when behavior seems different from the written
 query code.
 
+## Spring Boot Starter Symbols
+
+| Symbol | Purpose | Read Next |
+|--------|---------|-----------|
+| `EasyQueryProperties` | Spring Boot `easy-query.*` property holder (`com.easy.query.sql.starter.config`) | `spring-boot-starter.md`, `configuration-starter.md` |
+| `EasyQueryInitializeOption` | Collects starter-discovered extension beans and applies them to the built client | `spring-boot-starter.md` |
+| `StarterConfigurer` | Spring Boot hook for replacing internal bootstrap services (`com.easy.query.core.bootstrapper`) | `spring-boot-starter.md` |
+| `JdbcTypeHandlerReplaceConfigurer` | Declares global JDBC handler type binding/replacement under starter | `spring-boot-starter.md`, `value-conversion-type-handler.md` |
+| `SpringBootStarterBuilder.buildClient(...)` | Default starter client-construction path | `spring-boot-starter.md` |
+| `@EasyQueryTrack` | Opens tracking scope on Spring public methods | `spring-boot-starter.md` |
+| `EasyQueryTrackProperties` | `easy-query-track.*` property holder | `spring-boot-starter.md` |
+
+Starter property switches commonly worth naming precisely:
+
+- `easy-query.enable`
+- `easy-query.build`
+- `easy-query.database`
+- `easy-query-track.enable`
+
 

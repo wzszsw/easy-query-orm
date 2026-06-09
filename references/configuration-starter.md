@@ -4,6 +4,24 @@ Use this reference when easy-query behavior differs from expected code because o
 
 Source evidence: `EasyQueryProperties` annotated with `@ConfigurationProperties(prefix = "easy-query")`.
 
+For auto-configuration topology, collected Spring beans, `StarterConfigurer`,
+`@EasyQueryTrack`, or multi-datasource behavior, add
+`spring-boot-starter.md`.
+
+## Condition Semantics
+
+Current starter source treats these two flags differently:
+
+- `easy-query.enable`:
+  explicit `false` disables `EasyQueryStarterAutoConfiguration`; missing
+  property still matches because the condition uses `matchIfMissing = true`
+- `easy-query.build`:
+  explicit `false` disables default `EasyQueryClient` /
+  `EasyEntityQuery` bean creation; missing property still builds them
+
+Do not describe `easy-query.enable` as a mandatory `true` flag unless the
+project version proves a different condition.
+
 ## High-Impact Defaults
 
 Important defaults from source:
@@ -28,6 +46,9 @@ easy-query.defaultCondition = LIKE
 easy-query.autoIncludeTable = THROW
 ```
 
+`easy-query-track.enable = true` is a separate property on
+`EasyQueryTrackProperties`; it is not part of `EasyQueryProperties`.
+
 ## Coding Implications
 
 - Object insert omits null columns by default. Use `setSQLStrategy(SQLExecuteStrategyEnum.ALL_COLUMNS)` (`com.easy.query.core.enums`) when nulls must be inserted, for example when upsert conflict columns may be null.
@@ -42,6 +63,20 @@ easy-query.autoIncludeTable = THROW
 ## Query Diagnostics
 
 Defaults `printSql = true` and `printNavSql = true` mean query and navigation SQL may be printed by starter logging. In production or tests, check the project config before assuming SQL logging is enabled/disabled.
+
+## Source Drift Warnings
+
+Older docs/examples may still mention these as starter properties:
+
+- `easy-query.default-track`
+- `easy-query.property-mode`
+- `easy-query.query-large-column`
+- `easy-query.no-version-error`
+- `easy-query.relation-table-append`
+- `easy-query.update-batch-threshold`
+
+They are not current `EasyQueryProperties` fields in the inspected source.
+Treat them as version-sensitive and verify locally before recommending them.
 
 ## Sharding Notes
 
