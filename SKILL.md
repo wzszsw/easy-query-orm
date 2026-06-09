@@ -55,14 +55,19 @@ task; do not read the whole `references/` tree by default.
    `references/implicit-query.md`. If the request names an exact control
    symbol or enum such as `SubQueryModeEnum`, also open
    `references/api-map.md`.
-4. For search-form page endpoints with filters + sort + paging + DTO graph,
+4. For ranked-child / partition-style requests such as `first()`,
+   `element(index)`, `elements(start,end)`, "partition by", "第一条子记录",
+   "第一张开户银行卡", or top-N child windows, read
+   `references/implicit-query.md` first, then `references/api-map.md` if the
+   exact symbol is unclear.
+5. For search-form page endpoints with filters + sort + paging + DTO graph,
    read `references/search-form-page.md` first.
-5. For setup or proxy-generation problems, read only the matching setup file
+6. For setup or proxy-generation problems, read only the matching setup file
    first:
    - Kotlin / `ksp` / `kapt` / missing `*Proxy`: `references/setup-kotlin.md`
    - Plain Java / Maven / APT / missing `*Proxy`: `references/setup-java.md`
    - Spring Boot bean/config/starter issues: `references/setup-spring-boot.md`
-6. Search before emitting code when the exact symbol is unclear.
+7. Search before emitting code when the exact symbol is unclear.
 
 ## Routing Table
 
@@ -79,6 +84,7 @@ task; do not read the whole `references/` tree by default.
 | Advanced projection / manual subquery / proxy relation `.set(...)` | `references/query-composition.md` |
 | Implicit relation basics: group, partition, joining, tree | `references/implicit-query.md` |
 | Implicit relation predicates / controls: `any/all/none/notEmptyAll`, `subQueryConfigure`, `filter/configure/mode`, `flatElement`, `valueOf`, `SubQueryModeEnum` | `references/implicit-controls.md` |
+| Ranked child / `partition by` / `first()` / `element()` / `elements()` / top-N child window | `references/implicit-query.md` first, then `references/api-map.md` |
 | Permission tree / `user -> roles -> menus` / tree with nested to-many filter | `references/implicit-controls.md` first, then `references/implicit-query.md` |
 | Search/page form endpoint: optional filters + stable sort + DTO graph result | `references/search-form-page.md` |
 | Query/search-form DTO filters/sorts via `whereObject` and `orderByObject` | `references/dto-object-query.md` |

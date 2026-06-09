@@ -106,6 +106,10 @@ If the result target is a DTO graph, prefer `selectAutoInclude(...)` before
 | `.any()` / `.any(...)` | Exists / any matched related row | `implicit-controls.md` |
 | `.none()` / `.none(...)` | No related row / no matched related row | `implicit-controls.md` |
 | `.all(...)` | Every row in the current relation slice passes | `implicit-controls.md` |
+| `.first()` | First ranked child in a relation slice | `implicit-query.md` |
+| `.element(index)` | Zero-based nth ranked child | `implicit-query.md` |
+| `.elements(start,end)` | Zero-based inclusive ranked child window | `implicit-query.md` |
+| `.joining(...)` on relation chain | Concatenate relation rows, often after `orderBy(...)` / `elements(...)` | `implicit-query.md` |
 | `.flatElement()` | Flatten to-many path for traversal or `toList(...)` | `implicit-controls.md` |
 | `.notEmptyAll(...)` | Non-empty and every matched row passes | `implicit-controls.md` |
 | `.distinct()` on relation chain | Keep distinctness inside implicit subquery | `implicit-controls.md` |

@@ -164,8 +164,31 @@ Source notes:
 
 ## 4. Implicit Partition / Ranked Child Access
 
+This is the official-style `Implicit Partition Grouping` / `partition by`
+branch: rank rows inside one relation slice, then continue navigating from the
+ranked child.
+
 Use partition operators for first child, nth child, top-N window, or
 relation-level limit/offset semantics.
+
+Canonical shape from source tests:
+
+```java
+List<SysUser> list = easyEntityQuery.queryable(SysUser.class)
+    .where(user -> {
+        // 用户的银行卡中第一个开户银行卡是工商银行的
+        user.bankCards()
+            .orderBy(x -> x.openTime().asc())
+            .first()
+            .bank()
+            .name()
+            .eq("工商银行");
+    })
+    .toList();
+```
+
+Treat prompts like `partition by`, "第一条子记录", "第一张开户银行卡", "首条明细",
+or "top-N child" as this branch before considering explicit SQL/window code.
 
 Relevant `@Navigate` fields:
 
@@ -184,6 +207,17 @@ Relevant `@Navigate` fields:
 
 `THROW` is the default. Ranked child access without explicit order should add
 `orderBy(...)`, `orderByProps`, or a non-throw `partitionOrder`.
+
+Copyable patterns:
+
+- first ranked child then continue to-one navigation:
+  `root.children().orderBy(...).first().toOnePath().field()`
+- nth ranked child:
+  `root.children().orderBy(...).element(index)`
+- top-N ranked child window:
+  `root.children().orderBy(...).elements(start,end)`
+- top-N rows projected as string/list-like aggregate:
+  `root.children().orderBy(...).elements(...).joining(...)`
 
 Annotation comment notes:
 

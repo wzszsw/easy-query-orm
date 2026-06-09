@@ -17,7 +17,7 @@
       {
         "id": "implicit-core",
         "purpose": "Implicit group, partition, joining, boolean relation projection, and structured relation loading.",
-        "eval_ids": [7, 8]
+        "eval_ids": [7, 8, 17]
       },
       {
         "id": "implicit-controls",
@@ -32,10 +32,10 @@
     ],
     "pass_policy": {
       "p0_must_pass_eval_ids": [1, 7, 8, 10, 11],
-      "p1_should_pass_eval_ids": [9, 12, 13, 14, 15, 16],
+      "p1_should_pass_eval_ids": [9, 12, 13, 14, 15, 16, 17],
       "p2_regression_guard_eval_ids": [0, 2, 3, 4, 5, 6]
     },
-    "benchmark_focus_eval_ids": [1, 7, 8, 10, 12]
+    "benchmark_focus_eval_ids": [1, 7, 8, 10, 12, 17]
   },
   "evals": [
     {
@@ -155,6 +155,13 @@
       "name": "quantifier-relation-predicates",
       "prompt": "帮我用 easy-query 写一个 Java 查询：按 User 查，要求至少有一张 type='储蓄卡' 的银行卡，并且这些储蓄卡的 code 必须全部以 33123 开头；另外还要求不存在任何 type='禁用卡' 的银行卡。不要手写 join。顺便说明 all(...) 和 notEmptyAll(...) 在空关系上的区别。",
       "expected_output": "Uses relation-driven quantifier predicates rather than manual joins, ideally bankCards().where(card -> card.type().eq(\"储蓄卡\")).notEmptyAll(card -> card.code().startsWith(\"33123\")) plus bankCards().none(card -> card.type().eq(\"禁用卡\")) or an equivalent verified none(...) shape. Must explicitly explain that all(...) can vacuously pass on an empty relation slice, while notEmptyAll(...) additionally requires at least one related row.",
+      "files": []
+    },
+    {
+      "id": 17,
+      "name": "implicit-partition-grouping-first-child",
+      "prompt": "easy-query 里我想按 User 查询，筛出“第一张开户银行卡所属银行是工商银行”的用户。要求保持隐式关系写法，不要手写 SQL 或窗口函数。给 Java 代码，并说明这类写法为什么属于 partition by / 分组后取第一条 的隐式能力。",
+      "expected_output": "Uses a ranked-child relation path such as user.bankCards().orderBy(x -> x.openTime().asc()).first().bank().name().eq(\"工商银行\") inside where(...). Must describe this as implicit partition / ranked-child behavior (partition by the parent key, then take the first child after ordering) rather than rewriting it to manual SQL/window code or an explicit join workaround.",
       "files": []
     }
   ]
