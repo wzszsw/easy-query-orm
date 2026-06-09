@@ -14,11 +14,15 @@ First checks:
 
 - Java uses APT; Kotlin uses KSP, not KAPT
 - entity has `@EntityProxy`
-- entity implements `ProxyEntityAvailable<Entity, EntityProxy>`
 - generated source directory is on the compile/IDE path
+- if the build config already uses `annotationProcessorPaths`, make sure
+  easy-query's processor is in that list
+- inspect the first compile or processor failure, not only the final missing
+  proxy import
 
 Read next:
 
+- `proxy-generation-troubleshooting.md`
 - `setup-java.md`
 - `setup-kotlin.md`
 - `entity-mapping.md`
@@ -33,6 +37,7 @@ First checks:
 
 Read next:
 
+- `proxy-generation-troubleshooting.md`
 - `setup-java.md`
 - `setup-kotlin.md`
 - `entity-mapping.md`

@@ -4,7 +4,9 @@ description: >-
   Use when Java/Kotlin code uses easy-query (`EasyEntityQuery`,
   `EasyQueryClient`, proxy DSL), when the user shows easy-query proxy syntax,
   or when migrating JPA/MyBatis to easy-query. Covers setup, proxy generation,
-  Spring Boot, CRUD/query/page/transaction code, implicit relation APIs
+  missing `*Proxy` troubleshooting, Maven APT / Kotlin KSP diagnosis,
+  `annotationProcessorPaths`, generated-sources visibility, Spring Boot,
+  CRUD/query/page/transaction code, implicit relation APIs
   (`any`/`all`/`none`, `subQueryToGroupJoin`, `subQueryConfigure`,
   `flatElement`, `first`/`element`/`elements`, `joining`,
   `anyValue`/`noneValue`, `notEmptyAll`), `@Navigate`/`@NavigateFlat`/`include`/`include2`/
@@ -25,22 +27,28 @@ task; do not read the whole `references/` tree by default.
 
 1. Default to `EasyEntityQuery` and proxy DSL unless the project clearly uses
    weak-typed `EasyQueryClient`.
-2. Missing `*Proxy` usually means setup trouble first. Java uses APT; Kotlin
-   uses KSP, not KAPT.
-3. Never invent easy-query API names. Search `references/api-map.md` or
+2. Missing `*Proxy` usually means setup or compile-chain trouble first. Java
+   uses APT; Kotlin uses KSP, not KAPT.
+3. `@EntityProxy` is the generation trigger. `ProxyEntityAvailable` helps with
+   typed proxy usage but is not the switch that makes APT/KSP generate the
+   class.
+4. For proxy-generation failures, diagnose by layer: generation mode,
+   processor wiring, generated output path, then the first real compile error.
+   Do not stop at "package xxx.proxy does not exist".
+5. Never invent easy-query API names. Search `references/api-map.md` or
    `scripts/search_references.py` first.
-4. easy-query leans heavily on relation metadata. If the requirement can be
+6. easy-query leans heavily on relation metadata. If the requirement can be
    derived from an existing relation path, prefer the relation-driven form
    first: implicit navigation, `flatElement`, relation aggregate/predicate.
    For tree answers, express the real root rule first, then apply recursive
    filtering or ancestor backfill only where needed. Fall back to explicit
    join, junction-table query, or post-query assembly only when the needed
    `@Navigate` path is missing or clearly insufficient.
-5. Prefer gated DSL for optional filters. Use `whereObject(...)` only for
+7. Prefer gated DSL for optional filters. Use `whereObject(...)` only for
    search-form DTOs.
-6. Keep paging stable with explicit `orderBy(...)` and a tie-breaker.
-7. Treat row count `0` as meaningful.
-8. Distinguish entity relation metadata from DTO/VO auto-include metadata.
+8. Keep paging stable with explicit `orderBy(...)` and a tie-breaker.
+9. Treat row count `0` as meaningful.
+10. Distinguish entity relation metadata from DTO/VO auto-include metadata.
 
 ## Workflow
 
@@ -62,17 +70,23 @@ task; do not read the whole `references/` tree by default.
    exact symbol is unclear.
 5. For search-form page endpoints with filters + sort + paging + DTO graph,
    read `references/search-form-page.md` first.
-6. For setup or proxy-generation problems, read only the matching setup file
-   first:
+6. For missing `*Proxy`, "package ...proxy does not exist", APT/KSP not
+   running, `annotationProcessorPaths`, generated-sources visibility, or
+   `javacTree`/Lombok/JDK compatibility issues, read
+   `references/proxy-generation-troubleshooting.md` first, then the matching
+   setup file.
+7. For setup or proxy-generation problems, read only the matching setup file
+   after the troubleshooting reference:
    - Kotlin / `ksp` / `kapt` / missing `*Proxy`: `references/setup-kotlin.md`
    - Plain Java / Maven / APT / missing `*Proxy`: `references/setup-java.md`
    - Spring Boot bean/config/starter issues: `references/setup-spring-boot.md`
-7. Search before emitting code when the exact symbol is unclear.
+8. Search before emitting code when the exact symbol is unclear.
 
 ## Routing Table
 
 | Task | Read |
 |------|------|
+| Troubleshoot missing `*Proxy`, `package ...proxy does not exist`, APT/KSP not firing, `annotationProcessorPaths`, generated-sources visibility, `javacTree`, Lombok/JDK processor clashes | `references/proxy-generation-troubleshooting.md` first, then `references/setup-java.md` or `references/setup-kotlin.md` |
 | Set up Kotlin + KSP + entity/proxy generation | `references/setup-kotlin.md` |
 | Set up plain Java + Maven/APT + proxy generation | `references/setup-java.md` |
 | Integrate with Spring Boot starter or fix bean/config registration | `references/setup-spring-boot.md` |
@@ -112,6 +126,8 @@ task; do not read the whole `references/` tree by default.
 - Push filter/sort/page/aggregate work into DSL.
 - Use DTO/VO result types for `selectAutoInclude`.
 - Prefer `include2` for more complex nested relation loading.
+- Do not claim `ProxyEntityAvailable` is required for proxy generation unless
+  the project specifically requires interface mode for usage style.
 
 ## Evidence Policy
 
@@ -126,5 +142,6 @@ and flag APIs that may have moved.
 
 ## Output
 
-Lead with working code. Cite a reference only for non-obvious API, SQL-shape,
-or version caveat.
+Lead with working code. For troubleshooting, lead with the first failing layer
+and the next concrete check or fix. Cite a reference only for non-obvious API,
+SQL-shape, or version caveat.

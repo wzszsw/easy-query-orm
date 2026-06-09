@@ -6,8 +6,8 @@
     "dimensions": [
       {
         "id": "setup-and-generation",
-        "purpose": "Proxy generation, Kotlin KSP vs KAPT, starter setup, and Spring integration.",
-        "eval_ids": [0, 1, 2]
+        "purpose": "Proxy generation, missing proxy troubleshooting, Kotlin KSP vs KAPT, starter setup, and Spring integration.",
+        "eval_ids": [0, 1, 2, 18]
       },
       {
         "id": "core-query-and-write",
@@ -31,7 +31,7 @@
       }
     ],
     "pass_policy": {
-      "p0_must_pass_eval_ids": [1, 7, 8, 10, 11],
+      "p0_must_pass_eval_ids": [1, 7, 8, 10, 11, 18],
       "p1_should_pass_eval_ids": [9, 12, 13, 14, 15, 16, 17],
       "p2_regression_guard_eval_ids": [0, 2, 3, 4, 5, 6]
     },
@@ -162,6 +162,13 @@
       "name": "implicit-partition-grouping-first-child",
       "prompt": "easy-query 里我想按 User 查询，筛出“第一张开户银行卡所属银行是工商银行”的用户。要求保持隐式关系写法，不要手写 SQL 或窗口函数。给 Java 代码，并说明这类写法为什么属于 partition by / 分组后取第一条 的隐式能力。",
       "expected_output": "Uses a ranked-child relation path such as user.bankCards().orderBy(x -> x.openTime().asc()).first().bank().name().eq(\"工商银行\") inside where(...). Must describe this as implicit partition / ranked-child behavior (partition by the parent key, then take the first child after ordering) rather than rewriting it to manual SQL/window code or an explicit join workaround.",
+      "files": []
+    },
+    {
+      "id": 18,
+      "name": "missing-proxy-troubleshooting",
+      "prompt": "我的 easy-query 项目里一直提示 `package com.foo.entity.proxy does not exist`，`UserProxy` 没生成。项目是 Java Maven，多模块，已经引了 `sql-processor`。另外 `maven-compiler-plugin` 里还配过 `annotationProcessorPaths`，本地 JDK 21，Lombok 比较老。不要直接给我一份新 pom，我要的是一套排查顺序和原因判断。",
+      "expected_output": "Must diagnose by layer instead of jumping to a pom snippet: identify Java APT path, explain that `@EntityProxy` is the generation trigger and `ProxyEntityAvailable` is not the switch, call out that existing `annotationProcessorPaths` can hide easy-query unless `sql-processor` is explicitly listed there, require checking the module that actually compiles the entities, require checking generated output under target/generated-sources/annotations, and explicitly say the visible missing-proxy error may be secondary to the first real processor/compile failure such as old Lombok on JDK 21 (`javacTree`/`JCImport`/`NoSuchFieldError`).",
       "files": []
     }
   ]
