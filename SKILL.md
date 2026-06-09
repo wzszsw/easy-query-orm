@@ -202,7 +202,8 @@ most one secondary reference when a boundary rule below says it is needed.
 - Update/object update/map update/`setColumns`/`setIgnoreColumns`/
   `whereColumns`/optimistic lock:
   `references/write-update.md`.
-- Delete / physical delete safety / version-aware delete:
+- Delete / physical delete safety / version-aware delete / expression delete vs
+  object delete:
   `references/write-delete.md`.
 - Diff update tracking / `TrackManager` / `asTracking` / `addTracking` /
   `@EasyQueryTrack`:
@@ -259,6 +260,9 @@ most one secondary reference when a boundary rule below says it is needed.
   aggregate expressions, grouped proxy access, or explicit window outputs.
 - Distinguish expression update from object update; do not blindly answer
   every update request with `updatable(entity).executeRows()`.
+- Distinguish expression delete from object delete; do not collapse
+  `deletable(Entity.class)` and `deletable(entity)` into one generic delete
+  shape.
 - When using `updatable(entity).setColumns(...)`, mention `whereColumns(...)`
   when the write condition must stay explicit.
 - Do not claim `asTracking()` alone enables diff update; mention the tracking

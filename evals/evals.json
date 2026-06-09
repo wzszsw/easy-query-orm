@@ -117,7 +117,8 @@
           34,
           35,
           36,
-          37
+          37,
+          40
         ]
       },
       {
@@ -148,7 +149,8 @@
         34,
         36,
         37,
-        38
+        38,
+        40
       ],
       "p1_should_pass_eval_ids": [
         9,
@@ -195,7 +197,8 @@
       34,
       36,
       37,
-      38
+      38,
+      40
     ]
   },
   "evals": [
@@ -477,6 +480,13 @@
       "name": "savable-ownership-and-key-safety",
       "prompt": "我有一个一对多保存接口，前端会传子项 id，还有一个对象所属权变更场景：某个值对象要从 A 父对象转到 B 父对象。请你结合 easy-query 源码说明两个问题：1）为什么不能盲信前端子项 id，`saveEntitySetPrimaryKey(...)` 该怎么用；2）为什么默认不允许所有权变更，什么时候才用 `SaveBehaviorEnum.ALLOW_OWNERSHIP_CHANGE`。如果关系是 many-to-one，再顺手说明为什么 `savable(child)` 不会递归保存 parent。",
       "expected_output": "Must explain that request-built child ids are unsafe in savable flows and show a tracked-context-safe use of `easyEntityQuery.saveEntitySetPrimaryKey(child)` so non-tracked child rows get backend-assigned keys. It must explain that ownership reassignment is blocked by default by source save logic and only allowed intentionally through `.configure(s -> s.getSaveBehavior().add(SaveBehaviorEnum.ALLOW_OWNERSHIP_CHANGE))`. It should also explicitly state the many-to-one boundary: `savable(valueObject)` copies aggregate-root relation keys but does not recursively save/detach the aggregate root parent.",
+      "files": []
+    },
+    {
+      "id": 40,
+      "name": "expression-delete-vs-object-delete",
+      "prompt": "请你说明 easy-query 里的表达式删除和对象删除有什么区别，并分别给 Java 例子。要求至少覆盖：`deletable(Entity.class).where(...)`、`whereById/whereByIds`、表达式删除上的 `withVersion(...)`、对象删除上的 `whereColumns(...)`，以及为什么 `allowDeleteStatement(true)` 不是“删除模板代码”。",
+      "expected_output": "Must distinguish `ClientExpressionDeletable` from `ClientEntityDeletable`: expression delete should be shown with `deletable(Entity.class).where(...)` and key-predicate helpers like `whereById/whereByIds`, and must mention that expression delete also supports `withVersion(...)`. Object delete should be shown with `deletable(entity)` or `deletable(collection)` plus `whereColumns(...)` when explicit original-column conditions are needed. It must explain that `allowDeleteStatement(true)` only removes the physical-delete guard and does not make an unsafe condition acceptable.",
       "files": []
     }
   ]

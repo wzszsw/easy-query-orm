@@ -182,6 +182,7 @@ projection, and `select-auto-include.md` for DTO graphs.
 | `columnConfigure(...)` | Per-column custom SQL generation during insert/update | `write-insert-upsert.md`, `write-update.md` |
 | `batch()` / `batch(true)` / `batch(false)` | Toggle JDBC batch execution behavior on the current write chain | `write.md` |
 | `withVersion(...)` / `ignoreVersion()` | Version handling | `write-update.md`, `write-delete.md` |
+| `whereById(...)` / `whereByIds(...)` on `deletable(Class)` | Expression-delete key predicates | `write-delete.md` |
 | `disableLogicDelete()` / `enableLogicDelete()` / `useLogicDelete(boolean)` | Toggle logic-delete filtering/behavior on the current chain | `logic-delete.md` |
 | `tableLogicDelete(() -> false)` | Disable logic delete for the nearest joined table in the current expression | `logic-delete.md` |
 | `disableLogicDelete()` / `allowDeleteStatement(true)` | Physical delete opt-in | `logic-delete.md` |
