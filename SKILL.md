@@ -78,19 +78,24 @@ task; do not read the whole `references/` tree by default.
    aggregates, conditional aggregates, ranked snapshots, CTE, UNION, or
    window functions, read `references/ap-analytics.md` first. If repeated
    to-many relation metrics are involved, add `references/implicit-query.md`.
-6. For search-form page endpoints with filters + sort + paging + DTO graph,
+6. For form-object filtering and sorting with `whereObject(...)`,
+   `@EasyWhereCondition`, range/in/notIn, `MULTI_OR`, relation-path filters,
+   or `COLLECTION_EQUAL_OR`, read `references/dto-object-query.md` first. Use
+   `references/easy-search.md` only when `sql-search` / `EasySearch` /
+   `@EasyCond` is actually in play.
+7. For search-form page endpoints with filters + sort + paging + DTO graph,
    read `references/search-form-page.md` first.
-7. For missing `*Proxy`, `package ...proxy does not exist`, APT/KSP not
+8. For missing `*Proxy`, `package ...proxy does not exist`, APT/KSP not
    running, `annotationProcessorPaths`, generated-sources visibility, or
    `javacTree`/Lombok/JDK compatibility issues, read
    `references/proxy-generation-troubleshooting.md` first, then the matching
    setup file.
-8. For setup or proxy-generation problems, read only the matching setup file
+9. For setup or proxy-generation problems, read only the matching setup file
    after the troubleshooting reference:
    - Kotlin / `ksp` / `kapt` / missing `*Proxy`: `references/setup-kotlin.md`
    - Plain Java / Maven / APT / missing `*Proxy`: `references/setup-java.md`
    - Spring Boot bean/config/starter issues: `references/setup-spring-boot.md`
-9. Search before emitting code when the exact symbol is unclear.
+10. Search before emitting code when the exact symbol is unclear.
 
 ## Routing Table
 
@@ -112,7 +117,7 @@ task; do not read the whole `references/` tree by default.
 | Ranked child / `partition by` / `first()` / `element()` / `elements()` / top-N child window | `references/implicit-query.md` first, then `references/api-map.md` |
 | Permission tree / `user -> roles -> menus` / tree with nested to-many filter | `references/implicit-controls.md` first, then `references/implicit-query.md` |
 | Search/page form endpoint: optional filters + stable sort + DTO graph result | `references/search-form-page.md` |
-| Query/search-form DTO filters/sorts via `whereObject` and `orderByObject` | `references/dto-object-query.md` |
+| Query/search-form DTO filters/sorts via `whereObject`, `orderByObject`, `@EasyWhereCondition`, `MULTI_OR`, range/in/notIn, relation-path filters, or `COLLECTION_EQUAL_OR` | `references/dto-object-query.md` |
 | User-management / admin-search / multi-condition search form endpoint | `references/dto-object-query.md` first, then add DSL only where needed |
 | `EasySearch` and `@EasyCond`-driven search/sort | `references/easy-search.md` |
 | `selectAutoInclude`, DTO-side `@Navigate`/`@NavigateFlat`, extras, include precedence | `references/select-auto-include.md` |
@@ -163,3 +168,5 @@ and the next concrete check or fix. For AP/reporting, state the
 `dimension -> metric -> filter -> rank/union/cte` shape before dropping into
 code when that framing prevents wrong SQL structure. Cite a reference only for
 non-obvious API, SQL-shape, or version caveat.
+
+

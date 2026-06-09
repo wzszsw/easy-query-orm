@@ -61,6 +61,14 @@
           20,
           21
         ]
+      },
+      {
+        "id": "form-query-conditions",
+        "purpose": "whereObject, @EasyWhereCondition, range/in/notIn, MULTI_OR, relation-path filters, and EasySearch/@EasyCond boundaries.",
+        "eval_ids": [
+          22,
+          23
+        ]
       }
     ],
     "pass_policy": {
@@ -72,7 +80,8 @@
         11,
         18,
         19,
-        20
+        20,
+        22
       ],
       "p1_should_pass_eval_ids": [
         9,
@@ -82,7 +91,8 @@
         15,
         16,
         17,
-        21
+        21,
+        23
       ],
       "p2_regression_guard_eval_ids": [
         0,
@@ -101,7 +111,8 @@
       12,
       17,
       19,
-      20
+      20,
+      22
     ]
   },
   "evals": [
@@ -257,6 +268,20 @@
       "name": "union-shaped-report-query",
       "prompt": "有两份 easy-query 数据源分支：一份来自 Topic，一份来自 Blog，我想统一投影成同一个报表行模型，然后 union all 之后再按 id 过滤。请给 Java 代码。不要先查两次再在内存里 merge。",
       "expected_output": "Uses a same-shaped result type for all branches, then unionAll(...) on entity queryables and downstream filtering on the merged query. Must not fall back to Java Stream concat/merge or raw SQL union strings.",
+      "files": []
+    },
+    {
+      "id": 22,
+      "name": "whereobject-condition-matrix",
+      "prompt": "帮我定义一个 easy-query Java 查询表单 DTO，并给出 whereObject 用法。需求：keyword 同时搜 title/content；publishTime 用一个前端传来的时间区间数组做闭区间筛选；statusList 做 IN；statusAny 做“多个值任意一个相等”而不是 IN；bankCardCode 走 bankCards.code 的 startsWith；说明空字符串、DEFAULT 条件、以及 MULTI_OR 有什么约束。不要退回成手写一长串 where if。",
+      "expected_output": "Uses @EasyWhereCondition metadata rather than hand-written gated DSL: MULTI_OR with non-empty propNames, RANGE_CLOSED over an array/list pair, IN, COLLECTION_EQUAL_OR, relation-path propName such as bankCards.code with STARTS_WITH, and explicitly explains that blank strings are skipped unless allowEmptyStrings=true, DEFAULT resolves through DefaultWhereConditionProvider (String -> LIKE/CONTAINS by config, others -> EQUAL), and MULTI_OR property paths must have the same depth.",
+      "files": []
+    },
+    {
+      "id": 23,
+      "name": "easysearch-vs-whereobject-boundary",
+      "prompt": "项目里已经接入了 sql-search。请说明什么时候该用普通 whereObject/@EasyWhereCondition，什么时候该用 EasySearch/@EasyCond；顺便给一个 @EasyCond 查询类例子，要求限制 age 只能 ge/le，createTime 默认排序 desc，并说明 cond 默认是怎么按字段类型推断的。",
+      "expected_output": "Explains the boundary: normal DTO form filtering uses whereObject/@EasyWhereCondition, while sql-search parameterized requests use EasySearch/@EasyCond through whereObject(search)+orderByObject(search). Must show condOnly and sort on @EasyCond, and explicitly state source default inference: String -> Like, date/time -> RangeClosed, List -> In, others -> Equals. Should also mention defaultEnabled=false / strict=true behavior from EasySearch options.",
       "files": []
     }
   ]

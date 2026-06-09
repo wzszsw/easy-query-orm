@@ -1,7 +1,7 @@
 # DTO Object Query
 
 Use this reference for request-object driven filtering and sorting with
-`whereObject(...)` and `orderByObject(...)`.
+`whereObject(...)`, `orderByObject(...)`, and `@EasyWhereCondition`.
 
 Do not use this file as the main guide for:
 
@@ -10,8 +10,8 @@ Do not use this file as the main guide for:
 - ordinary non-form dynamic query logic: read `query.md`
 
 This is the query/search-form branch, not the default for all dynamic query
-tasks. For the common combined shape "search/page form + stable sort + DTO
-graph return", read `search-form-page.md` first.
+tasks. For the common combined shape `search/page form + stable sort + DTO
+graph return`, read `search-form-page.md` first.
 
 ## Core APIs
 
@@ -61,22 +61,9 @@ queryable
 Use `whereObject(...)` for the broad form conditions, then add explicit DSL
 only for the awkward relation/computed pieces.
 
-## Search-Form Filters With Manual Sort
+## Source-Truth Note
 
-For many admin/search page endpoints, filters are form-like but sorting is only
-`sortBy + asc/desc`. In that shape:
-
-- keep filters in `whereObject(...)`
-- keep sort as explicit allowlisted `.orderBy(...)`
-- append stable fallback order such as `createdTime desc`, `id desc`
-- then call `selectAutoInclude(ResultDTO.class)` and `toPageResult(...)`
-
-Do not force `orderByObject(...)` if only a few sortable fields exist; manual
-`orderBy(...)` is often clearer.
-
-## `@EasyWhereCondition`
-
-Source fields:
+Current source `EasyWhereCondition` fields are:
 
 ```java
 @EasyWhereCondition(
@@ -90,12 +77,36 @@ Source fields:
 )
 ```
 
+If some older docs mention a `strict` attribute on `@EasyWhereCondition`,
+prefer the project source first. The current source signature shown above does
+not expose `strict`.
+
+## Default Condition Resolution
+
+Source behavior from `DefaultWhereConditionProvider`:
+
+- `type = DEFAULT` on `String` fields -> `LIKE` or `CONTAINS`, depending on
+  starter/global `defaultCondition`
+- `type = DEFAULT` on non-`String` fields -> `EQUAL`
+
+That means `DEFAULT` is not one fixed operator.
+
+Practical rule:
+
+- do not blindly document every untyped field as `LIKE`
+- check whether the field is `String`
+- if the project config sets `defaultCondition = CONTAINS`, `%` and `_` are
+  treated as ordinary characters instead of wildcard input
+
+## `@EasyWhereCondition` Condition Matrix
+
 High-value condition values:
 
 ```text
-DEFAULT, EQUAL, NOT_EQUAL, GREATER_THAN, LESS_THAN,
+DEFAULT, EQUAL, NOT_EQUAL,
+GREATER_THAN, GREATER_THAN_EQUAL,
+LESS_THAN, LESS_THAN_EQUAL,
 LIKE, LIKE_MATCH_LEFT, LIKE_MATCH_RIGHT,
-GREATER_THAN_EQUAL, LESS_THAN_EQUAL,
 IN, NOT_IN,
 RANGE_LEFT_OPEN, RANGE_LEFT_CLOSED,
 RANGE_RIGHT_OPEN, RANGE_RIGHT_CLOSED,
@@ -103,6 +114,56 @@ COLLECTION_EQUAL_OR,
 RANGE_OPEN, RANGE_CLOSED, RANGE_CLOSED_OPEN, RANGE_OPEN_CLOSED,
 CONTAINS, STARTS_WITH, ENDS_WITH
 ```
+
+Interpretation:
+
+- `LIKE` / `LIKE_MATCH_LEFT` / `LIKE_MATCH_RIGHT` use normal SQL like semantics
+- `CONTAINS` / `STARTS_WITH` / `ENDS_WITH` keep the same match shape, but do
+  not treat `%` and `_` as caller-provided wildcard input
+- `RANGE_LEFT_*` / `RANGE_RIGHT_*` are one-sided range expressions
+- `RANGE_*` pair conditions consume a left/right pair from an array or
+  collection
+- `COLLECTION_EQUAL_OR` means `(a = ? or a = ? or a = ?)`; it is not the same
+  as `IN`
+
+## Input Shape Semantics
+
+`whereObject(...)` skips null values.
+
+For `String` values:
+
+- blank strings are skipped by default
+- set `allowEmptyStrings = true` if an empty-string filter should still enter
+  the predicate
+
+For `IN`, `NOT_IN`, and `COLLECTION_EQUAL_OR`:
+
+- arrays are supported
+- collections are supported
+- empty arrays/collections are ignored
+
+For `RANGE_OPEN`, `RANGE_CLOSED`, `RANGE_CLOSED_OPEN`, `RANGE_OPEN_CLOSED`:
+
+- arrays are supported
+- collections are supported
+- the executor uses the first two values as the pair
+- if only one value is present, it degrades to a one-sided compare using the
+  left-side comparator
+
+Examples:
+
+```java
+@EasyWhereCondition(type = EasyWhereCondition.Condition.RANGE_CLOSED, propName = "publishTime")
+private List<LocalDateTime> publishTimes;
+
+@EasyWhereCondition(type = EasyWhereCondition.Condition.RANGE_OPEN_CLOSED, propName = "publishTime")
+private LocalDateTime[] publishTimeOpenClosed;
+
+@EasyWhereCondition(type = EasyWhereCondition.Condition.COLLECTION_EQUAL_OR, propName = "status")
+private List<Integer> statusAny;
+```
+
+## Modes: `SINGLE` vs `MULTI_OR`
 
 Modes:
 
@@ -112,32 +173,97 @@ Modes:
 Examples:
 
 ```java
-@EasyWhereCondition(propName = "bankCards.code", type = EasyWhereCondition.Condition.STARTS_WITH)
-private String bankCardCode;
-
 @EasyWhereCondition(mode = EasyWhereCondition.Mode.MULTI_OR, propNames = {"name", "phone"})
 private String keyword;
 
-@EasyWhereCondition(type = EasyWhereCondition.Condition.RANGE_LEFT_CLOSED, propName = "createTime")
-private LocalDateTime createTimeBegin;
-
-@EasyWhereCondition(type = EasyWhereCondition.Condition.RANGE_RIGHT_CLOSED, propName = "createTime")
-private LocalDateTime createTimeEnd;
+@EasyWhereCondition(mode = EasyWhereCondition.Mode.MULTI_OR, propNames = {"title", "content"})
+private String titleOrContent;
 ```
 
-Notes:
+Source constraints from `DefaultWhereObjectQueryExecutor`:
 
-- relation paths in `propName` are supported
+- `propNames` must not be empty in `MULTI_OR`
+- all `propNames` must have the same property-path depth
+- `tablesIndex` can be shorter than `propNames`; missing entries default to `0`
+
+So this is valid:
+
+```java
+@EasyWhereCondition(mode = EasyWhereCondition.Mode.MULTI_OR, propNames = {"title", "content"})
+private String keyword;
+```
+
+But mixing path depths such as `{"name", "bankCards.code"}` in one
+`MULTI_OR` field is not valid.
+
+## Relation Path Semantics
+
+Relation paths in `propName` are first-class and use the same relation metadata
+as ordinary DSL.
+
+Examples:
+
+```java
+@EasyWhereCondition(propName = "bankCards.code", type = EasyWhereCondition.Condition.STARTS_WITH)
+private String bankCardCode;
+
+@EasyWhereCondition(propName = "bankCards.bank.name", type = EasyWhereCondition.Condition.IN)
+private List<String> bankCardBankNames;
+```
+
+Source behavior:
+
 - to-one paths become implicit joins
 - to-many paths become implicit subqueries
-- `tableIndex` / `tablesIndex` are for explicit join tables
-- `DEFAULT` follows starter `defaultCondition`
+- repeated conditions under the same to-many path are merged on the same query
+  path tree
+- if the query behavior enables `ALL_SUB_QUERY_GROUP_JOIN`, or relation config
+  forces group join, the to-many path can be rewritten to implicit group-join
+  SQL instead of plain correlated subqueries
+
+Practical rule:
+
+- relation-path DTO filters are good when relation metadata is already stable
+- if the relation part is hard to review or only one awkward condition exists,
+  combine `whereObject(...)` with one explicit DSL predicate instead
+
+## Explicit Join Table Targeting: `tableIndex` / `tablesIndex`
+
+Use `tableIndex` or `tablesIndex` only for explicit join table positions.
+
+```java
+@EasyWhereCondition(tableIndex = 1, propName = "name")
+private String companyName;
+```
+
+Interpretation:
+
+- `tableIndex = 0` means the root table
+- each explicit join adds the next index
+- `tablesIndex` is the multi-property version for `MULTI_OR`
+
+Important source rule:
+
+- `tableIndex` does not drive implicit relation joins
+- implicit relation resolution comes from the property path itself (`bankCards.code`, `company.name`, ...)
+
+## Search-Form Filters With Manual Sort
+
+For many admin/search page endpoints, filters are form-like but sorting is only
+`sortBy + asc/desc`. In that shape:
+
+- keep filters in `whereObject(...)`
+- keep sort as explicit allowlisted `.orderBy(...)`
+- append stable fallback order such as `createdTime desc`, `id desc`
+- then call `selectAutoInclude(ResultDTO.class)` and `toPageResult(...)`
+
+Do not force `orderByObject(...)` if only a few sortable fields exist; manual
+`orderBy(...)` is often clearer.
 
 ## `orderByObject` and `ObjectSort`
 
 `orderByObject(...)` expects an `ObjectSort` (`com.easy.query.core.api.dynamic.sort`)
-configuration or a project helper
-that produces one.
+configuration or a project helper that produces one.
 
 Pattern:
 
@@ -191,16 +317,20 @@ Still validate property names through an allowlist.
 
 `OrderByModeEnum` is `com.easy.query.core.func.def.enums.OrderByModeEnum`.
 
-## Relation-Aware DTO Filters
+## Replace the Default Executor
 
-DTO request objects can target relation paths when entity navigation metadata is
-already correct.
+`whereObject(...)` is executor-driven.
 
-Rules:
+Relevant types:
 
-- use relation paths only when entity relations are already correct
-- prefer explicit DSL when annotation-driven relation logic is hard to review
-- repeated to-many relation hits may justify `subQueryToGroupJoin`
+- `WhereObjectQueryExecutor`
+- `DefaultWhereObjectQueryExecutor`
+- `WhereConditionProvider`
+- `DefaultWhereConditionProvider`
+
+That means a project can replace the framework behavior or even define its own
+annotation model. Use source/project truth before claiming a behavior is fixed
+by the public API.
 
 ## When Explicit DSL Is Clearer
 
@@ -231,7 +361,7 @@ Use explicit DSL when:
 - the condition depends on nontrivial branching or computed business rules
 - only a few fields are involved and the DSL is shorter than the metadata
 
-Do not swing too far the other way: if the task is obviously "build a search
-endpoint with many optional filters", prefer `whereObject(...)` first rather
+Do not swing too far the other way: if the task is obviously `build a search
+endpoint with many optional filters`, prefer `whereObject(...)` first rather
 than hand-writing a long chain of gated predicates. Outside that search-form
 shape, stay with DSL.

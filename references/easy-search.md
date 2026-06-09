@@ -33,12 +33,13 @@ List<User> rows = easyEntityQuery.queryable(User.class)
     .toList();
 ```
 
-The call surface looks like ordinary DTO object query, but the metadata model and
-parameter parsing rules are different.
+The call surface looks like ordinary DTO object query, but the metadata model
+and parameter parsing rules are different.
 
 ## `@EasyCond`
 
-`@EasyCond` (`com.easy.query.search.annotation`) can be declared on fields or at type level.
+`@EasyCond` (`com.easy.query.search.annotation`) can be declared on fields or at
+type level.
 
 Examples:
 
@@ -68,10 +69,26 @@ EasySortType sort() default EasySortType.Asc;
 EasySortType[] sortOnly() default {EasySortType.Asc, EasySortType.Desc};
 ```
 
-Use `table`, `tableAlias`, or `tableIndex` only when request params need to
-target joined tables rather than the root table.
+Type-level note from source comment:
 
-`EasySortType` is `com.easy.query.search.EasySortType`.
+- on a type, only `value`, `table`, `tableAlias`, and `tableIndex` are used as
+  defaults
+- if `table`, `tableAlias`, and `tableIndex` are all unset, EasySearch falls
+  back to its dynamic table matcher
+
+## Source Default Inference
+
+Source comment on `@EasyCond.cond()` is important:
+
+- `String` -> Like
+- date/time -> RangeClosed
+- `List` -> In
+- other scalar types -> Equals
+
+That means `cond = Op.class` is not one fixed operator. It is type-driven.
+
+Use `condOnly` when the request is allowed to switch operators but must stay
+inside a safe subset.
 
 ## Parameter Format
 
@@ -144,9 +161,11 @@ The actual parameter suffix is `paramSplitter + opName`, for example `age-ge`.
 
 - strict mode is `true` by default
 - excluded default params include `token`, `page`, `current`, `pageSize`
-- fields are disabled by default because `defaultEnabled = false`
+- unannotated fields are disabled by default because `defaultEnabled = false`
 - `condOnly` restricts legal operators
 - `sortOnly` restricts legal sort directions
+- `whereEnabled` / `orderEnabled` can disable one side independently
+- `indexEnabled` controls indexed parameter names such as `name-1`
 
 `EasySortType.of(...)` recognizes `asc`, `desc`, `ascend`, and `descend`.
 
