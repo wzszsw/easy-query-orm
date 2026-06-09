@@ -4,6 +4,7 @@ Use this reference for:
 
 - expression update
 - object update
+- low-level expression-update setters
 - `setColumns(...)`
 - `setIgnoreColumns(...)`
 - `whereColumns(...)`
@@ -17,7 +18,9 @@ For diff update tracking, add `write-tracking.md`. For delete semantics, read
 
 ## 1. Expression Update
 
-This is the default answer for service-layer update commands.
+This is the default answer for service-layer update commands. In source terms,
+`easyEntityQuery.updatable(Entity.class)` is the `ClientExpressionUpdatable<T>`
+branch.
 
 ```java
 long rows = easyEntityQuery.updatable(Topic.class)
@@ -34,6 +37,21 @@ Use expression update when:
 - the update condition is explicit
 - only some columns should change
 - SQL-side increment/decrement or custom expressions are needed
+- the update should be expressed as one SQL command instead of query-then-loop
+
+### Key predicate helpers
+
+```java
+easyEntityQuery.updatable(Topic.class)
+    .setColumns(t -> t.title().set("x"))
+    .whereById("5")
+    .executeRows();
+
+easyEntityQuery.updatable(Topic.class)
+    .setColumns(t -> t.title().set("x"))
+    .whereByIds(Arrays.asList("5", "6"))
+    .executeRows();
+```
 
 ### Atomic increment / decrement
 
@@ -60,6 +78,79 @@ easyEntityQuery.updatable(User.class)
     .where(u -> u.id().eq(1))
     .executeRows();
 ```
+
+### Joined expression update via relation paths
+
+Current tests show that expression update can generate multi-table update SQL
+for supported dialects when `SET` or `WHERE` references relation paths:
+
+```java
+easyEntityQuery.updatable(DocBankCard.class)
+    .setColumns(card -> card.type().set(card.user().name()))
+    .where(card -> card.user().name().like("123"))
+    .executeRows();
+```
+
+Also valid:
+
+```java
+easyEntityQuery.updatable(DocBankCard.class)
+    .setColumns(card -> card.type().set(card.bank().name()))
+    .where(card -> card.user().name().like("123"))
+    .executeRows();
+```
+
+Tests in current source cover dialect-specific SQL shapes for at least:
+
+- PostgreSQL
+- SQL Server
+- Dameng
+
+Do not rewrite these to "query rows first, then loop update" unless the target
+dialect/project version clearly cannot support the generated shape.
+
+### Low-level property-name setters
+
+The underlying expression-update API is broader than proxy-lambda
+`setColumns(...)`. For generic or dynamic infrastructure code, current source
+also supports:
+
+```java
+easyQueryClient.updatable(Topic.class)
+    .set("title", "new-title")
+    .setWithColumn("title", "id")
+    .whereById("5")
+    .executeRows();
+```
+
+And SQL-function assignment:
+
+```java
+easyQueryClient.updatable(Topic.class)
+    .setSQLFunction("title", runtimeContext.fx().concat("prefix-", "x"))
+    .whereById("5")
+    .executeRows();
+```
+
+Guidance:
+
+- prefer proxy DSL in normal application code
+- mention the property-name APIs only when the requirement is dynamic,
+  reflective, or infrastructure-level
+
+### `toSQL()` / `toSQLResult()`
+
+Expression update also supports SQL-shape inspection:
+
+```java
+String sql = easyEntityQuery.updatable(Topic.class)
+    .setColumns(t -> t.title().set("x"))
+    .whereById("5")
+    .toSQL();
+```
+
+Use this when the user is debugging generated SQL shape rather than asking for
+normal business code.
 
 ## 2. Object Update
 
@@ -197,13 +288,20 @@ Use this for "must affect exactly one row" mutation invariants.
   add `write.md`
 - Need diff update / `asTracking` / `addTracking` / `@EasyQueryTrack`:
   add `write-tracking.md`
+- Need dialect-specific joined delete counterpart:
+  add `write-delete.md`
 
 ## Common Mistakes
 
 - Treating object update and expression update as the same shape
+- Rewriting valid relation-driven expression update into query-then-loop
+  mutation
 - Forgetting object update default is full-column update
 - Calling `setColumns(...)` and then assuming the update condition stayed
   obvious without `whereColumns(...)`
+- Forgetting expression update also has `whereById(...)` / `whereByIds(...)`
+- Teaching only proxy `setColumns(...)` and forgetting the lower-level
+  `set(...)` / `setWithColumn(...)` / `setSQLFunction(...)` APIs exist
 - Using map update with property names instead of column names
 - Treating `ignoreVersion()` as a harmless default
 
@@ -211,6 +309,10 @@ Use this for "must affect exactly one row" mutation invariants.
 
 - docs:
   `easy-query-doc/src/ability/update.md`
+- source:
+  `ClientExpressionUpdatable`
+- source:
+  `AbstractClientExpressionUpdatable`
 - source:
   `ClientEntityUpdatable`
 - source:

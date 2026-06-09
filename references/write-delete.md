@@ -4,6 +4,7 @@ Use this reference for:
 
 - `deletable(...)`
 - expression delete vs object delete
+- relation-driven joined expression delete
 - batch delete
 - version-aware delete controls
 - physical delete safety
@@ -44,6 +45,30 @@ This is the delete-side counterpart of expression update:
   `updatable(Entity.class).setColumns(...).where(...)`
 - delete:
   `deletable(Entity.class).where(...)`
+
+### Joined expression delete via relation paths
+
+Current tests show that expression delete can also generate joined delete SQL
+for supported dialects when the predicate references relation paths:
+
+```java
+easyEntityQuery.deletable(DocBankCard.class)
+    .allowDeleteStatement(true)
+    .where(card -> card.user().name().like("123"))
+    .executeRows();
+```
+
+This is important because there is no separate `leftJoin(...)` API on the
+delete chain. The relation predicate itself drives the generated multi-table
+delete shape.
+
+Current tests cover dialect-specific joined delete SQL at least for:
+
+- PostgreSQL
+- SQL Server
+
+Do not rewrite this to "query ids first, then delete by ids" unless the target
+dialect/project version clearly cannot support the generated shape.
 
 ### Expression delete version controls
 
@@ -194,12 +219,16 @@ Do not silently treat it as success unless the business flow really accepts
   object delete
 - need version match inside explicit condition:
   expression delete with `withVersion(...)`
+- need relation-path predicate that should compile to joined delete SQL:
+  expression delete
 
 ## Common Mistakes
 
 - Treating `deletable(Entity.class)` and `deletable(entity)` as the same
   mutation shape
 - Forgetting expression delete has `whereByIds(...)` and version controls
+- Rewriting a valid relation-driven expression delete into multi-step
+  query-then-delete logic without a dialect reason
 - Calling physical delete without both a real condition and
   `allowDeleteStatement(true)`
 - Teaching `disableLogicDelete()` as harmless default boilerplate

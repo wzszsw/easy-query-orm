@@ -263,6 +263,9 @@ most one secondary reference when a boundary rule below says it is needed.
 - Distinguish expression delete from object delete; do not collapse
   `deletable(Entity.class)` and `deletable(entity)` into one generic delete
   shape.
+- Do not rewrite valid relation-driven expression update/delete into
+  query-then-loop or query-ids-then-delete flows without a dialect-specific
+  reason.
 - When using `updatable(entity).setColumns(...)`, mention `whereColumns(...)`
   when the write condition must stay explicit.
 - Do not claim `asTracking()` alone enables diff update; mention the tracking

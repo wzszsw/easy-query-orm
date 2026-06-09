@@ -177,12 +177,13 @@ projection, and `select-auto-include.md` for DTO graphs.
 | `mapUpdatable(...)` | Update column-value map rows | `write-update.md` |
 | `onConflictThen(...)` | Conflict/upsert handling on insert | `write-insert-upsert.md` |
 | `setSQLStrategy(...)` | Control insert/update column emission strategy | `write-insert-upsert.md`, `write-update.md`, `configuration-starter.md` |
+| `set(...)` / `setWithColumn(...)` / `setSQLFunction(...)` on `updatable(Class)` | Low-level expression-update setters | `write-update.md` |
 | `setIgnoreColumns(...)` | Exclude selected object-update columns from `SET` | `write-update.md` |
 | `whereColumns(...)` | Choose object-update or object-delete key columns | `write-update.md`, `write-delete.md` |
 | `columnConfigure(...)` | Per-column custom SQL generation during insert/update | `write-insert-upsert.md`, `write-update.md` |
 | `batch()` / `batch(true)` / `batch(false)` | Toggle JDBC batch execution behavior on the current write chain | `write.md` |
 | `withVersion(...)` / `ignoreVersion()` | Version handling | `write-update.md`, `write-delete.md` |
-| `whereById(...)` / `whereByIds(...)` on `deletable(Class)` | Expression-delete key predicates | `write-delete.md` |
+| `whereById(...)` / `whereByIds(...)` on `updatable(Class)` / `deletable(Class)` | Expression-update/delete key predicates | `write-update.md`, `write-delete.md` |
 | `disableLogicDelete()` / `enableLogicDelete()` / `useLogicDelete(boolean)` | Toggle logic-delete filtering/behavior on the current chain | `logic-delete.md` |
 | `tableLogicDelete(() -> false)` | Disable logic delete for the nearest joined table in the current expression | `logic-delete.md` |
 | `disableLogicDelete()` / `allowDeleteStatement(true)` | Physical delete opt-in | `logic-delete.md` |

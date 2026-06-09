@@ -118,7 +118,8 @@
           35,
           36,
           37,
-          40
+          40,
+          41
         ]
       },
       {
@@ -150,7 +151,8 @@
         36,
         37,
         38,
-        40
+        40,
+        41
       ],
       "p1_should_pass_eval_ids": [
         9,
@@ -198,7 +200,8 @@
       36,
       37,
       38,
-      40
+      40,
+      41
     ]
   },
   "evals": [
@@ -487,6 +490,13 @@
       "name": "expression-delete-vs-object-delete",
       "prompt": "请你说明 easy-query 里的表达式删除和对象删除有什么区别，并分别给 Java 例子。要求至少覆盖：`deletable(Entity.class).where(...)`、`whereById/whereByIds`、表达式删除上的 `withVersion(...)`、对象删除上的 `whereColumns(...)`，以及为什么 `allowDeleteStatement(true)` 不是“删除模板代码”。",
       "expected_output": "Must distinguish `ClientExpressionDeletable` from `ClientEntityDeletable`: expression delete should be shown with `deletable(Entity.class).where(...)` and key-predicate helpers like `whereById/whereByIds`, and must mention that expression delete also supports `withVersion(...)`. Object delete should be shown with `deletable(entity)` or `deletable(collection)` plus `whereColumns(...)` when explicit original-column conditions are needed. It must explain that `allowDeleteStatement(true)` only removes the physical-delete guard and does not make an unsafe condition acceptable.",
+      "files": []
+    },
+    {
+      "id": 41,
+      "name": "expression-update-join-and-lowlevel-setters",
+      "prompt": "请你用 easy-query 说明表达式更新的两类能力。第一类：按 `DocBankCard` 更新，把 `type` 设成关联 `user.name` 或 `bank.name`，并在条件里按 `user.name like '123'` 过滤，说明这为什么不是 query-then-loop。第二类：说明 `set(...)`、`setWithColumn(...)`、`setSQLFunction(...)`、`whereByIds(...)` 这组表达式更新底层 API 什么时候才该提，而不是默认盖过代理 DSL。",
+      "expected_output": "Must show relation-driven expression update examples like `updatable(DocBankCard.class).setColumns(card -> card.type().set(card.user().name())).where(card -> card.user().name().like(\"123\")).executeRows()` and an equivalent bank-name variant, and explain that supported dialects can emit joined update SQL rather than requiring query-then-loop mutation. It must also acknowledge the lower-level `ClientExpressionUpdatable` APIs `set(...)`, `setWithColumn(...)`, `setSQLFunction(...)`, and `whereByIds(...)`, but frame them as dynamic/infrastructure-level tools while keeping proxy DSL as the normal application default.",
       "files": []
     }
   ]
