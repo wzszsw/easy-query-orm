@@ -7,8 +7,7 @@ description: >-
   missing `*Proxy` troubleshooting, AP / OLAP-style analytics,
   `groupBy` / `having`, conditional aggregate filters, implicit
   `subQueryToGroupJoin`, CTE / UNION / window functions, Maven APT / Kotlin
-  KSP diagnosis, `annotationProcessorPaths`, generated-sources visibility,
-  Spring Boot, CRUD/query/page/transaction code, implicit relation APIs
+  KSP diagnosis, `annotationProcessorPaths`, generated-sources visibility, ValueConverter / ValueAutoConverter / TypeHandler, Interceptor, LogicDelete, Spring Boot, CRUD/query/page/transaction code, implicit relation APIs
   (`any`/`all`/`none`, `subQueryToGroupJoin`, `subQueryConfigure`,
   `flatElement`, `first`/`element`/`elements`, `joining`,
   `anyValue`/`noneValue`, `notEmptyAll`), `@Navigate`/`@NavigateFlat`/`include`/`include2`/
@@ -83,19 +82,31 @@ task; do not read the whole `references/` tree by default.
    or `COLLECTION_EQUAL_OR`, read `references/dto-object-query.md` first. Use
    `references/easy-search.md` only when `sql-search` / `EasySearch` /
    `@EasyCond` is actually in play.
-7. For search-form page endpoints with filters + sort + paging + DTO graph,
+7. For value conversion, enum/json mapping, `@Column(conversion=...)`,
+   `ValueAutoConverter`, `@Enumerated`, `@Column(typeHandler=...)`, JDBC
+   binding overrides, or PostgreSQL `jsonb`, read
+   `references/value-conversion-type-handler.md` first.
+8. For multi-tenant filters, data-permission filters, audit/default field
+   filling, expression-update auto-set columns, `useInterceptor(...)`,
+   `noInterceptor(...)`, or `ProtectedInterceptor`, read
+   `references/interceptor.md` first.
+9. For `@LogicDelete`, `disableLogicDelete()`, `enableLogicDelete()`,
+   `useLogicDelete(boolean)`, `tableLogicDelete(...)`, custom delete
+   strategies, or physical-delete escape hatches, read
+   `references/logic-delete.md` first.
+10. For search-form page endpoints with filters + sort + paging + DTO graph,
    read `references/search-form-page.md` first.
-8. For missing `*Proxy`, `package ...proxy does not exist`, APT/KSP not
+11. For missing `*Proxy`, `package ...proxy does not exist`, APT/KSP not
    running, `annotationProcessorPaths`, generated-sources visibility, or
    `javacTree`/Lombok/JDK compatibility issues, read
    `references/proxy-generation-troubleshooting.md` first, then the matching
    setup file.
-9. For setup or proxy-generation problems, read only the matching setup file
+12. For setup or proxy-generation problems, read only the matching setup file
    after the troubleshooting reference:
    - Kotlin / `ksp` / `kapt` / missing `*Proxy`: `references/setup-kotlin.md`
    - Plain Java / Maven / APT / missing `*Proxy`: `references/setup-java.md`
    - Spring Boot bean/config/starter issues: `references/setup-spring-boot.md`
-10. Search before emitting code when the exact symbol is unclear.
+13. Search before emitting code when the exact symbol is unclear.
 
 ## Routing Table
 
@@ -116,6 +127,9 @@ task; do not read the whole `references/` tree by default.
 | Implicit relation predicates / controls: `any/all/none/notEmptyAll`, `subQueryConfigure`, `filter/configure/mode`, `flatElement`, `valueOf`, `SubQueryModeEnum` | `references/implicit-controls.md` |
 | Ranked child / `partition by` / `first()` / `element()` / `elements()` / top-N child window | `references/implicit-query.md` first, then `references/api-map.md` |
 | Permission tree / `user -> roles -> menus` / tree with nested to-many filter | `references/implicit-controls.md` first, then `references/implicit-query.md` |
+| Value conversion / enum / JSON / jsonb / `ValueConverter` / `ValueAutoConverter` / `@Enumerated` / `@Column(typeHandler=...)` / `JdbcTypeHandler` | `references/value-conversion-type-handler.md` |
+| Interceptor / multi-tenant / data-permission / audit fill / `useInterceptor` / `noInterceptor` / `ProtectedInterceptor` | `references/interceptor.md` |
+| Logic delete / `@LogicDelete` / `disableLogicDelete` / `tableLogicDelete` / custom logic-delete strategy / physical-delete escape hatch | `references/logic-delete.md` |
 | Search/page form endpoint: optional filters + stable sort + DTO graph result | `references/search-form-page.md` |
 | Query/search-form DTO filters/sorts via `whereObject`, `orderByObject`, `@EasyWhereCondition`, `MULTI_OR`, range/in/notIn, relation-path filters, or `COLLECTION_EQUAL_OR` | `references/dto-object-query.md` |
 | User-management / admin-search / multi-condition search form endpoint | `references/dto-object-query.md` first, then add DSL only where needed |
@@ -150,6 +164,13 @@ task; do not read the whole `references/` tree by default.
 - Keep grouped projections group-aware: non-key fields should come from
   aggregate expressions, grouped proxy access, or explicit window outputs.
 
+- Do not recommend `JdbcTypeHandler` when an in-memory `ValueConverter` is sufficient.
+- Do not recommend `ValueConverter` alone when the real problem is JDBC binding/driver behavior such as PostgreSQL `jsonb` `PGobject` writes.
+- Prefer interceptor abstraction for cross-cutting tenant, audit, and data-permission rules instead of repeating ad hoc where/set logic in every service.
+- State `useInterceptor(...)` / `noInterceptor(...)` semantics precisely: `useInterceptor(name)` does not mean “only this one”, and `ProtectedInterceptor` survives global `noInterceptor()` unless removed by `noInterceptor(name)`.
+
+- Separate soft-delete semantics from physical delete semantics; do not teach `disableLogicDelete()` as a harmless default.
+- Mention `tableLogicDelete(...)` and relation `.configure(q -> q.disableLogicDelete())` when only part of a query graph should ignore logical delete.
 ## Evidence Policy
 
 Order of truth:
@@ -168,5 +189,8 @@ and the next concrete check or fix. For AP/reporting, state the
 `dimension -> metric -> filter -> rank/union/cte` shape before dropping into
 code when that framing prevents wrong SQL structure. Cite a reference only for
 non-obvious API, SQL-shape, or version caveat.
+
+
+
 
 

@@ -24,8 +24,11 @@ Common top-level methods:
 | `@Table` | Table mapping | `entity-mapping.md` |
 | `@EntityProxy` | Generate `*Proxy` | `entity-mapping.md` |
 | `@Column` | Column mapping options | `entity-mapping.md` |
+| `@Column(conversion=...)` | Field-level `ValueConverter` mapping | `value-conversion-type-handler.md` |
+| `@Column(typeHandler=...)` | Field-level JDBC type handler override | `value-conversion-type-handler.md` |
+| `@Enumerated` | Built-in enum-name auto conversion trigger | `value-conversion-type-handler.md` |
 | `@Version` | Optimistic lock | `write.md` |
-| `@LogicDelete` | Logic delete | `write.md` |
+| `@LogicDelete` | Logic-delete column and strategy binding | `logic-delete.md` |
 | `@Navigate` | Relation metadata | `relation-query.md`, `entity-modeling-navigate.md` |
 | `@NavigateFlat` | DTO/VO path flattening | `entity-modeling-navigate.md` |
 | `ProxyEntityAvailable<TEntity, TProxy>` | Proxy-enabled entity contract (`com.easy.query.core.proxy`) | `entity-mapping.md` |
@@ -57,9 +60,20 @@ Common operators:
 | `orderByObject(sort)` | Search-form DTO sort / request-driven sort | `dto-object-query.md` |
 | `selectAutoInclude(ResultDTO.class)` | DTO graph result | `select-auto-include.md` |
 | `@EasyWhereCondition` | Query-form filter metadata: `DEFAULT`, `MULTI_OR`, range/in/notIn, relation-path filters | `dto-object-query.md` |
-| ObjectSortBuilder | Sort allowlist / builder API (com.easy.query.core.api.dynamic.sort) | dto-object-query.md |
-| WhereObjectQueryExecutor | Replace default whereObject / @EasyWhereCondition behavior (com.easy.query.core.api.dynamic.executor.query) | dto-object-query.md |
+| `ObjectSortBuilder` | Sort allowlist / builder API (`com.easy.query.core.api.dynamic.sort`) | `dto-object-query.md` |
+| `WhereObjectQueryExecutor` | Replace default `whereObject` / `@EasyWhereCondition` behavior (`com.easy.query.core.api.dynamic.executor.query`) | `dto-object-query.md` |
 | `anyColumn(...)` | Dynamic property path sort/filter helper | `dto-object-query.md` |
+
+## Conversion and JDBC Symbols
+
+| Symbol | Purpose | Read Next |
+|--------|---------|-----------|
+| `ValueConverter` | Property <-> DB Java value conversion (`com.easy.query.core.basic.extension.conversion`) | `value-conversion-type-handler.md` |
+| `ValueAutoConverter` | Global auto-applied value converter | `value-conversion-type-handler.md` |
+| `JdbcTypeHandler` | JDBC parameter/result handler | `value-conversion-type-handler.md` |
+| `JdbcTypeHandlerManager.appendHandler(...)` | Replace or append handler by Java type | `value-conversion-type-handler.md` |
+| `JdbcTypeHandlerReplaceConfigurer` | Spring Boot auto-registration contract for JDBC handlers | `value-conversion-type-handler.md` |
+| `QueryConfiguration.applyValueConverter(...)` | Register converter or auto converter | `value-conversion-type-handler.md` |
 
 ## EasySearch Symbols
 
@@ -73,6 +87,20 @@ Typical chain:
 `whereObject(search)` + `orderByObject(search)`
 
 For non-form dynamic query composition, read `query.md` instead.
+
+## Interceptor Symbols
+
+| Symbol | Purpose | Read Next |
+|--------|---------|-----------|
+| `Interceptor` | Base cross-cutting ORM interceptor | `interceptor.md` |
+| `EntityInterceptor` | Mutate entity objects on insert/update | `interceptor.md` |
+| `PredicateFilterInterceptor` | Cross-cutting where predicate filter (tenant/data permission) | `interceptor.md` |
+| `UpdateSetInterceptor` | Add `SET` columns for expression updates | `interceptor.md` |
+| `UpdateEntityColumnInterceptor` | Force columns into entity-update column selection | `interceptor.md` |
+| `ProtectedInterceptor` | Marker that survives global `noInterceptor()` unless removed by name | `interceptor.md` |
+| `QueryConfiguration.applyInterceptor(...)` | Global registration entry point | `interceptor.md` |
+| `.useInterceptor(name)` / `.noInterceptor(name)` | Per-expression named control | `interceptor.md` |
+| `.useInterceptor()` / `.noInterceptor()` | Re-enable/disable default interceptor set on the current expression | `interceptor.md` |
 
 ## Relation and Include Symbols
 
@@ -134,7 +162,9 @@ projection, and `select-auto-include.md` for DTO graphs.
 | `updatable(...)` | Update rows | `write.md` |
 | `deletable(...)` | Delete rows | `write.md` |
 | `withVersion(...)` / `ignoreVersion()` | Version handling | `write.md` |
-| `disableLogicDelete()` / `allowDeleteStatement(true)` | Physical delete opt-in | `write.md` |
+| `disableLogicDelete()` / `enableLogicDelete()` / `useLogicDelete(boolean)` | Toggle logic-delete filtering/behavior on the current chain | `logic-delete.md` |
+| `tableLogicDelete(() -> false)` | Disable logic delete for the nearest joined table in the current expression | `logic-delete.md` |
+| `disableLogicDelete()` / `allowDeleteStatement(true)` | Physical delete opt-in | `logic-delete.md` |
 | `beginTransaction()` | Plain transaction API returning `Transaction` (`com.easy.query.core.basic.jdbc.tx`) | `transaction.md` |
 | `@Transactional` | Spring transaction boundary | `transaction.md` |
 | `savable(...)` | Aggregate graph save | `savable-aggregate.md` |

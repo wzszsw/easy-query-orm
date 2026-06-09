@@ -69,6 +69,30 @@
           22,
           23
         ]
+      },
+      {
+        "id": "conversion-and-type-handler",
+        "purpose": "ValueConverter, ValueAutoConverter, @Enumerated, and JdbcTypeHandler boundaries plus jsonb-style combined handling.",
+        "eval_ids": [
+          24,
+          25
+        ]
+      },
+      {
+        "id": "interceptors",
+        "purpose": "EntityInterceptor, PredicateFilterInterceptor, UpdateSetInterceptor, UpdateEntityColumnInterceptor, ProtectedInterceptor, and use/noInterceptor control.",
+        "eval_ids": [
+          26,
+          27
+        ]
+      },
+      {
+        "id": "logic-delete",
+        "purpose": "@LogicDelete, built-in/custom strategies, query-time toggles, table-level disable, and physical-delete escape hatches.",
+        "eval_ids": [
+          28,
+          29
+        ]
       }
     ],
     "pass_policy": {
@@ -81,7 +105,10 @@
         18,
         19,
         20,
-        22
+        22,
+        24,
+        26,
+        28
       ],
       "p1_should_pass_eval_ids": [
         9,
@@ -92,7 +119,10 @@
         16,
         17,
         21,
-        23
+        23,
+        25,
+        27,
+        29
       ],
       "p2_regression_guard_eval_ids": [
         0,
@@ -112,7 +142,10 @@
       17,
       19,
       20,
-      22
+      22,
+      24,
+      26,
+      28
     ]
   },
   "evals": [
@@ -282,6 +315,48 @@
       "name": "easysearch-vs-whereobject-boundary",
       "prompt": "项目里已经接入了 sql-search。请说明什么时候该用普通 whereObject/@EasyWhereCondition，什么时候该用 EasySearch/@EasyCond；顺便给一个 @EasyCond 查询类例子，要求限制 age 只能 ge/le，createTime 默认排序 desc，并说明 cond 默认是怎么按字段类型推断的。",
       "expected_output": "Explains the boundary: normal DTO form filtering uses whereObject/@EasyWhereCondition, while sql-search parameterized requests use EasySearch/@EasyCond through whereObject(search)+orderByObject(search). Must show condOnly and sort on @EasyCond, and explicitly state source default inference: String -> Like, date/time -> RangeClosed, List -> In, others -> Equals. Should also mention defaultEnabled=false / strict=true behavior from EasySearch options.",
+      "files": []
+    },
+    {
+      "id": 24,
+      "name": "valueconverter-vs-valueautoconverter",
+      "prompt": "帮我给 easy-query 设计一套枚举值映射方案。需求：数据库里存整数 code，Java 实体字段想直接用枚举；同时我不想每个字段都手写 `@Column(conversion=...)`。请说明什么时候用 ValueConverter，什么时候用 ValueAutoConverter，并给出代码。还要说清楚如果字段上已经显式写了 conversion，会不会压过自动转换。",
+      "expected_output": "Must distinguish field-level ValueConverter from global ValueAutoConverter, show apply(entityClass, propertyType, property), mention registration through QueryConfiguration.applyValueConverter(...) or Spring bean, explain that auto conversion only participates when the column conversion remains default, and state that explicit @Column(conversion=...) overrides auto conversion. Should not misdescribe JdbcTypeHandler as the primary solution for enum code mapping.",
+      "files": []
+    },
+    {
+      "id": 25,
+      "name": "jsonb-converter-plus-typehandler",
+      "prompt": "PostgreSQL 里我想把 jsonb 列映射成 Java 对象字段，既要查询出来自动反序列化，也要保存时正确写成 PGobject。请说明 easy-query 里 ValueConverter / ValueAutoConverter / TypeHandler 分别负责什么，并给一个合理的组合方案。",
+      "expected_output": "Must explain the split: ValueConverter/ValueAutoConverter handle object <-> JSON string/object mapping, while JdbcTypeHandler handles JDBC read/write behavior such as PGobject binding. Should mention @Column(dbType=\"jsonb\", jdbcType=JDBCType.JAVA_OBJECT), runtime registration via applyValueConverter(...) and JdbcTypeHandlerManager.appendHandler(...), and recommend the combined converter + type handler approach for jsonb instead of treating either one as sufficient for both layers.",
+      "files": []
+    },
+    {
+      "id": 26,
+      "name": "tenant-audit-interceptor-stack",
+      "prompt": "帮我给 easy-query 设计一套拦截器方案。需求：BaseEntity 插入时自动填充 createTime/createBy/updateTime/updateBy；对象更新时自动刷新 updateTime/updateBy；表达式更新时如果用户没手写 set 这两个字段，也要自动补上；查询/更新/删除都要自动带 tenantId 条件。请说明分别该用哪些 interceptor 接口，并给 Java 代码。",
+      "expected_output": "Must split responsibilities correctly: EntityInterceptor for insert/update object mutation, PredicateFilterInterceptor for tenant where predicates, UpdateSetInterceptor for expression-update set-column autofill, and optionally UpdateEntityColumnInterceptor when entity-update column selection must include audit columns. Must not collapse everything into one hand-written where/set pattern or misdescribe PredicateFilterInterceptor as query-only.",
+      "files": []
+    },
+    {
+      "id": 27,
+      "name": "protected-interceptor-control",
+      "prompt": "项目里有一个多租户拦截器和一个审计拦截器。请解释 easy-query 里的 `useInterceptor()`、`useInterceptor(name)`、`noInterceptor()`、`noInterceptor(name)` 各自会怎么影响当前表达式；另外说明为什么多租户拦截器通常应该实现 ProtectedInterceptor。",
+      "expected_output": "Must explain source-backed semantics precisely: defaults already use interceptors, useInterceptor(name) does not mean “only this one”, noInterceptor() disables the default set for the current expression, useInterceptor() re-enables defaults, and ProtectedInterceptor survives global noInterceptor() unless removed by noInterceptor(name). Should recommend noInterceptor().useInterceptor(name) when the user truly wants only one specific interceptor.",
+      "files": []
+    },
+    {
+      "id": 28,
+      "name": "logic-delete-control-surface",
+      "prompt": "帮我说明 easy-query 里的逻辑删除控制面。需求：Company 有 `@LogicDelete(strategy = LogicDeleteStrategyEnum.BOOLEAN)` 的 deleted 字段。我要解释默认删除会发生什么、查询默认会发生什么、什么时候用 `disableLogicDelete()` / `enableLogicDelete()` / `useLogicDelete(false)`，什么时候需要 `tableLogicDelete(() -> false)`，以及物理删除为什么必须再配 `allowDeleteStatement(true)`。",
+      "expected_output": "Must explain soft-delete semantics instead of only giving code: delete becomes update, normal queries auto-filter not-deleted rows, disable/enable/useLogicDelete control the current chain, tableLogicDelete is for partial joined-table override rather than global disable, and physical delete requires both disableLogicDelete() and allowDeleteStatement(true). Should not present disableLogicDelete as a default or harmless choice.",
+      "files": []
+    },
+    {
+      "id": 29,
+      "name": "custom-logic-delete-strategy",
+      "prompt": "我想做一个 easy-query 自定义逻辑删除策略：未删除时 deletedTime 为 null，删除时写当前时间，同时额外写 deletedUserId；实体字段上通过 `@LogicDelete(strategy = CUSTOM, strategyName = ...)` 绑定。请给 Java 代码，并说明为什么在 getDeletedSQLExpression 里不能先把 now 提取成局部变量再返回 lambda。顺便说明配置级逻辑删除策略和字段绑定策略有什么区别。",
+      "expected_output": "Uses AbstractLogicDeleteStrategy with getPredicateFilterExpression/getDeletedSQLExpression/getStrategy, registration through QueryConfiguration.applyLogicDeleteStrategy(...), field binding through @LogicDelete(strategy = LogicDeleteStrategyEnum.CUSTOM, strategyName = ...), and explicitly explains the delayed-lambda capture pitfall for timestamps/thread-local values. Should also distinguish field-bound custom strategy from AbstractConfigurationLogicDeleteStrategy driven by apply(entityClass).",
       "files": []
     }
   ]
