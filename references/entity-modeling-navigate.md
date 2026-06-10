@@ -186,6 +186,24 @@ private Company company;
 `@EasyTree("children")` selects which self relation should be treated as the tree
 children path for tree result APIs.
 
+Treat it as a disambiguation annotation, not as the thing that creates the tree
+relation. The real tree modeling still comes from self `@Navigate` metadata.
+
+Practical rule:
+
+- exactly one self `List<SelfType>` one-to-many path -> usually no `@EasyTree`
+  needed
+- multiple self `List<SelfType>` one-to-many paths -> add `@EasyTree("...")`
+  on the entity to point at the real child collection used by tree APIs
+
+Tree entity prompts should usually produce:
+
+- `id`
+- `parentId`
+- self `ManyToOne parent` when upward traversal matters
+- self `OneToMany children`
+- optional `@EasyTree("children")` only for ambiguity resolution
+
 `@Encryption(...)` belongs on encrypted fields only when the entity or result path
 already uses the matching encryption strategy. Do not infer fuzzy-query support
 without source evidence.

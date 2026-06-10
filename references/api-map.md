@@ -41,6 +41,7 @@ Common top-level methods:
 | `@LogicDelete` | Logic-delete column and strategy binding | `logic-delete.md` |
 | `@Navigate` | Relation metadata | `relation-query.md`, `entity-modeling-navigate.md` |
 | `@NavigateFlat` | DTO/VO path flattening | `entity-modeling-navigate.md` |
+| `@EasyTree` | Mark which self `List<SelfType>` navigation is the tree children path | `entity-modeling-navigate.md`, `implicit-query.md` |
 | `ProxyEntityAvailable<TEntity, TProxy>` | Proxy-enabled entity contract (`com.easy.query.core.proxy`) | `entity-mapping.md` |
 | `RelationTypeEnum` | Relation kind enum (`com.easy.query.core.enums`) | `relation-query.md` |
 | `@ShardingTableKey` | Sharding route key | `advanced.md` |

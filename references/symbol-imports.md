@@ -78,6 +78,7 @@ import com.easy.query.core.annotation.Version;
 import com.easy.query.core.annotation.LogicDelete;
 import com.easy.query.core.annotation.Navigate;
 import com.easy.query.core.annotation.NavigateFlat;
+import com.easy.query.core.annotation.EasyTree;
 import com.easy.query.core.annotation.ShardingTableKey;
 import com.easy.query.core.annotation.EasyQueryTrack;
 import com.easy.query.core.annotation.EasyWhereCondition;

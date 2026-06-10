@@ -59,6 +59,7 @@
         "id": "entity-modeling",
         "purpose": "Entity annotations, advanced table/column controls, computed properties, and current-source modeling caveats such as deprecated value-object support.",
         "eval_ids": [
+          48,
           42,
           43
         ]
@@ -157,6 +158,7 @@
         10,
         11,
         18,
+        48,
         42,
         19,
         20,
@@ -555,8 +557,8 @@
     {
       "id": 46,
       "name": "missing-imports-core-symbols",
-      "prompt": "easy-query 的一些示例没写 import。我现在只知道这些类型名：`EasyWhereCondition`、`WhereConditionProvider`、`ObjectSortBuilder`、`EasyEntityQuery`、`ProxyEntityAvailable`。请直接告诉我每个类型对应的 Java import，并顺手说明 `EasyWhereCondition.Condition` 这种嵌套枚举应该 import 谁。",
-      "expected_output": "Must return the exact current-source imports: `com.easy.query.core.annotation.EasyWhereCondition`, `com.easy.query.core.api.dynamic.executor.query.WhereConditionProvider`, `com.easy.query.core.api.dynamic.sort.ObjectSortBuilder`, `com.easy.query.api.proxy.client.EasyEntityQuery`, and `com.easy.query.core.proxy.ProxyEntityAvailable`. It must also explicitly say that nested members such as `EasyWhereCondition.Condition` are covered by importing the owner type `EasyWhereCondition`, not a separate `Condition` type.",
+      "prompt": "easy-query 的一些示例没写 import。我现在只知道这些类型名：`EasyWhereCondition`、`EasyTree`、`WhereConditionProvider`、`ObjectSortBuilder`、`EasyEntityQuery`、`ProxyEntityAvailable`。请直接告诉我每个类型对应的 Java import，并顺手说明 `EasyWhereCondition.Condition` 这种嵌套枚举应该 import 谁。",
+      "expected_output": "Must return the exact current-source imports: `com.easy.query.core.annotation.EasyWhereCondition`, `com.easy.query.core.annotation.EasyTree`, `com.easy.query.core.api.dynamic.executor.query.WhereConditionProvider`, `com.easy.query.core.api.dynamic.sort.ObjectSortBuilder`, `com.easy.query.api.proxy.client.EasyEntityQuery`, and `com.easy.query.core.proxy.ProxyEntityAvailable`. It must also explicitly say that nested members such as `EasyWhereCondition.Condition` are covered by importing the owner type `EasyWhereCondition`, not a separate `Condition` type.",
       "files": []
     },
     {
@@ -564,6 +566,13 @@
       "name": "missing-imports-starter-and-spi",
       "prompt": "我在写 easy-query 的 starter / 扩展代码，示例里又没 import。请直接给出这些类型的包名或 Java import：`StarterConfigurer`、`JdbcTypeHandlerReplaceConfigurer`、`ValueConverter`、`JdbcTypeHandler`、`PredicateFilterInterceptor`、`EasyQueryProperties`、`EasySearch`、`EasyCond`。",
       "expected_output": "Must return the exact current-source imports: `com.easy.query.core.bootstrapper.StarterConfigurer`, `com.easy.query.sql.starter.config.JdbcTypeHandlerReplaceConfigurer`, `com.easy.query.core.basic.extension.conversion.ValueConverter`, `com.easy.query.core.basic.jdbc.types.handler.JdbcTypeHandler`, `com.easy.query.core.basic.extension.interceptor.PredicateFilterInterceptor`, `com.easy.query.sql.starter.config.EasyQueryProperties`, `com.easy.query.search.EasySearch`, and `com.easy.query.search.annotation.EasyCond`.",
+      "files": []
+    },
+    {
+      "id": 48,
+      "name": "tree-entity-self-relation-modeling",
+      "prompt": "帮我写一个 easy-query 的树表实体 `SysDept`。字段至少有 `id`、`parentId`、`name`。要求后续既能做 `asTreeCTE().toTreeList()`，也能支持从当前节点访问父节点名称。请给 Java 实体代码，并说明 `@EasyTree` 什么时候才需要。",
+      "expected_output": "Must model the tree as self relations instead of only a flat `parentId` field: a self `ManyToOne parent` and a self `OneToMany children`, preferably with explicit `selfProperty` / `targetProperty` and `ProxyEntityAvailable<SysDept, SysDeptProxy>`. It must explain that `@EasyTree(\"children\")` is only needed when the entity has multiple self `List<SelfType>` one-to-many paths and the framework must disambiguate the real tree children path.",
       "files": []
     }
   ]

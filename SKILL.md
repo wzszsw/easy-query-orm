@@ -170,6 +170,7 @@ most one secondary reference when a boundary rule below says it is needed.
   `references/entity-computed-properties.md`.
 - Fix `@Navigate` cardinality/direction or a missing relation path:
   `references/relation-query.md`.
+  Tree/self-relation entity modeling also starts here.
 - Advanced relation metadata, DTO-side navigation, `@NavigateFlat`,
   navigate extras:
   `references/entity-modeling-navigate.md`.

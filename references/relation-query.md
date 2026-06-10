@@ -147,6 +147,89 @@ public class SysUser implements ProxyEntityAvailable<SysUser, SysUserProxy> {
 }
 ```
 
+## Tree / Self-Relation Entity
+
+Tree entities are not a separate ORM type. They are ordinary self-relations.
+The high-value distinction is:
+
+- `children`: self `OneToMany`, required when you want `asTreeCTE()` to infer
+  the tree child path and when you want `toTreeList()`
+- `parent`: self `ManyToOne`, optional but strongly recommended when business
+  code also traverses upward paths such as `node.parent().name()`
+- `@EasyTree("children")`: only needed when the same entity has multiple self
+  `List<SelfType>` one-to-many relations and the framework needs to know which
+  one is the real tree child path
+
+Minimal tree entity skeleton:
+
+```java
+import com.easy.query.core.annotation.Column;
+import com.easy.query.core.annotation.EntityProxy;
+import com.easy.query.core.annotation.Navigate;
+import com.easy.query.core.annotation.Table;
+import com.easy.query.core.enums.RelationTypeEnum;
+import com.easy.query.core.proxy.ProxyEntityAvailable;
+import lombok.Data;
+import lombok.experimental.FieldNameConstants;
+
+import java.util.List;
+
+@Data
+@Table("sys_dept")
+@EntityProxy
+@FieldNameConstants
+public class SysDept implements ProxyEntityAvailable<SysDept, SysDeptProxy> {
+    @Column(primaryKey = true)
+    private String id;
+    private String parentId;
+    private String name;
+
+    @Navigate(
+        value = RelationTypeEnum.ManyToOne,
+        selfProperty = {Fields.parentId},
+        targetProperty = {Fields.id}
+    )
+    private SysDept parent;
+
+    @Navigate(
+        value = RelationTypeEnum.OneToMany,
+        selfProperty = {Fields.id},
+        targetProperty = {Fields.parentId}
+    )
+    private List<SysDept> children;
+}
+```
+
+Source-backed simpler form also exists for the child side:
+
+```java
+@Navigate(value = RelationTypeEnum.OneToMany, targetProperty = "parentId")
+private List<MyCategory> children;
+```
+
+But for skill answers, prefer the explicit `selfProperty + targetProperty`
+version when writing a fresh entity template. It is easier to review and
+extends cleanly when the user later adds the `parent` relation too.
+
+If the user only needs recursive SQL and does not want to model `children` on
+the entity, the fallback is `asTreeCTECustom(idExpr, parentIdExpr)`. That is a
+query workaround, not the preferred tree-entity modeling answer.
+
+## Tree Modeling Rules
+
+When the task says `树表 entity`, `菜单树实体`, `评论树`, `部门树`, or similar:
+
+1. Start from self-relation modeling, not from query code.
+2. Add `id` and `parentId` first.
+3. Add self `OneToMany children`.
+4. Add self `ManyToOne parent` if the business also traverses upward.
+5. Add `@EasyTree("children")` only when multiple self `List<SelfType>` paths
+   exist.
+
+Do not answer a tree-entity prompt with only `parentId` plus plain fields and
+leave out the self relation. That shape compiles as a flat table entity but is
+not the tree model easy-query expects for `asTreeCTE() + toTreeList()`.
+
 ## Common Mistakes
 
 - `selfProperty` and `targetProperty` reversed
@@ -155,6 +238,9 @@ public class SysUser implements ProxyEntityAvailable<SysUser, SysUserProxy> {
 - declaring `ManyToMany` without a real mapping table
 - trying to solve DTO graph problems by changing entity relation cardinality
 - using relation field names that do not match the actual business meaning
+- for tree tables, keeping only `parentId` and forgetting self `children`
+- adding `@EasyTree` as if every tree entity must have it; it is only a
+  disambiguation hook when multiple self child lists exist
 
 ## Read Next
 
