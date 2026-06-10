@@ -80,6 +80,7 @@ Common operators:
 | `@EasyWhereCondition` | Query-form filter metadata: `DEFAULT`, `MULTI_OR`, range/in/notIn, relation-path filters | `dto-object-query.md` |
 | `ObjectSortBuilder` | Sort allowlist / builder API (`com.easy.query.core.api.dynamic.sort`) | `dto-object-query.md` |
 | `WhereObjectQueryExecutor` | Replace default `whereObject` / `@EasyWhereCondition` behavior (`com.easy.query.core.api.dynamic.executor.query`) | `dto-object-query.md` |
+| `ConfigureArgument` | Request-scoped argument carrier for `selectAutoInclude` extra configure | `select-auto-include.md` |
 | `anyColumn(...)` | Dynamic property path sort/filter helper | `dto-object-query.md` |
 
 ## Conversion and JDBC Symbols
@@ -88,6 +89,7 @@ Common operators:
 |--------|---------|-----------|
 | `ValueConverter` | Property <-> DB Java value conversion | `value-conversion-type-handler.md` |
 | `ValueAutoConverter` | Global auto-applied value converter | `value-conversion-type-handler.md` |
+| `ColumnValueSQLConverter` | SQL-side derived/computed property converter | `entity-computed-properties.md`, `value-conversion-type-handler.md` |
 | `JdbcTypeHandler` | JDBC parameter/result handler | `value-conversion-type-handler.md` |
 | `JdbcTypeHandlerManager.appendHandler(...)` | Replace or append handler by Java type | `value-conversion-type-handler.md` |
 | `JdbcTypeHandlerReplaceConfigurer` | Spring Boot auto-registration contract for JDBC handlers | `value-conversion-type-handler.md` |
@@ -271,6 +273,15 @@ query code.
 | `JdbcTypeHandlerReplaceConfigurer` | Declares global JDBC handler type binding/replacement under starter | `spring-boot-starter.md`, `value-conversion-type-handler.md` |
 | `SpringBootStarterBuilder.buildClient(...)` | Default starter client-construction path | `spring-boot-starter.md` |
 | `EasyQueryTrackProperties` | `easy-query-track.*` property holder | `spring-boot-starter.md` |
+| `LogicDeleteStrategy` | Starter-collected logic-delete strategy bean | `spring-boot-starter.md`, `logic-delete.md` |
+| `VersionStrategy` | Starter-collected optimistic-lock strategy bean | `spring-boot-starter.md` |
+| `ShardingInitializer` | Starter/manual sharding bootstrap component | `spring-boot-starter.md`, `advanced.md` |
+| `EncryptionStrategy` | Starter-collected field encryption strategy | `spring-boot-starter.md` |
+| `TableRoute<?>` | Starter-collected table route component | `spring-boot-starter.md`, `advanced.md` |
+| `DataSourceRoute<?>` | Starter-collected datasource route component | `spring-boot-starter.md`, `advanced.md` |
+| `NavigateExtraFilterStrategy` | Starter-collected relation extra filter strategy | `spring-boot-starter.md` |
+| `NavigateValueSetter` | Starter-collected relation value setter | `spring-boot-starter.md` |
+| `EntityRelationPropertyProvider` | Starter-collected implicit relation metadata provider | `spring-boot-starter.md` |
 
 Starter property switches commonly worth naming precisely:
 
@@ -278,5 +289,12 @@ Starter property switches commonly worth naming precisely:
 - `easy-query.build`
 - `easy-query.database`
 - `easy-query-track.enable`
+
+## Behavior Symbols
+
+| Symbol | Purpose | Read Next |
+|--------|---------|-----------|
+| `EasyBehaviorEnum.ALL_SUB_QUERY_GROUP_JOIN` | Broader behavior flag to rewrite eligible to-many subqueries as group join | `implicit-query.md` |
+| `EasyBehaviorEnum.GROUP_JOIN_NOT_ALLOW_AUTO_MERGE` | Disable eligible group-join auto merge behavior | `implicit-query.md` |
 
 

@@ -85,6 +85,7 @@ import com.easy.query.core.basic.extension.logicdel.LogicDeleteStrategyEnum;
 |--------|--------|
 | `WhereConditionProvider` | `import com.easy.query.core.api.dynamic.executor.query.WhereConditionProvider;` |
 | `WhereObjectQueryExecutor` | `import com.easy.query.core.api.dynamic.executor.query.WhereObjectQueryExecutor;` |
+| `ConfigureArgument` | `import com.easy.query.core.api.dynamic.executor.query.ConfigureArgument;` |
 | `ObjectSortBuilder` | `import com.easy.query.core.api.dynamic.sort.ObjectSortBuilder;` |
 | `OrderByModeEnum` | `import com.easy.query.core.func.def.enums.OrderByModeEnum;` |
 | `NotNullOrEmptyValueFilter` | `import com.easy.query.core.expression.builder.core.NotNullOrEmptyValueFilter;` |
@@ -95,6 +96,7 @@ import com.easy.query.core.basic.extension.logicdel.LogicDeleteStrategyEnum;
 |--------|--------|
 | `Select` | `import com.easy.query.core.proxy.sql.Select;` |
 | `GroupKeys` | `import com.easy.query.core.proxy.sql.GroupKeys;` |
+| `EasyBehaviorEnum` | `import com.easy.query.core.enums.EasyBehaviorEnum;` |
 
 ### Key Generation
 
@@ -110,6 +112,7 @@ import com.easy.query.core.basic.extension.generated.SaveEntitySetPrimaryKeyGene
 ```java
 import com.easy.query.core.basic.extension.conversion.ValueConverter;
 import com.easy.query.core.basic.extension.conversion.ValueAutoConverter;
+import com.easy.query.core.basic.extension.conversion.ColumnValueSQLConverter;
 import com.easy.query.core.basic.jdbc.types.handler.JdbcTypeHandler;
 import com.easy.query.core.basic.extension.interceptor.Interceptor;
 import com.easy.query.core.basic.extension.interceptor.EntityInterceptor;
@@ -117,12 +120,27 @@ import com.easy.query.core.basic.extension.interceptor.PredicateFilterIntercepto
 import com.easy.query.core.basic.extension.interceptor.UpdateSetInterceptor;
 import com.easy.query.core.basic.extension.interceptor.UpdateEntityColumnInterceptor;
 import com.easy.query.core.basic.extension.interceptor.ProtectedInterceptor;
+import com.easy.query.core.basic.extension.logicdel.LogicDeleteStrategy;
+import com.easy.query.core.basic.extension.version.VersionStrategy;
+import com.easy.query.core.basic.extension.encryption.EncryptionStrategy;
+import com.easy.query.core.basic.extension.navigate.NavigateExtraFilterStrategy;
+import com.easy.query.core.basic.extension.navigate.NavigateValueSetter;
+import com.easy.query.core.expression.implicit.EntityRelationPropertyProvider;
+```
+
+### Sharding / Routing
+
+```java
+import com.easy.query.core.sharding.initializer.ShardingInitializer;
+import com.easy.query.core.sharding.route.table.TableRoute;
+import com.easy.query.core.sharding.route.datasource.DataSourceRoute;
 ```
 
 ### Spring Boot / Search Extension
 
 ```java
 import com.easy.query.sql.starter.config.EasyQueryProperties;
+import com.easy.query.sql.starter.config.EasyQueryTrackProperties;
 import com.easy.query.sql.starter.config.EasyQueryInitializeOption;
 import com.easy.query.sql.starter.config.JdbcTypeHandlerReplaceConfigurer;
 import com.easy.query.core.bootstrapper.StarterConfigurer;

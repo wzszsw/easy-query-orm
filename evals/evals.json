@@ -84,10 +84,11 @@
       },
       {
         "id": "symbol-imports",
-        "purpose": "Resolve missing easy-query imports and FQCNs from the maintained skill-local import map instead of guessing packages from snippets.",
+        "purpose": "Resolve missing easy-query imports and FQCNs from the maintained skill-local import map instead of guessing packages from snippets, including higher-level starter and extension SPI types.",
         "eval_ids": [
           46,
-          47
+          47,
+          50
         ]
       },
       {
@@ -189,6 +190,7 @@
         21,
         23,
         47,
+        50,
         25,
         27,
         29,
@@ -582,6 +584,13 @@
       "name": "primary-key-generation-choice-and-registration",
       "prompt": "请系统说明 easy-query 的主键生成怎么选。我有三种场景：1）数据库自增/identity；2）数据库函数 `nextId()` 之类生成；3）Java 里自己发 UUID/雪花 id。要求结合源码说清楚 `generatedKey`、`generatedSQLColumnGenerator`、`primaryKeyGenerator` 各自怎么写、怎么注册，Spring Boot 下哪些 `@Component` 就够了，`executeRows(true)` 什么时候才需要，以及 `PrimaryKeyGenerator` 和插入拦截器谁先执行。最后顺手说明 `saveEntitySetPrimaryKey(...)` 为什么不是普通 insert 的默认答案。",
       "expected_output": "Must distinguish the three source-backed paths instead of collapsing them: database-generated key via `@Column(primaryKey = true, generatedKey = true)`, database SQL/function key via `generatedKey = true + generatedSQLColumnGenerator = ...`, and Java-side generation via `@Column(primaryKey = true, primaryKeyGenerator = ...)`. It must show or describe manual registration with `QueryConfiguration.applyPrimaryKeyGenerator(...)` / `applyGeneratedKeySQLColumnGenerator(...)`, and explain that current Spring Boot starter auto-collects `PrimaryKeyGenerator` and `GeneratedKeySQLColumnGenerator` beans by type. It must explicitly state that `executeRows(true)` is for database-generated key backfill rather than a requirement for Java-side `PrimaryKeyGenerator`, and that current source calls `PrimaryKeyGenerator.setPrimaryKey(...)` before entity insert interceptors. It must also explain that `saveEntitySetPrimaryKey(...)` is the tracking/savable safety path for request-built entities, not the generic default for ordinary inserts.",
+      "files": []
+    },
+    {
+      "id": 50,
+      "name": "missing-imports-advanced-extension-symbols",
+      "prompt": "easy-query 里又碰到一批示例没写 import。请直接给出这些类型的 Java import：`ColumnValueSQLConverter`、`LogicDeleteStrategy`、`VersionStrategy`、`ShardingInitializer`、`EncryptionStrategy`、`TableRoute`、`DataSourceRoute`、`NavigateExtraFilterStrategy`、`NavigateValueSetter`、`EntityRelationPropertyProvider`、`EasyQueryTrackProperties`、`ConfigureArgument`、`EasyBehaviorEnum`。",
+      "expected_output": "Must return the exact current-source imports: `com.easy.query.core.basic.extension.conversion.ColumnValueSQLConverter`, `com.easy.query.core.basic.extension.logicdel.LogicDeleteStrategy`, `com.easy.query.core.basic.extension.version.VersionStrategy`, `com.easy.query.core.sharding.initializer.ShardingInitializer`, `com.easy.query.core.basic.extension.encryption.EncryptionStrategy`, `com.easy.query.core.sharding.route.table.TableRoute`, `com.easy.query.core.sharding.route.datasource.DataSourceRoute`, `com.easy.query.core.basic.extension.navigate.NavigateExtraFilterStrategy`, `com.easy.query.core.basic.extension.navigate.NavigateValueSetter`, `com.easy.query.core.expression.implicit.EntityRelationPropertyProvider`, `com.easy.query.sql.starter.config.EasyQueryTrackProperties`, `com.easy.query.core.api.dynamic.executor.query.ConfigureArgument`, and `com.easy.query.core.enums.EasyBehaviorEnum`.",
       "files": []
     }
   ]
