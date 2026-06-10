@@ -59,6 +59,7 @@
         "id": "entity-modeling",
         "purpose": "Entity annotations, advanced table/column controls, primary-key generation choices, computed properties, and current-source modeling caveats such as deprecated value-object support.",
         "eval_ids": [
+          51,
           49,
           48,
           42,
@@ -160,6 +161,7 @@
         10,
         11,
         18,
+        51,
         49,
         48,
         42,
@@ -591,6 +593,13 @@
       "name": "missing-imports-advanced-extension-symbols",
       "prompt": "easy-query 里又碰到一批示例没写 import。请直接给出这些类型的 Java import：`ColumnValueSQLConverter`、`LogicDeleteStrategy`、`VersionStrategy`、`ShardingInitializer`、`EncryptionStrategy`、`TableRoute`、`DataSourceRoute`、`NavigateExtraFilterStrategy`、`NavigateValueSetter`、`EntityRelationPropertyProvider`、`EasyQueryTrackProperties`、`ConfigureArgument`、`EasyBehaviorEnum`。",
       "expected_output": "Must return the exact current-source imports: `com.easy.query.core.basic.extension.conversion.ColumnValueSQLConverter`, `com.easy.query.core.basic.extension.logicdel.LogicDeleteStrategy`, `com.easy.query.core.basic.extension.version.VersionStrategy`, `com.easy.query.core.sharding.initializer.ShardingInitializer`, `com.easy.query.core.basic.extension.encryption.EncryptionStrategy`, `com.easy.query.core.sharding.route.table.TableRoute`, `com.easy.query.core.sharding.route.datasource.DataSourceRoute`, `com.easy.query.core.basic.extension.navigate.NavigateExtraFilterStrategy`, `com.easy.query.core.basic.extension.navigate.NavigateValueSetter`, `com.easy.query.core.expression.implicit.EntityRelationPropertyProvider`, `com.easy.query.sql.starter.config.EasyQueryTrackProperties`, `com.easy.query.core.api.dynamic.executor.query.ConfigureArgument`, and `com.easy.query.core.enums.EasyBehaviorEnum`.",
+      "files": []
+    },
+    {
+      "id": 51,
+      "name": "computed-property-book-count-modeling",
+      "prompt": "假设书店 `BookStore` 和书本 `Book` 是一对多关系。现在业务里经常要按书店返回书本数量、按书本数量筛选、排序，而且这个含义比较稳定，不想每次都在 VO 里临时拼。请结合 easy-query 源码说明：这种场景什么时候该沉淀成实体计算属性，什么时候只做一次性投影；如果沉淀到实体，`BookStore` 上的 `bookCount` 应该怎么建模，`ColumnValueSQLConverter` 里的 `selectColumnConvert/propertyColumnConvert/valueConvert/isRealColumn` 分别怎么理解；`autoSelect=false`、注册方式、以及为什么当前源码不能再把 `isMergeSubQuery()` 当成现行接口方法，也要讲清楚。",
+      "expected_output": "Must explain the modeling boundary: repeated stable business semantics such as `bookCount` should prefer entity-side computed-property modeling, while one-off report/list metrics can stay as query-time relation aggregate projection. It must show or clearly describe a `BookStore` entity with self fields plus `@Navigate(... List<Book> books)` and `@Column(sqlConversion = BookCountColumnValueSQLConverter.class, autoSelect = false)` paired with `@InsertIgnore` and `@UpdateIgnore`. It must explain `selectColumnConvert(...)` as select-side SQL, `propertyColumnConvert(...)` as left-hand expression rewrite for where/orderBy/groupBy, `valueConvert(...)` as right-hand compare/store value handling, and `isRealColumn()` as false for non-physical columns like `bookCount`. It must mention manual registration through `QueryConfiguration.applyColumnValueSQLConverter(...)` and starter auto-collection of `ColumnValueSQLConverter` beans. It must also explicitly correct older docs by stating that the current inspected `ColumnValueSQLConverter` source does not expose `isMergeSubQuery()` as a current interface method.",
       "files": []
     }
   ]
