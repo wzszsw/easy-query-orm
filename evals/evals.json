@@ -81,6 +81,14 @@
         ]
       },
       {
+        "id": "symbol-imports",
+        "purpose": "Resolve missing easy-query imports and FQCNs from source-backed symbol lookup instead of guessing packages from snippets.",
+        "eval_ids": [
+          46,
+          47
+        ]
+      },
+      {
         "id": "conversion-and-type-handler",
         "purpose": "ValueConverter, ValueAutoConverter, @Enumerated, and JdbcTypeHandler boundaries plus jsonb-style combined handling.",
         "eval_ids": [
@@ -153,6 +161,7 @@
         19,
         20,
         22,
+        46,
         24,
         26,
         28,
@@ -175,6 +184,7 @@
         17,
         21,
         23,
+        47,
         25,
         27,
         29,
@@ -205,6 +215,7 @@
       19,
       20,
       22,
+      46,
       24,
       26,
       28,
@@ -539,6 +550,20 @@
       "name": "selectautoinclude-root-vs-nested-extra-configure",
       "prompt": "请你解释 easy-query 里的 `EXTRA_AUTO_INCLUDE_CONFIGURE` 能挂在什么地方，以及 root DTO 和 nested DTO 上的区别。再顺手说明 `ignoreNavigateConfigure()` 是干什么的，什么时候需要它。要求回答要结合 `selectAutoInclude` 的真实执行模型，不要把它说成单次 JOIN 返回。",
       "expected_output": "Must explain that current source applies `EXTRA_AUTO_INCLUDE_CONFIGURE` both on the root result DTO class and on nested DTO classes, with root config shaping the root query and nested config shaping the child include query. It should also explain that `selectAutoInclude` is include-style secondary-query + IN loading rather than one joined query, and that `ignoreNavigateConfigure()` is used when DTO-local include shaping should ignore inherited `@Navigate` options such as order/limit/offset for that node.",
+      "files": []
+    },
+    {
+      "id": 46,
+      "name": "missing-imports-core-symbols",
+      "prompt": "easy-query 的一些示例没写 import。我现在只知道这些类型名：`EasyWhereCondition`、`WhereConditionProvider`、`ObjectSortBuilder`、`EasyEntityQuery`、`ProxyEntityAvailable`。请直接告诉我每个类型对应的 Java import，并顺手说明 `EasyWhereCondition.Condition` 这种嵌套枚举应该 import 谁。",
+      "expected_output": "Must return the exact current-source imports: `com.easy.query.core.annotation.EasyWhereCondition`, `com.easy.query.core.api.dynamic.executor.query.WhereConditionProvider`, `com.easy.query.core.api.dynamic.sort.ObjectSortBuilder`, `com.easy.query.api.proxy.client.EasyEntityQuery`, and `com.easy.query.core.proxy.ProxyEntityAvailable`. It must also explicitly say that nested members such as `EasyWhereCondition.Condition` are covered by importing the owner type `EasyWhereCondition`, not a separate `Condition` type.",
+      "files": []
+    },
+    {
+      "id": 47,
+      "name": "missing-imports-starter-and-spi",
+      "prompt": "我在写 easy-query 的 starter / 扩展代码，示例里又没 import。请直接给出这些类型的包名或 Java import：`StarterConfigurer`、`JdbcTypeHandlerReplaceConfigurer`、`ValueConverter`、`JdbcTypeHandler`、`PredicateFilterInterceptor`、`EasyQueryProperties`、`EasySearch`、`EasyCond`。",
+      "expected_output": "Must return the exact current-source imports: `com.easy.query.core.bootstrapper.StarterConfigurer`, `com.easy.query.sql.starter.config.JdbcTypeHandlerReplaceConfigurer`, `com.easy.query.core.basic.extension.conversion.ValueConverter`, `com.easy.query.core.basic.jdbc.types.handler.JdbcTypeHandler`, `com.easy.query.core.basic.extension.interceptor.PredicateFilterInterceptor`, `com.easy.query.sql.starter.config.EasyQueryProperties`, `com.easy.query.search.EasySearch`, and `com.easy.query.search.annotation.EasyCond`.",
       "files": []
     }
   ]

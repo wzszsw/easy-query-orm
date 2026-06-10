@@ -39,6 +39,7 @@ SKILL.md
 agents/openai.yaml
 references/
 scripts/search_references.py
+scripts/search_symbols.py
 evals/
 ```
 

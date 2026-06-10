@@ -39,25 +39,29 @@ most one secondary reference when a boundary rule below says it is needed.
    Do not stop at `package xxx.proxy does not exist`.
 6. Never invent easy-query API names. Search `references/api-map.md` or
    `scripts/search_references.py` first.
-7. For AP/reporting work, keep dimensions, grouped aggregates, partition
+7. If code, docs, or a user snippet mention easy-query type names without
+   imports, resolve the package from source first with
+   `references/symbol-imports.md` or `scripts/search_symbols.py`. Do not guess
+   the package from memory.
+8. For AP/reporting work, keep dimensions, grouped aggregates, partition
    ranks, and union branches in SQL DSL. Prefer explicit `groupBy` / `having`
    first; switch to `subQueryToGroupJoin` when repeated to-many relation
    metrics would otherwise emit many correlated subqueries.
-8. easy-query leans heavily on relation metadata. If the requirement can be
+9. easy-query leans heavily on relation metadata. If the requirement can be
    derived from an existing relation path, prefer the relation-driven form
    first: implicit navigation, `flatElement`, relation aggregate/predicate.
    For tree answers, express the real root rule first, then apply recursive
    filtering or ancestor backfill only where needed. Fall back to explicit
    join, junction-table query, or post-query assembly only when the needed
    `@Navigate` path is missing or clearly insufficient.
-9. Prefer gated DSL for optional filters. Use `whereObject(...)` only for
+10. Prefer gated DSL for optional filters. Use `whereObject(...)` only for
    search-form DTOs.
-10. Keep paging stable with explicit `orderBy(...)` and a tie-breaker.
-11. Treat row count `0` as meaningful.
-12. Distinguish entity relation metadata from DTO/VO auto-include metadata.
-13. Distinguish transient business fields, ignored ORM fields, and true
+11. Keep paging stable with explicit `orderBy(...)` and a tie-breaker.
+12. Treat row count `0` as meaningful.
+13. Distinguish entity relation metadata from DTO/VO auto-include metadata.
+14. Distinguish transient business fields, ignored ORM fields, and true
     SQL-derived computed properties; do not collapse them into one pattern.
-14. If the project version differs from the reference version, prefer the
+15. If the project version differs from the reference version, prefer the
     project and say which API or behavior may have moved.
 
 ## Triage
@@ -67,9 +71,11 @@ most one secondary reference when a boundary rule below says it is needed.
    review.
 2. Open one primary reference from `Routing by Area`.
 3. Add one secondary reference only when a `Pair with ...` clause applies.
-4. Use `references/api-map.md` only when the exact symbol or package name is
-   unclear.
-5. Use `references/troubleshooting.md` only after a primary feature reference
+4. Use `references/symbol-imports.md` first when the missing piece is the
+   package/import/FQCN for a type name.
+5. Use `references/api-map.md` when the exact symbol exists but the right
+   semantic reference or verified API surface is still unclear.
+6. Use `references/troubleshooting.md` only after a primary feature reference
    is already known, or when code compiles but behaves differently from the
    expected feature semantics.
 
@@ -245,7 +251,9 @@ most one secondary reference when a boundary rule below says it is needed.
 
 ### Support
 
-- Exact symbol/package lookup or "does this API name exist":
+- Missing import / package / FQCN for an easy-query type:
+  `references/symbol-imports.md`.
+- Exact symbol surface or "does this API name exist":
   `references/api-map.md`.
 - Unit test shapes for repositories/services or SQL-shape assertions:
   `references/testing.md`.
@@ -340,6 +348,8 @@ most one secondary reference when a boundary rule below says it is needed.
   build path injects a single `DataSource`; recommend `@Primary` only when one
   default client is acceptable, otherwise use custom beans or
   `easy-query.build=false`.
+- When non-obvious easy-query types appear in code or explanation, include an
+  import line or FQCN on first mention if the original snippet omitted it.
 ## Evidence Policy
 
 Order of truth:
@@ -358,4 +368,8 @@ and the next concrete check or fix. For AP/reporting, state the
 `dimension -> metric -> filter -> rank/union/cte` shape before dropping into
 code when that framing prevents wrong SQL structure. Cite a reference only for
 non-obvious API, SQL-shape, or version caveat.
+
+If compile-ready code uses non-obvious easy-query annotations, enums, starter
+SPI, or extension types, include the needed imports instead of assuming the
+reader can recover them from context.
 

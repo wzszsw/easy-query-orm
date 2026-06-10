@@ -1,6 +1,8 @@
 # API Map
 
-Use this file only to confirm symbol names and choose the next reference.
+Use this file to confirm symbol names and choose the next semantic reference.
+If the missing piece is the Java/Kotlin package or import for a type name,
+start with `symbol-imports.md` instead.
 
 ## Entry Points
 

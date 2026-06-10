@@ -26,5 +26,9 @@ if($c -match 'description:\s*>-\s*(?<d>(?s).*?)\n---'){
 
 6. If `SKILL.md` routing or positioning changes materially, check whether
    `agents/openai.yaml` still matches the public skill framing.
-7. Do not add extra maintenance docs beyond this file unless there is a clear
+7. Keep symbol/package lookup source-backed. For long-tail type names, prefer
+   improving `scripts/search_symbols.py` and routing to
+   `references/symbol-imports.md` instead of bloating `SKILL.md` or scattering
+   guessed packages across topic references.
+8. Do not add extra maintenance docs beyond this file unless there is a clear
    repository-level instruction need.
