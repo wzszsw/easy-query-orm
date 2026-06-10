@@ -3,6 +3,16 @@
 How an easy-query entity is declared and how its proxy works. This is the foundation every other reference
 builds on.
 
+Boundary:
+
+- this file is the basic entity/proxy/mapping entry
+- advanced table/column controls, alias/index/proxy variants:
+  `entity-modeling-advanced.md`
+- computed/derived properties:
+  `entity-computed-properties.md`
+- relation metadata:
+  `relation-query.md` and `entity-modeling-navigate.md`
+
 ## The proxy model in one paragraph
 
 Each entity is paired with a generated `*Proxy` class. You annotate the entity with `@EntityProxy` and make
@@ -18,6 +28,7 @@ inside `where(o -> o.title().eq(x))` — `o` is the proxy. You never hand-write 
 | `@Table("t_name")` | `com.easy.query.core.annotation` | Maps the class to a table. |
 | `@EntityProxy` | `com.easy.query.core.annotation` | Triggers proxy generation. |
 | `@Column(...)` | `com.easy.query.core.annotation` | Per-column options (see below). |
+| `@EasyAlias("x")` | `com.easy.query.core.annotation` | Plugin/source-level lambda alias helper, not the core runtime mapping switch. |
 | `@Version(strategy = ...)` | `com.easy.query.core.annotation` | Optimistic-lock column. |
 | `@LogicDelete(strategy = ...)` | `com.easy.query.core.annotation` | Soft-delete column. |
 | `@Navigate(...)` | `com.easy.query.core.annotation` | Relation to another entity (see `relation-query.md`). |
@@ -42,6 +53,19 @@ examples with string literals such as `"id"` or `"companyId"`.
 - `value = "col_name"` — explicit column name (otherwise name-conversion applies, default snake_case).
 - `exist = false` — field is **not** a DB column (computed/transient).
 - `autoSelect` — whether the column is included in `SELECT *` by default.
+
+For the advanced split between:
+
+- `exist = false`
+- `@ColumnIgnore`
+- `@InsertIgnore`
+- `@UpdateIgnore`
+- `sqlExpression`
+- `sqlConversion`
+- `primaryKeyGenerator`
+- `generatedSQLColumnGenerator`
+
+read `entity-modeling-advanced.md` and `entity-computed-properties.md`.
 
 ## A complete annotated entity (Java)
 

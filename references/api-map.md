@@ -23,10 +23,18 @@ Common top-level methods:
 |--------|---------|-----------|
 | `@Table` | Table mapping | `entity-mapping.md` |
 | `@EntityProxy` | Generate `*Proxy` | `entity-mapping.md` |
+| `@EntityFileProxy` | Generate proxy files into source/plugin-managed path | `entity-modeling-advanced.md` |
+| `@EasyAlias` | Plugin/source-level lambda alias helper | `entity-modeling-advanced.md` |
 | `@Column` | Column mapping options | `entity-mapping.md` |
+| `@Column(sqlConversion=...)` | Advanced computed/derived SQL property | `entity-computed-properties.md` |
+| `@Column(sqlExpression=...)` | Simple inline SQL computed property | `entity-computed-properties.md` |
 | `@Column(conversion=...)` | Field-level `ValueConverter` mapping | `value-conversion-type-handler.md` |
 | `@Column(typeHandler=...)` | Field-level JDBC type handler override | `value-conversion-type-handler.md` |
 | `@Enumerated` | Built-in enum-name auto conversion trigger | `value-conversion-type-handler.md` |
+| `@ColumnIgnore` / `@InsertIgnore` / `@UpdateIgnore` | Advanced persistence-scope controls for fields | `entity-modeling-advanced.md` |
+| `@TableIndex` / `@TableIndexes` | Code-first table index metadata | `entity-modeling-advanced.md` |
+| `@ValueObject` | Deprecated current-source value-object field modeling | `entity-computed-properties.md`, `entity-modeling-advanced.md` |
+| `@ProxyProperty` | Rename or adjust generated proxy property behavior | `entity-modeling-advanced.md` |
 | `@Version` | Optimistic lock | `write-update.md`, `write-delete.md` |
 | `@LogicDelete` | Logic-delete column and strategy binding | `logic-delete.md` |
 | `@Navigate` | Relation metadata | `relation-query.md`, `entity-modeling-navigate.md` |

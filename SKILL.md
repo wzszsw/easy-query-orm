@@ -1,14 +1,15 @@
 ---
 name: easy-query-orm
 description: >-
-  Use when Java/Kotlin code uses easy-query (`EasyEntityQuery`,
-  `EasyQueryClient`, proxy DSL) or when migrating JPA/MyBatis to easy-query.
-  Covers setup and missing `*Proxy` troubleshooting, Spring Boot
-  starter/config, CRUD and mutation APIs (`insertable/updatable/deletable`,
-  `onConflictThen`, `mapInsertable/mapUpdatable`, `setSQLStrategy`,
-  version/logic delete), diff update tracking, search-form DTO query (`whereObject`,
-  `orderByObject`, `EasySearch`), relation metadata/loading (`@Navigate`,
-  `include`, `selectAutoInclude`), implicit and explicit
+  Use when Java/Kotlin code uses easy-query (often abbreviated as `eq`;
+  `EasyEntityQuery`, `EasyQueryClient`, proxy DSL) or when migrating
+  JPA/MyBatis to easy-query. Covers setup and missing `*Proxy`
+  troubleshooting, Spring Boot starter/config, CRUD and mutation APIs
+  (`insertable/updatable/deletable`, `onConflictThen`,
+  `mapInsertable/mapUpdatable`, `setSQLStrategy`, version/logic delete), diff
+  update tracking, search-form DTO query (`whereObject`, `orderByObject`,
+  `EasySearch`), relation metadata/loading (`@Navigate`, `include`,
+  `selectAutoInclude`), implicit and explicit
   subquery/group-join/CTE/window/UNION analytics, `savable`, sharding,
   code-first DDL, and verified API lookup/troubleshooting. Do not use for
   unrelated ORMs.
@@ -25,33 +26,38 @@ most one secondary reference when a boundary rule below says it is needed.
 
 1. Default to `EasyEntityQuery` and proxy DSL unless the project clearly uses
    weak-typed `EasyQueryClient`.
-2. Missing `*Proxy` usually means setup or compile-chain trouble first. Java
+2. Treat `eq` in user requests, docs, or code comments as a common shorthand
+   for `easy-query` unless surrounding project context clearly proves
+   otherwise.
+3. Missing `*Proxy` usually means setup or compile-chain trouble first. Java
    uses APT; Kotlin uses KSP, not KAPT.
-3. `@EntityProxy` is the generation trigger. `ProxyEntityAvailable` helps with
+4. `@EntityProxy` is the generation trigger. `ProxyEntityAvailable` helps with
    typed proxy usage but is not the switch that makes APT/KSP generate the
    class.
-4. For proxy-generation failures, diagnose by layer: generation mode,
+5. For proxy-generation failures, diagnose by layer: generation mode,
    processor wiring, generated output path, then the first real compile error.
    Do not stop at `package xxx.proxy does not exist`.
-5. Never invent easy-query API names. Search `references/api-map.md` or
+6. Never invent easy-query API names. Search `references/api-map.md` or
    `scripts/search_references.py` first.
-6. For AP/reporting work, keep dimensions, grouped aggregates, partition
+7. For AP/reporting work, keep dimensions, grouped aggregates, partition
    ranks, and union branches in SQL DSL. Prefer explicit `groupBy` / `having`
    first; switch to `subQueryToGroupJoin` when repeated to-many relation
    metrics would otherwise emit many correlated subqueries.
-7. easy-query leans heavily on relation metadata. If the requirement can be
+8. easy-query leans heavily on relation metadata. If the requirement can be
    derived from an existing relation path, prefer the relation-driven form
    first: implicit navigation, `flatElement`, relation aggregate/predicate.
    For tree answers, express the real root rule first, then apply recursive
    filtering or ancestor backfill only where needed. Fall back to explicit
    join, junction-table query, or post-query assembly only when the needed
    `@Navigate` path is missing or clearly insufficient.
-8. Prefer gated DSL for optional filters. Use `whereObject(...)` only for
+9. Prefer gated DSL for optional filters. Use `whereObject(...)` only for
    search-form DTOs.
-9. Keep paging stable with explicit `orderBy(...)` and a tie-breaker.
-10. Treat row count `0` as meaningful.
-11. Distinguish entity relation metadata from DTO/VO auto-include metadata.
-12. If the project version differs from the reference version, prefer the
+10. Keep paging stable with explicit `orderBy(...)` and a tie-breaker.
+11. Treat row count `0` as meaningful.
+12. Distinguish entity relation metadata from DTO/VO auto-include metadata.
+13. Distinguish transient business fields, ignored ORM fields, and true
+    SQL-derived computed properties; do not collapse them into one pattern.
+14. If the project version differs from the reference version, prefer the
     project and say which API or behavior may have moved.
 
 ## Triage
@@ -86,6 +92,9 @@ most one secondary reference when a boundary rule below says it is needed.
   `relation-query.md` is for `@Navigate` direction/cardinality;
   `entity-modeling-navigate.md` is for advanced navigate metadata,
   DTO-side navigation, and `@NavigateFlat`;
+  `entity-modeling-advanced.md` is for advanced table/column/alias/index/
+  proxy-variant modeling;
+  `entity-computed-properties.md` is for derived/computed properties;
   `include-structured-loading.md` is for entity relation loading;
   `select-auto-include.md` is for DTO/VO structured return.
 - Implicit relation stack:
@@ -145,6 +154,14 @@ most one secondary reference when a boundary rule below says it is needed.
 
 - Entity annotations, `@EntityProxy`, `@Column`, `@Version`, `@LogicDelete`:
   `references/entity-mapping.md`.
+- Advanced table/column modeling such as `@EasyAlias`, `@TableIndex`,
+  `@ColumnIgnore`, `@InsertIgnore`, `@UpdateIgnore`, `primaryKeyGenerator`,
+  `generatedSQLColumnGenerator`, `schema`, `oldName`, or `@EntityFileProxy`:
+  `references/entity-modeling-advanced.md`.
+- Computed/derived properties such as `sqlExpression`, `sqlConversion`,
+  cross-table computed fields, `autoSelect=false`, or current `@ValueObject`
+  usage:
+  `references/entity-computed-properties.md`.
 - Fix `@Navigate` cardinality/direction or a missing relation path:
   `references/relation-query.md`.
 - Advanced relation metadata, DTO-side navigation, `@NavigateFlat`,
@@ -241,6 +258,8 @@ most one secondary reference when a boundary rule below says it is needed.
 - Reject non-easy-query syntax unless the task is explicit migration.
 - Prefer relation-driven answers before explicit join or link-table queries when
   an existing `@Navigate` path can express the requirement.
+- Do not casually introduce `@ValueObject` for new modeling without noting that
+  current source marks it deprecated.
 - For tree answers, express the real root predicate first instead of teaching a
   default `query ids first -> .in(...) -> build tree` template.
 - Prefer `singleOrNull()` for unique business keys.
