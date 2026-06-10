@@ -30,7 +30,9 @@
         "eval_ids": [
           7,
           8,
-          17
+          17,
+          44,
+          45
         ]
       },
       {
@@ -194,9 +196,10 @@
     "benchmark_focus_eval_ids": [
       1,
       7,
-      8,
-      10,
-      12,
+        8,
+        10,
+        44,
+        12,
       17,
       42,
       19,
@@ -522,6 +525,20 @@
       "name": "advanced-entity-annotation-boundaries",
       "prompt": "请你解释 easy-query 里几个容易混淆的建模点，并给出建议用法：`@ColumnIgnore` vs `@Column(exist=false)`，`generatedKey` vs `primaryKeyGenerator`，`@EasyAlias` 的真实定位，`@EntityProxy` vs `@EntityFileProxy`，以及当前源码里 `@ValueObject` 的状态。回答要以源码现状为准，不要只讲老文档。",
       "expected_output": "Must distinguish `@ColumnIgnore` from `@Column(exist=false)` rather than treating them as identical; explain `generatedKey` as DB-generated/backfilled key behavior and `primaryKeyGenerator` as Java-side key generation when `generatedKey=false`; describe `@EasyAlias` as source/plugin-facing alias help rather than primary runtime mapping; prefer `@EntityProxy` for normal projects and treat `@EntityFileProxy` as a plugin/source-generation variant; and explicitly state that current source marks `@ValueObject` as deprecated, so it should not be casually introduced as a new default modeling pattern.",
+      "files": []
+    },
+    {
+      "id": 44,
+      "name": "selectautoinclude-child-prune-vs-root-filter",
+      "prompt": "有一个 `selectAutoInclude(SysMenuFlatResp.class)` 的树查询，根表 `SysMenu` 有 `sysMenuActionList` 子集合，子项再导航到 `sysAction`。我想过滤掉 `sysAction.name` 为 null 的 action 子项，但不能因为某个 action 不符合就把整个 menu 主记录过滤掉，其他 action 还要保留，也不要回到内存里用 Java 过滤。请给 easy-query 思路，并说明为什么不应该把这个需求只写成根查询里的 `.where(menu -> menu.sysMenuActionList().any(...))`。",
+      "expected_output": "Must explicitly distinguish root-row filtering from child-list pruning in `selectAutoInclude`. It should explain that a root `.where(...any(...))` condition only controls whether the root row survives and does not prune non-matching child items from the returned child collection. It should recommend nested `EXTRA_AUTO_INCLUDE_CONFIGURE.where(...)` on the DTO class corresponding to the child relation as the preferred solution for pruning included child rows while preserving the root row, and may mention `ConfigureArgument` when request-driven child filters are needed.",
+      "files": []
+    },
+    {
+      "id": 45,
+      "name": "selectautoinclude-root-vs-nested-extra-configure",
+      "prompt": "请你解释 easy-query 里的 `EXTRA_AUTO_INCLUDE_CONFIGURE` 能挂在什么地方，以及 root DTO 和 nested DTO 上的区别。再顺手说明 `ignoreNavigateConfigure()` 是干什么的，什么时候需要它。要求回答要结合 `selectAutoInclude` 的真实执行模型，不要把它说成单次 JOIN 返回。",
+      "expected_output": "Must explain that current source applies `EXTRA_AUTO_INCLUDE_CONFIGURE` both on the root result DTO class and on nested DTO classes, with root config shaping the root query and nested config shaping the child include query. It should also explain that `selectAutoInclude` is include-style secondary-query + IN loading rather than one joined query, and that `ignoreNavigateConfigure()` is used when DTO-local include shaping should ignore inherited `@Navigate` options such as order/limit/offset for that node.",
       "files": []
     }
   ]

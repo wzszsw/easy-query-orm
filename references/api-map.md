@@ -67,6 +67,8 @@ Common operators:
 | `whereObject(request)` | Query/search-form DTO filters; use for many optional form fields, not as a general query default | `dto-object-query.md` |
 | `orderByObject(sort)` | Search-form DTO sort / request-driven sort | `dto-object-query.md` |
 | `selectAutoInclude(ResultDTO.class)` | DTO graph result | `select-auto-include.md` |
+| `TABLE.EXTRA_AUTO_INCLUDE_CONFIGURE()` | Root/nested `selectAutoInclude` include-query shaping hook | `select-auto-include.md` |
+| `.ignoreNavigateConfigure()` on extra auto include | Make DTO-local include shaping ignore inherited `@Navigate` order/limit settings | `select-auto-include.md` |
 | `@EasyWhereCondition` | Query-form filter metadata: `DEFAULT`, `MULTI_OR`, range/in/notIn, relation-path filters | `dto-object-query.md` |
 | `ObjectSortBuilder` | Sort allowlist / builder API (`com.easy.query.core.api.dynamic.sort`) | `dto-object-query.md` |
 | `WhereObjectQueryExecutor` | Replace default `whereObject` / `@EasyWhereCondition` behavior (`com.easy.query.core.api.dynamic.executor.query`) | `dto-object-query.md` |

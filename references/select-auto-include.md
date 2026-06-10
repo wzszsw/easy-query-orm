@@ -13,6 +13,15 @@ Do not use this as the main guide for:
 Read `include-structured-loading.md`, `dto-object-query.md`, or `query.md`
 instead for those cases.
 
+Core mindset:
+
+- use root `.where(...)` to decide which root rows survive
+- use nested `EXTRA_AUTO_INCLUDE_CONFIGURE` to shape or prune child relation
+  rows inside the returned graph
+
+If the requirement is "keep the main record, but filter items out of a child
+list", prefer `EXTRA_AUTO_INCLUDE_CONFIGURE` over root relation predicates.
+
 ## Basic Pattern
 
 ```java
@@ -29,6 +38,14 @@ Execution shape:
 - Nested data is fetched by separate include-style relation queries.
 - Deep graphs normally mean multiple SQL statements.
 - Batching follows starter `relationGroupSize` default `512`.
+
+Source/docs implication:
+
+- `selectAutoInclude` is fundamentally a secondary-query + `IN` loading model
+- do not describe it as "one big join query that happens to return a DTO tree"
+
+That execution shape is the reason root filtering and child-list pruning are
+not the same thing.
 
 ## Extra Select Pattern
 
@@ -117,7 +134,12 @@ EntityExtraAutoIncludeConfigure<TProxy, TEntity>
     .ignoreNavigateConfigure();
 ```
 
-This hook is mainly for second-level-and-deeper DTO/VO relation tuning.
+This hook is the preferred way to attach query behavior to a DTO/VO graph
+shape. It can apply on:
+
+- the root DTO/VO class
+- nested DTO/VO classes
+
 `@NavigateFlat` properties cannot have extra filters, but `@NavigateFlat`
 objects can.
 
@@ -139,6 +161,187 @@ Additional source-backed behavior:
 
 Use this when nested DTO relation includes need custom filtering, custom sort,
 `subQueryToGroupJoin`, or extra selected values.
+
+### Root DTO vs nested DTO extra configure
+
+Current source applies `EXTRA_AUTO_INCLUDE_CONFIGURE` in two places:
+
+1. on the root result DTO class before recursive include building
+2. on each nested included DTO relation query through `EasyNavigateUtil`
+
+Practical meaning:
+
+- root DTO `EXTRA_AUTO_INCLUDE_CONFIGURE` can shape the root query itself
+- nested DTO `EXTRA_AUTO_INCLUDE_CONFIGURE` shapes the include query for that
+  child relation
+
+Root DTO example pattern:
+
+```java
+private static final ExtraAutoIncludeConfigure EXTRA_AUTO_INCLUDE_CONFIGURE =
+    SysUserProxy.TABLE.EXTRA_AUTO_INCLUDE_CONFIGURE()
+        .configure(query -> query.subQueryToGroupJoin(u -> u.bankCards()))
+        .select(u -> Select.of(
+            u.bankCards().count().as("cardCount")
+        ));
+```
+
+Nested DTO example pattern:
+
+```java
+private static final ExtraAutoIncludeConfigure EXTRA_AUTO_INCLUDE_CONFIGURE =
+    SysBankCardProxy.TABLE.EXTRA_AUTO_INCLUDE_CONFIGURE()
+        .where(card -> card.type().eq("储蓄卡"))
+        .select(card -> Select.of(
+            card.bank().createTime().format("yyyy-MM-dd").as("bankNameOr123")
+        ));
+```
+
+### Why this is the preferred answer for reusable child filtering
+
+If the child filtering/projection rule is part of the DTO contract itself,
+`EXTRA_AUTO_INCLUDE_CONFIGURE` is usually better than scattering ad hoc
+`include(...)` adapters around service methods because:
+
+- the DTO carries its own child shaping rule
+- repeated queries reuse the same semantics
+- the root row / child list boundary stays explicit
+
+Prefer explicit `include(...)` only when the query instance needs a one-off
+loading rule that should not become part of the DTO contract.
+
+### Root filter vs child-list prune
+
+This is the most important `selectAutoInclude` boundary to state precisely.
+
+Root filter:
+
+```java
+easyEntityQuery.queryable(SysMenu.class)
+    .where(menu -> {
+        menu.sysMenuActionList().any(action -> {
+            action.sysAction().name().contains(req.getActionName());
+        });
+    })
+    .selectAutoInclude(SysMenuFlatResp.class)
+    .toList();
+```
+
+Meaning:
+
+- keep only roots that have at least one matching child
+- it does **not** prune non-matching child rows from the returned child list
+
+If the real requirement is:
+
+- keep the root row
+- keep other child rows
+- only remove child rows that fail the child condition
+
+then the child query itself must be filtered. In `selectAutoInclude`, the
+recommended place is nested `EXTRA_AUTO_INCLUDE_CONFIGURE`.
+
+### Child-list pruning pattern
+
+For a nested DTO class corresponding to `sysMenuActionList`:
+
+```java
+@Data
+public static class InternalMenuActions {
+    private static final ExtraAutoIncludeConfigure EXTRA_AUTO_INCLUDE_CONFIGURE =
+        SysMenuActionProxy.TABLE.EXTRA_AUTO_INCLUDE_CONFIGURE()
+            .where(ma -> {
+                ma.sysAction().name().isNotNull();
+            });
+
+    private String id;
+    private String menuId;
+
+    @Navigate(value = RelationTypeEnum.ManyToOne)
+    private InternalAction sysAction;
+}
+```
+
+That filters the include query for the child list itself, so:
+
+- matching root menus stay
+- the `sysMenuActionList` collection is pruned
+- rows with `sysAction.name == null` do not appear in the child list
+
+This is usually the right answer when the user says:
+
+- "不要把整个主记录过滤掉"
+- "只是子集合里不要这个元素"
+- "这个过滤规则本来就是这个 DTO 子集合的组成语义"
+
+### Dynamic request-aware child filtering
+
+When child pruning depends on request values, pass arguments from the root
+query and consume them inside nested extra config:
+
+```java
+List<SysMenuFlatResp> rows = easyEntityQuery.queryable(SysMenu.class)
+    .configure(o -> o.setConfigureArgument(req))
+    .selectAutoInclude(SysMenuFlatResp.class)
+    .toList();
+```
+
+Nested DTO:
+
+```java
+private static final ExtraAutoIncludeConfigure EXTRA_AUTO_INCLUDE_CONFIGURE =
+    SysMenuActionProxy.TABLE.EXTRA_AUTO_INCLUDE_CONFIGURE()
+        .where(ma -> {
+            ma.sysAction().name().isNotNull();
+
+            ConfigureArgument argument =
+                ma.getEntitySQLContext().getEntityExpressionBuilder()
+                    .getExpressionContext().getConfigureArgument();
+            MenuReq req = argument.getTypeArg();
+            if (req.getActionName() != null) {
+                ma.sysAction().name().contains(req.getActionName());
+            }
+        });
+```
+
+### When to still use root `.where(...any(...))`
+
+Use root relation predicates when the requirement is genuinely about root-row
+eligibility, for example:
+
+- only menus that have at least one matching action should appear at all
+
+If both semantics are needed, combine them:
+
+- root `.where(...any(...))` for root eligibility
+- nested `EXTRA_AUTO_INCLUDE_CONFIGURE.where(...)` for child-list pruning
+
+### `ignoreNavigateConfigure()` when DTO-local rules should win
+
+`ignoreNavigateConfigure()` is worth calling out explicitly because current
+source short-circuits inherited navigate config when it is set.
+
+Use it when the DTO-local extra config should fully own the child query, rather
+than combining with entity/result-side `@Navigate` settings such as:
+
+- `orderByProps`
+- `limit`
+- `offset`
+
+Example intent:
+
+```java
+private static final ExtraAutoIncludeConfigure EXTRA_AUTO_INCLUDE_CONFIGURE =
+    MySignUpProxy.TABLE.EXTRA_AUTO_INCLUDE_CONFIGURE()
+        .where(x -> x.status().eq(1))
+        .ignoreNavigateConfigure();
+```
+
+That says:
+
+- still use `selectAutoInclude`
+- but do not inherit the normal navigate ordering/limit shaping for this DTO
+  node
 
 ## Tree CTE Interaction
 

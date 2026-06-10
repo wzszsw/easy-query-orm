@@ -265,6 +265,13 @@ most one secondary reference when a boundary rule below says it is needed.
 - Prefer `singleOrNull()` for unique business keys.
 - Push filter/sort/page/aggregate work into DSL.
 - Use DTO/VO result types for `selectAutoInclude`.
+- For `selectAutoInclude`, distinguish root filtering from child-list pruning:
+  use root `.where(...)` for root eligibility, and prefer
+  `EXTRA_AUTO_INCLUDE_CONFIGURE.where(...)` when child rows should be pruned
+  while the root row stays.
+- When a child filter/projection is part of the DTO contract itself, prefer
+  `EXTRA_AUTO_INCLUDE_CONFIGURE` over scattering one-off `include(...)`
+  adapters across service methods.
 - Prefer `include2` for more complex nested relation loading.
 - Do not claim `ProxyEntityAvailable` is required for proxy generation unless
   the project specifically requires interface mode for usage style.
