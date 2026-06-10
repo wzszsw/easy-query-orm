@@ -57,8 +57,9 @@
       },
       {
         "id": "entity-modeling",
-        "purpose": "Entity annotations, advanced table/column controls, computed properties, and current-source modeling caveats such as deprecated value-object support.",
+        "purpose": "Entity annotations, advanced table/column controls, primary-key generation choices, computed properties, and current-source modeling caveats such as deprecated value-object support.",
         "eval_ids": [
+          49,
           48,
           42,
           43
@@ -158,6 +159,7 @@
         10,
         11,
         18,
+        49,
         48,
         42,
         19,
@@ -573,6 +575,13 @@
       "name": "tree-entity-self-relation-modeling",
       "prompt": "帮我写一个 easy-query 的树表实体 `SysDept`。字段至少有 `id`、`parentId`、`name`。要求后续既能做 `asTreeCTE().toTreeList()`，也能支持从当前节点访问父节点名称。请给 Java 实体代码，并说明 `@EasyTree` 什么时候才需要。",
       "expected_output": "Must model the tree as self relations instead of only a flat `parentId` field: a self `ManyToOne parent` and a self `OneToMany children`, preferably with explicit `selfProperty` / `targetProperty` and `ProxyEntityAvailable<SysDept, SysDeptProxy>`. It must explain that `@EasyTree(\"children\")` is only needed when the entity has multiple self `List<SelfType>` one-to-many paths and the framework must disambiguate the real tree children path.",
+      "files": []
+    },
+    {
+      "id": 49,
+      "name": "primary-key-generation-choice-and-registration",
+      "prompt": "请系统说明 easy-query 的主键生成怎么选。我有三种场景：1）数据库自增/identity；2）数据库函数 `nextId()` 之类生成；3）Java 里自己发 UUID/雪花 id。要求结合源码说清楚 `generatedKey`、`generatedSQLColumnGenerator`、`primaryKeyGenerator` 各自怎么写、怎么注册，Spring Boot 下哪些 `@Component` 就够了，`executeRows(true)` 什么时候才需要，以及 `PrimaryKeyGenerator` 和插入拦截器谁先执行。最后顺手说明 `saveEntitySetPrimaryKey(...)` 为什么不是普通 insert 的默认答案。",
+      "expected_output": "Must distinguish the three source-backed paths instead of collapsing them: database-generated key via `@Column(primaryKey = true, generatedKey = true)`, database SQL/function key via `generatedKey = true + generatedSQLColumnGenerator = ...`, and Java-side generation via `@Column(primaryKey = true, primaryKeyGenerator = ...)`. It must show or describe manual registration with `QueryConfiguration.applyPrimaryKeyGenerator(...)` / `applyGeneratedKeySQLColumnGenerator(...)`, and explain that current Spring Boot starter auto-collects `PrimaryKeyGenerator` and `GeneratedKeySQLColumnGenerator` beans by type. It must explicitly state that `executeRows(true)` is for database-generated key backfill rather than a requirement for Java-side `PrimaryKeyGenerator`, and that current source calls `PrimaryKeyGenerator.setPrimaryKey(...)` before entity insert interceptors. It must also explain that `saveEntitySetPrimaryKey(...)` is the tracking/savable safety path for request-built entities, not the generic default for ordinary inserts.",
       "files": []
     }
   ]

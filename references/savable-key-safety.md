@@ -11,6 +11,10 @@ Use this reference for:
 This file exists because savable diff logic can otherwise trust a wrong child
 id and turn it into a dangerous insert/update decision.
 
+For the broader choice among `generatedKey`, `generatedSQLColumnGenerator`,
+`primaryKeyGenerator`, and general registration/timing, read
+`primary-key-generation.md`.
+
 ## The Problem
 
 In request-driven one-to-many update flows, frontend payloads often contain

@@ -50,6 +50,8 @@ examples with string literals such as `"id"` or `"companyId"`.
 
 - `primaryKey = true` — marks the primary key.
 - `generatedKey = true` — DB-generated key (auto-increment); backfilled after insert.
+- `generatedSQLColumnGenerator = ...` — DB function/expression generated-key SQL.
+- `primaryKeyGenerator = ...` — Java-side key generation before insert SQL.
 - `value = "col_name"` — explicit column name (otherwise name-conversion applies, default snake_case).
 - `exist = false` — field is **not** a DB column (computed/transient).
 - `autoSelect` — whether the column is included in `SELECT *` by default.
@@ -65,7 +67,8 @@ For the advanced split between:
 - `primaryKeyGenerator`
 - `generatedSQLColumnGenerator`
 
-read `entity-modeling-advanced.md` and `entity-computed-properties.md`.
+read `primary-key-generation.md`, `entity-modeling-advanced.md`, and
+`entity-computed-properties.md`.
 
 ## A complete annotated entity (Java)
 

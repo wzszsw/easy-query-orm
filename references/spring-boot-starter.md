@@ -91,8 +91,12 @@ So under Spring Boot:
 
 - `@Component` on `Interceptor` / `LogicDeleteStrategy` / `ValueConverter` is
   sufficient
+- `@Component` on `PrimaryKeyGenerator` / `GeneratedKeySQLColumnGenerator` is
+  sufficient
 - `@Component` on `JdbcTypeHandler` alone is not sufficient for global type
   replacement; implement `JdbcTypeHandlerReplaceConfigurer` too
+- `SaveEntitySetPrimaryKeyGenerator` is not in this auto-collected bean list;
+  do not claim a plain `@Component` auto-binds it the same way
 
 ## Default beans and replacement points
 

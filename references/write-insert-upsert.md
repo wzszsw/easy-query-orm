@@ -47,6 +47,11 @@ Integer id = topic.getId();
 Use this only when the entity metadata really marks the column as
 database-generated, for example `@Column(primaryKey = true, generatedKey = true)`.
 
+Do not explain `executeRows(true)` as the normal path for Java-side
+`primaryKeyGenerator`. That generator runs before insert SQL and sets the id on
+the entity directly. Read `primary-key-generation.md` when the user is really
+asking about id strategy selection.
+
 ## 2. Insert SQL Strategy
 
 Current default insert strategy is `ONLY_NOT_NULL_COLUMNS`.
@@ -153,6 +158,9 @@ Use this when:
 
 ## 6. Pairing Rules
 
+- Need to choose between DB-generated key, DB function key, Java-side
+  `PrimaryKeyGenerator`, or save-key safety:
+  add `primary-key-generation.md`
 - Need batch behavior details:
   add `write.md`
 - Need transaction boundary:

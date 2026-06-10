@@ -13,6 +13,10 @@ This file covers:
 - `@EntityFileProxy` / `@ProxyProperty`
 - current-source note about `@ValueObject`
 
+For the dedicated choice among database-generated key, SQL-function generated
+key, Java-side `PrimaryKeyGenerator`, starter/manual registration, or
+`saveEntitySetPrimaryKey(...)`, read `primary-key-generation.md`.
+
 For computed properties such as `sqlExpression`, `sqlConversion`, cross-table
 derived fields, or `autoSelect=false`, read `entity-computed-properties.md`.
 
@@ -141,6 +145,9 @@ Current source constraint:
 
 - `primaryKeyGenerator` only matters when `primaryKey=true` and
   `generatedKey=false`
+
+If the user needs a real decision tree, registration code, or insert-time
+ordering, switch to `primary-key-generation.md`.
 
 ## 7. `@EntityProxy` vs `@EntityFileProxy`
 

@@ -32,6 +32,9 @@ Common top-level methods:
 | `@Column(sqlExpression=...)` | Simple inline SQL computed property | `entity-computed-properties.md` |
 | `@Column(conversion=...)` | Field-level `ValueConverter` mapping | `value-conversion-type-handler.md` |
 | `@Column(typeHandler=...)` | Field-level JDBC type handler override | `value-conversion-type-handler.md` |
+| `@Column(primaryKey = true, generatedKey = true)` | Database-generated primary key | `primary-key-generation.md`, `write-insert-upsert.md` |
+| `@Column(primaryKey = true, primaryKeyGenerator = ...)` | Java-side primary key generation | `primary-key-generation.md` |
+| `@Column(generatedSQLColumnGenerator=...)` | Database function/expression generated key SQL | `primary-key-generation.md` |
 | `@Enumerated` | Built-in enum-name auto conversion trigger | `value-conversion-type-handler.md` |
 | `@ColumnIgnore` / `@InsertIgnore` / `@UpdateIgnore` | Advanced persistence-scope controls for fields | `entity-modeling-advanced.md` |
 | `@TableIndex` / `@TableIndexes` | Code-first table index metadata | `entity-modeling-advanced.md` |
@@ -87,6 +90,16 @@ Common operators:
 | `JdbcTypeHandlerManager.appendHandler(...)` | Replace or append handler by Java type | `value-conversion-type-handler.md` |
 | `JdbcTypeHandlerReplaceConfigurer` | Spring Boot auto-registration contract for JDBC handlers | `value-conversion-type-handler.md` |
 | `QueryConfiguration.applyValueConverter(...)` | Register converter or auto converter | `value-conversion-type-handler.md` |
+
+## Key Generation Symbols
+
+| Symbol | Purpose | Read Next |
+|--------|---------|-----------|
+| `PrimaryKeyGenerator` | Java-side primary key generation SPI (`com.easy.query.core.basic.extension.generated`) | `primary-key-generation.md` |
+| `GeneratedKeySQLColumnGenerator` | Database SQL/function generated-key SPI (`com.easy.query.core.basic.extension.generated`) | `primary-key-generation.md` |
+| `SaveEntitySetPrimaryKeyGenerator` | Runtime save-key safety SPI for request-built entities (`com.easy.query.core.basic.extension.generated`) | `primary-key-generation.md`, `savable-key-safety.md` |
+| `QueryConfiguration.applyPrimaryKeyGenerator(...)` | Register a Java-side primary key generator | `primary-key-generation.md` |
+| `QueryConfiguration.applyGeneratedKeySQLColumnGenerator(...)` | Register a database SQL generated-key component | `primary-key-generation.md` |
 
 ## EasySearch Symbols
 
@@ -214,7 +227,7 @@ projection, and `select-auto-include.md` for DTO graphs.
 | `.configure(s -> s.getSaveBehavior().add(...))` | Advanced savable behavior flags | `savable-execution.md`, `savable-relation-rules.md` |
 | `SaveBehaviorEnum.ALLOW_OWNERSHIP_CHANGE` | Permit value-object ownership reassignment | `savable-relation-rules.md` |
 | `SaveBehaviorEnum.IGNORE_NULL` / `IGNORE_EMPTY` / `IGNORE_LOGIC_DELETE` | Advanced savable behavior switches | `savable-execution.md` |
-| `easyEntityQuery.saveEntitySetPrimaryKey(entity)` | Assign safe backend keys for request-built child rows | `savable-key-safety.md` |
+| `easyEntityQuery.saveEntitySetPrimaryKey(entity)` | Assign safe backend keys for request-built child rows | `savable-key-safety.md`, `primary-key-generation.md` |
 
 ## Tracking Symbols
 

@@ -40,9 +40,8 @@ most one secondary reference when a boundary rule below says it is needed.
 6. Never invent easy-query API names. Search `references/api-map.md` or
    `scripts/search_references.py` first.
 7. If code, docs, or a user snippet mention easy-query type names without
-   imports, resolve the package from source first with
-   `references/symbol-imports.md` or `scripts/search_symbols.py`. Do not guess
-   the package from memory.
+   imports, resolve the package from `references/symbol-imports.md` first. Do
+   not guess the package from memory.
 8. For AP/reporting work, keep dimensions, grouped aggregates, partition
    ranks, and union branches in SQL DSL. Prefer explicit `groupBy` / `having`
    first; switch to `subQueryToGroupJoin` when repeated to-many relation
@@ -98,6 +97,9 @@ most one secondary reference when a boundary rule below says it is needed.
   `relation-query.md` is for `@Navigate` direction/cardinality;
   `entity-modeling-navigate.md` is for advanced navigate metadata,
   DTO-side navigation, and `@NavigateFlat`;
+  `primary-key-generation.md` is for `generatedKey`,
+  `generatedSQLColumnGenerator`, `primaryKeyGenerator`, and key-generation
+  registration/timing;
   `entity-modeling-advanced.md` is for advanced table/column/alias/index/
   proxy-variant modeling;
   `entity-computed-properties.md` is for derived/computed properties;
@@ -164,6 +166,12 @@ most one secondary reference when a boundary rule below says it is needed.
   `@ColumnIgnore`, `@InsertIgnore`, `@UpdateIgnore`, `primaryKeyGenerator`,
   `generatedSQLColumnGenerator`, `schema`, `oldName`, or `@EntityFileProxy`:
   `references/entity-modeling-advanced.md`.
+- Primary key generation strategy such as `generatedKey`,
+  `generatedSQLColumnGenerator`, `primaryKeyGenerator`, insert id backfill, or
+  starter/manual generator registration:
+  `references/primary-key-generation.md`.
+  Pair with `references/write-insert-upsert.md` when the question also depends
+  on `executeRows(true)` or insert-chain behavior.
 - Computed/derived properties such as `sqlExpression`, `sqlConversion`,
   cross-table computed fields, `autoSelect=false`, or current `@ValueObject`
   usage:
@@ -325,6 +333,11 @@ most one secondary reference when a boundary rule below says it is needed.
   sufficient.
 - Do not recommend `ValueConverter` alone when the real problem is JDBC
   binding/driver behavior such as PostgreSQL `jsonb` `PGobject` writes.
+- Do not conflate `generatedKey`, `generatedSQLColumnGenerator`,
+  `primaryKeyGenerator`, and `saveEntitySetPrimaryKey(...)`; they solve
+  different phases of key assignment.
+- Do not teach `executeRows(true)` as if Java-side `PrimaryKeyGenerator`
+  needed it.
 - Prefer interceptor abstraction for cross-cutting tenant, audit, and
   data-permission rules instead of repeating ad hoc where/set logic in every
   service.

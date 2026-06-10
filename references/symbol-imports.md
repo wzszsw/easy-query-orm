@@ -7,15 +7,16 @@ This is the package/FQCN branch, not the semantic feature guide. Resolve the
 type here first, then jump back to `api-map.md` or the feature reference for
 behavior.
 
+This table is intentionally maintained statically inside the skill so the skill
+does not depend on any machine-local easy-query source checkout path.
+
 ## Workflow
 
-1. Resolve the type from easy-query source, not from blog/demo snippets.
-2. Run `python scripts/search_symbols.py EasyWhereCondition StarterConfigurer`
-   for the exact type names you need.
-3. Prefer `src/main/java` / `src/main/kotlin` declarations over tests or docs.
-4. If the current project already imports one of several matches, prefer the
+1. Resolve the type from this maintained import map first.
+2. Prefer source-verified entries over blog/demo snippets.
+3. If the current project already imports one of several matches, prefer the
    project import.
-5. When answering with non-obvious easy-query types, include the explicit
+4. When answering with non-obvious easy-query types, include the explicit
    `import ...;` line or the FQCN on first mention.
 
 ## Nested Type Rule
@@ -29,23 +30,6 @@ Import the owner type, not the nested member:
 
 If the missing symbol is really a method/field rather than a type, switch to
 `api-map.md` or the feature reference instead of forcing an import lookup.
-
-## Source Lookup Command
-
-Examples:
-
-```text
-python scripts/search_symbols.py EasyWhereCondition WhereConditionProvider
-python scripts/search_symbols.py EasyEntityQuery ProxyEntityAvailable
-python scripts/search_symbols.py --root D:\develop\SOURCE_CODE\easy-query EasySearch EasyCond
-```
-
-The script reads top-level declarations from easy-query source and prints:
-
-- symbol kind
-- fully qualified class name
-- ready-to-copy Java import line
-- declaring file path
 
 ## High-Frequency Imports
 
@@ -116,6 +100,9 @@ import com.easy.query.core.basic.extension.logicdel.LogicDeleteStrategyEnum;
 import com.easy.query.core.configuration.QueryConfiguration;
 import com.easy.query.core.basic.extension.conversion.ValueConverter;
 import com.easy.query.core.basic.extension.conversion.ValueAutoConverter;
+import com.easy.query.core.basic.extension.generated.PrimaryKeyGenerator;
+import com.easy.query.core.basic.extension.generated.GeneratedKeySQLColumnGenerator;
+import com.easy.query.core.basic.extension.generated.SaveEntitySetPrimaryKeyGenerator;
 import com.easy.query.core.basic.jdbc.types.handler.JdbcTypeHandler;
 import com.easy.query.core.basic.extension.interceptor.Interceptor;
 import com.easy.query.core.basic.extension.interceptor.EntityInterceptor;
