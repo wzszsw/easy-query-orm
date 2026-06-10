@@ -13,10 +13,12 @@ does not depend on any machine-local easy-query source checkout path.
 ## Workflow
 
 1. Resolve the type from this maintained import map first.
-2. Prefer source-verified entries over blog/demo snippets.
-3. If the current project already imports one of several matches, prefer the
+2. If the symbol is missing here, add it here rather than reviving a
+   machine-local lookup helper.
+3. Prefer source-verified entries over blog/demo snippets.
+4. If the current project already imports one of several matches, prefer the
    project import.
-4. When answering with non-obvious easy-query types, include the explicit
+5. When answering with non-obvious easy-query types, include the explicit
    `import ...;` line or the FQCN on first mention.
 
 ## Nested Type Rule
@@ -94,15 +96,20 @@ import com.easy.query.core.basic.extension.logicdel.LogicDeleteStrategyEnum;
 | `Select` | `import com.easy.query.core.proxy.sql.Select;` |
 | `GroupKeys` | `import com.easy.query.core.proxy.sql.GroupKeys;` |
 
-### Conversion / Interceptor
+### Key Generation
 
 ```java
 import com.easy.query.core.configuration.QueryConfiguration;
-import com.easy.query.core.basic.extension.conversion.ValueConverter;
-import com.easy.query.core.basic.extension.conversion.ValueAutoConverter;
 import com.easy.query.core.basic.extension.generated.PrimaryKeyGenerator;
 import com.easy.query.core.basic.extension.generated.GeneratedKeySQLColumnGenerator;
 import com.easy.query.core.basic.extension.generated.SaveEntitySetPrimaryKeyGenerator;
+```
+
+### Conversion / Interceptor
+
+```java
+import com.easy.query.core.basic.extension.conversion.ValueConverter;
+import com.easy.query.core.basic.extension.conversion.ValueAutoConverter;
 import com.easy.query.core.basic.jdbc.types.handler.JdbcTypeHandler;
 import com.easy.query.core.basic.extension.interceptor.Interceptor;
 import com.easy.query.core.basic.extension.interceptor.EntityInterceptor;
@@ -132,3 +139,5 @@ import com.easy.query.search.annotation.EasyCond;
   picking one.
 - For compile-ready answers, do not leave non-obvious easy-query types
   unimported just because the original snippet omitted them.
+- Keep this file as the single import map. Do not reintroduce local helper
+  scripts that depend on machine-specific easy-query source paths.

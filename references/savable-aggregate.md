@@ -42,6 +42,8 @@ first-class prerequisites, not optional polish.
   `savable-relation-rules.md`
 - Need to prevent frontend child ids from corrupting inserts:
   `savable-key-safety.md`
+- Need generic id strategy rather than request-child safety:
+  `primary-key-generation.md`
 - Need only ordinary insert/update/delete:
   `write-insert-upsert.md`, `write-update.md`, `write-delete.md`
 

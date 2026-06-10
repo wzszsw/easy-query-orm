@@ -22,6 +22,8 @@ separate companions rather than overloading one write file with everything.
   `write-insert-upsert.md`
 - Need insert-or-update / insert-or-ignore by key:
   `write-insert-upsert.md`
+- Need to choose id strategy or explain insert-time key assignment:
+  `primary-key-generation.md`
 - Need explicit `UPDATE ... SET ... WHERE ...`:
   `write-update.md`
 - Already have an entity object and need controlled object update:
@@ -78,6 +80,8 @@ Practical caveats:
 - insert/upsert + batch:
   read `write-insert-upsert.md`, then return here only if batch semantics are
   the core question
+- insert/upsert + generated key / custom id:
+  add `primary-key-generation.md`
 - update + tracking:
   read `write-update.md`, then add `write-tracking.md`
 - delete + logic delete:

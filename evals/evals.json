@@ -84,7 +84,7 @@
       },
       {
         "id": "symbol-imports",
-        "purpose": "Resolve missing easy-query imports and FQCNs from source-backed symbol lookup instead of guessing packages from snippets.",
+        "purpose": "Resolve missing easy-query imports and FQCNs from the maintained skill-local import map instead of guessing packages from snippets.",
         "eval_ids": [
           46,
           47

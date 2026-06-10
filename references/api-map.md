@@ -1,16 +1,18 @@
 # API Map
 
 Use this file to confirm symbol names and choose the next semantic reference.
-If the missing piece is the Java/Kotlin package or import for a type name,
-start with `symbol-imports.md` instead.
+Keep package/import lookup in `symbol-imports.md`; this file is the semantic
+index.
+
+Package hints appear here only when they materially disambiguate the symbol.
 
 ## Entry Points
 
 | Symbol | Purpose | Read Next |
 |--------|---------|-----------|
-| `EasyEntityQuery` | Default strong-typed proxy DSL client (`com.easy.query.api.proxy.client`) | `query.md` |
-| `DefaultEasyEntityQuery` | Concrete `EasyEntityQuery` implementation (`com.easy.query.api.proxy.client`) | `setup-java.md`, `setup-kotlin.md` |
-| `EasyQueryClient` | Weak-typed core client (`com.easy.query.core.api.client`) | local project first |
+| `EasyEntityQuery` | Default strong-typed proxy DSL client | `query.md` |
+| `DefaultEasyEntityQuery` | Concrete `EasyEntityQuery` implementation | `setup-java.md`, `setup-kotlin.md` |
+| `EasyQueryClient` | Weak-typed core client | local project first |
 | `EasyQueryBootstrapper` | Bootstrap/build the client | `setup-java.md`, `setup-kotlin.md`, `setup-spring-boot.md`, `spring-boot-starter.md` |
 
 Common top-level methods:
@@ -45,8 +47,8 @@ Common top-level methods:
 | `@Navigate` | Relation metadata | `relation-query.md`, `entity-modeling-navigate.md` |
 | `@NavigateFlat` | DTO/VO path flattening | `entity-modeling-navigate.md` |
 | `@EasyTree` | Mark which self `List<SelfType>` navigation is the tree children path | `entity-modeling-navigate.md`, `implicit-query.md` |
-| `ProxyEntityAvailable<TEntity, TProxy>` | Proxy-enabled entity contract (`com.easy.query.core.proxy`) | `entity-mapping.md` |
-| `RelationTypeEnum` | Relation kind enum (`com.easy.query.core.enums`) | `relation-query.md` |
+| `ProxyEntityAvailable<TEntity, TProxy>` | Proxy-enabled entity contract | `entity-mapping.md` |
+| `RelationTypeEnum` | Relation kind enum | `relation-query.md` |
 | `@ShardingTableKey` | Sharding route key | `advanced.md` |
 
 ## Query Chain Symbols
@@ -84,7 +86,7 @@ Common operators:
 
 | Symbol | Purpose | Read Next |
 |--------|---------|-----------|
-| `ValueConverter` | Property <-> DB Java value conversion (`com.easy.query.core.basic.extension.conversion`) | `value-conversion-type-handler.md` |
+| `ValueConverter` | Property <-> DB Java value conversion | `value-conversion-type-handler.md` |
 | `ValueAutoConverter` | Global auto-applied value converter | `value-conversion-type-handler.md` |
 | `JdbcTypeHandler` | JDBC parameter/result handler | `value-conversion-type-handler.md` |
 | `JdbcTypeHandlerManager.appendHandler(...)` | Replace or append handler by Java type | `value-conversion-type-handler.md` |
@@ -95,9 +97,9 @@ Common operators:
 
 | Symbol | Purpose | Read Next |
 |--------|---------|-----------|
-| `PrimaryKeyGenerator` | Java-side primary key generation SPI (`com.easy.query.core.basic.extension.generated`) | `primary-key-generation.md` |
-| `GeneratedKeySQLColumnGenerator` | Database SQL/function generated-key SPI (`com.easy.query.core.basic.extension.generated`) | `primary-key-generation.md` |
-| `SaveEntitySetPrimaryKeyGenerator` | Runtime save-key safety SPI for request-built entities (`com.easy.query.core.basic.extension.generated`) | `primary-key-generation.md`, `savable-key-safety.md` |
+| `PrimaryKeyGenerator` | Java-side primary key generation SPI | `primary-key-generation.md` |
+| `GeneratedKeySQLColumnGenerator` | Database SQL/function generated-key SPI | `primary-key-generation.md` |
+| `SaveEntitySetPrimaryKeyGenerator` | Runtime save-key safety SPI for request-built entities | `primary-key-generation.md`, `savable-key-safety.md` |
 | `QueryConfiguration.applyPrimaryKeyGenerator(...)` | Register a Java-side primary key generator | `primary-key-generation.md` |
 | `QueryConfiguration.applyGeneratedKeySQLColumnGenerator(...)` | Register a database SQL generated-key component | `primary-key-generation.md` |
 

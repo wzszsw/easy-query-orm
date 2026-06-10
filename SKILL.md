@@ -68,7 +68,7 @@ most one secondary reference when a boundary rule below says it is needed.
 1. Classify first: setup/runtime, mapping/modeling, query/search,
    relation/implicit, write/cross-cutting, AP/reporting, troubleshooting, or
    review.
-2. Open one primary reference from `Routing by Area`.
+2. Open one primary reference from `Routing Table`.
 3. Add one secondary reference only when a `Pair with ...` clause applies.
 4. Use `references/symbol-imports.md` first when the missing piece is the
    package/import/FQCN for a type name.
@@ -78,59 +78,39 @@ most one secondary reference when a boundary rule below says it is needed.
    is already known, or when code compiles but behaves differently from the
    expected feature semantics.
 
-## Canonical Boundaries
+## High-Conflict Boundaries
 
-- Spring Boot stack:
-  `setup-spring-boot.md` is for dependency/basic wiring and bean injection;
-  `spring-boot-starter.md` is for auto-configuration topology, collected
-  extension beans, `StarterConfigurer`, `@EasyQueryTrack`, and
-  multi-datasource starter limits; `configuration-starter.md` is for property
-  defaults and behavior drift.
-- Query stack:
-  `query.md` is for ordinary root DSL; `query-composition.md` is for explicit
-  joins, advanced projection, and proxy VO relation
-  `.set(...)`;
-  `subquery-explicit.md` is for explicit `where/select/from/join` subqueries,
-  derived tables, and `toCteAs()`;
+- Spring Boot:
+  `setup-spring-boot.md` is dependency/basic wiring;
+  `spring-boot-starter.md` is starter internals, collected beans, and
+  `StarterConfigurer`;
+  `configuration-starter.md` is property semantics;
+  `advanced.md` is DDL/sharding/runtime scope.
+- Modeling:
+  `entity-mapping.md` is basic entity/proxy mapping;
+  `entity-modeling-advanced.md` is advanced table/column flags;
+  `primary-key-generation.md` is key strategy and timing;
+  `relation-query.md` is entity relation shape;
+  `entity-modeling-navigate.md` is advanced/DTO-side navigation metadata;
+  `include-structured-loading.md` is entity include loading;
+  `select-auto-include.md` is DTO graph return.
+- Query:
+  `query.md` is ordinary root DSL;
+  `query-composition.md` is explicit joins/projection/proxy VO `.set(...)`;
+  `subquery-explicit.md` is explicit subquery/derived table/CTE promotion;
+  `implicit-query.md` and `implicit-controls.md` are relation-driven SQL;
   `functions-native-sql.md` is only for function helpers or raw SQL fragments.
-- Relation metadata vs result loading:
-  `relation-query.md` is for `@Navigate` direction/cardinality;
-  `entity-modeling-navigate.md` is for advanced navigate metadata,
-  DTO-side navigation, and `@NavigateFlat`;
-  `primary-key-generation.md` is for `generatedKey`,
-  `generatedSQLColumnGenerator`, `primaryKeyGenerator`, and key-generation
-  registration/timing;
-  `entity-modeling-advanced.md` is for advanced table/column/alias/index/
-  proxy-variant modeling;
-  `entity-computed-properties.md` is for derived/computed properties;
-  `include-structured-loading.md` is for entity relation loading;
-  `select-auto-include.md` is for DTO/VO structured return.
-- Implicit relation stack:
-  `implicit-query.md` is for capabilities such as implicit join, group join,
-  ranked child, and tree;
-  `implicit-controls.md` is for quantifiers and control knobs such as
-  `any/all/none/notEmptyAll/filter/configure/mode/subQueryConfigure/flatElement`.
-- Search-form stack:
-  `search-form-page.md` is for end-to-end page endpoints;
-  `dto-object-query.md` is for
-  `whereObject/orderByObject/@EasyWhereCondition` semantics;
-  `easy-search.md` is only for `sql-search` / `EasySearch` / `@EasyCond`.
-- Write stack:
-  `write.md` is the mutation overview and batch semantics router;
-  `write-insert-upsert.md` is insert/upsert/map insert;
-  `write-update.md` is update/object update/map update/version;
-  `write-delete.md` is delete/physical delete safety;
-  `write-tracking.md` is diff update tracking and `@EasyQueryTrack`.
-- Savable stack:
-  `savable-aggregate.md` is the savable overview router;
-  `savable-execution.md` is transaction/tracking prerequisites, `savePath`,
-  root controls, and save behaviors;
-  `savable-relation-rules.md` is aggregate-root/value-object/cascade/
-  ownership modeling;
-  `savable-key-safety.md` is `saveEntitySetPrimaryKey(...)` and frontend child
-  id safety.
+- Search form:
+  `search-form-page.md` is endpoint workflow;
+  `dto-object-query.md` is `whereObject/orderByObject/@EasyWhereCondition`;
+  `easy-search.md` is only for `sql-search`.
+- Write vs savable:
+  `write*.md` is ordinary row mutation;
+  `primary-key-generation.md` is key strategy rather than generic insert
+  syntax;
+  `savable-aggregate.md` is only for aggregate diff save.
 
-## Routing By Area
+## Routing Table
 
 ### Setup & Runtime
 
