@@ -60,10 +60,9 @@ most one secondary reference when a boundary rule below says it is needed.
 13. Distinguish entity relation metadata from DTO/VO auto-include metadata.
 14. Distinguish transient business fields, ignored ORM fields, and true
     SQL-derived computed properties; do not collapse them into one pattern.
-15. For recurring derived business semantics such as `bookCount`,
-    `studentSize`, status, age, or full name, prefer entity-side
-    computed-property modeling over repeating ad hoc VO/service projection
-    logic.
+15. For derived fields/metrics, let project context, prompt semantics, likely
+    reuse, and complexity of the equivalent query shape guide the choice
+    between entity-side computed-property modeling and query-time projection.
 16. If the project version differs from the reference version, prefer the
     project and say which API or behavior may have moved.
 
@@ -261,8 +260,9 @@ most one secondary reference when a boundary rule below says it is needed.
   an existing `@Navigate` path can express the requirement.
 - Do not casually introduce `@ValueObject` for new modeling without noting that
   current source marks it deprecated.
-- For reusable derived business metrics, do not default to rebuilding the same
-  aggregate in every VO/service if entity computed-property modeling fits.
+- For derived fields/metrics, do not force either extreme: neither sink every
+  simple aggregate into entity computed properties nor rule modeling out when
+  reusable model-level meaning is reasonably likely.
 - For tree answers, express the real root predicate first instead of teaching a
   default `query ids first -> .in(...) -> build tree` template.
 - Prefer `singleOrNull()` for unique business keys.

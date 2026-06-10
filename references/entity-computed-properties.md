@@ -8,7 +8,7 @@ columns:
 - advanced computed properties via `sqlConversion`
 - cross-table derived properties
 - `autoSelect=false`
-- model-level recurring metrics such as "book store book count"
+- model-level recurring derived metrics/properties
 
 For broader advanced table/column annotation choices, read
 `entity-modeling-advanced.md`.
@@ -25,9 +25,11 @@ Before writing code, classify the requirement:
   prefer an entity computed property
 
 This matters because easy-query is strongest when repeated business semantics
-are modeled once and then reused through DSL. If "book count on a store" is a
-real domain concept rather than a one-off page field, it should usually be
-modeled on the entity side instead of being rebuilt in every VO projection.
+are modeled once and then reused through DSL. But that is a modeling decision,
+not an automatic upgrade path: a short relation aggregate can still be better
+left in query DSL, while a metric that looks likely to recur across services,
+filters, and sorts may still be worth modeling even if the prompt does not
+spell the requirement out in rigid wording.
 
 ### Pure business/transient field
 
@@ -55,20 +57,10 @@ Use `@Column(sqlConversion = MyConverter.class)` when:
 
 ### One-off query metric instead of entity modeling
 
-If the requirement is not really reusable model knowledge, prefer ordinary DSL:
-
-```java
-easyEntityQuery.queryable(BookStore.class)
-    .select(BookStoreListVO.class, s -> Select.of(
-        s.id(),
-        s.name(),
-        s.books().count().as(BookStoreListVO::getBookCount)
-    ))
-    .toList();
-```
-
+If the requirement is not really reusable model knowledge, prefer ordinary DSL.
 That is often better than introducing a permanent computed property for a
-single report/list page.
+single report/list page, especially when a direct relation aggregate is already
+short and readable.
 
 ## 2. Simple Computed Property: `sqlExpression`
 
@@ -169,34 +161,27 @@ field, not just a returned alias.
 
 ## 5. Cross-Table Aggregate Property
 
-This is the branch behind prompts like:
+If the relation path is stable and the metric is reused, modeling it once on
+the entity can be high-value.
 
-- store book count
-- class student count
-- user certificate count
-- parent aggregate child total
-
-If the relation is stable and the metric is reused, modeling it once on the
-entity is high-value.
-
-Bookstore/books example:
+Generic entity shape:
 
 ```java
 @Data
-@Table("book_store")
+@Table("root_table")
 @EntityProxy
-public class BookStore implements ProxyEntityAvailable<BookStore, BookStoreProxy> {
+public class AggregateRoot implements ProxyEntityAvailable<AggregateRoot, AggregateRootProxy> {
     @Column(primaryKey = true)
     private String id;
     private String name;
 
-    @Navigate(value = RelationTypeEnum.OneToMany, targetProperty = "storeId")
-    private List<Book> books;
+    @Navigate(value = RelationTypeEnum.OneToMany, targetProperty = "rootId")
+    private List<ChildEntity> children;
 
-    @Column(sqlConversion = BookCountColumnValueSQLConverter.class, autoSelect = false)
+    @Column(sqlConversion = DerivedCountColumnValueSQLConverter.class, autoSelect = false)
     @InsertIgnore
     @UpdateIgnore
-    private Long bookCount;
+    private Long derivedCount;
 }
 ```
 
@@ -213,7 +198,7 @@ import com.easy.query.core.expression.parser.core.available.TableAvailable;
 import com.easy.query.core.expression.parser.core.base.SimpleEntitySQLTableOwner;
 import com.easy.query.core.metadata.ColumnMetadata;
 
-public class BookCountColumnValueSQLConverter implements ColumnValueSQLConverter {
+public class DerivedCountColumnValueSQLConverter implements ColumnValueSQLConverter {
     @Override
     public boolean isRealColumn() {
         return false;
@@ -245,8 +230,8 @@ public class BookCountColumnValueSQLConverter implements ColumnValueSQLConverter
     private ClientQueryable<Long> createCountQuery(TableAvailable table,
                                                    QueryRuntimeContext runtimeContext) {
         SQLClientApiFactory factory = runtimeContext.getSQLClientApiFactory();
-        return factory.createQueryable(Book.class, runtimeContext)
-            .where(t -> t.eq(new SimpleEntitySQLTableOwner<>(table), "storeId", "id"))
+        return factory.createQueryable(ChildEntity.class, runtimeContext)
+            .where(t -> t.eq(new SimpleEntitySQLTableOwner<>(table), "rootId", "id"))
             .select(Long.class, s -> s.columnCount("id"));
     }
 
@@ -296,9 +281,8 @@ Implications:
 - `autoSelect = false` is common because it may be expensive
 - you must explicitly fetch it when needed
 - the entity-side `@Navigate` path is usually the modeling prerequisite
-
-If the user asks "书店上如何用计算属性表达书本数量", this is the correct
-branch, not `@Column(exist=false)` and not a plain VO-only field.
+- this branch fits only when project context or prompt semantics actually call
+  for model-side reuse rather than a one-off query metric
 
 ## 6. `autoSelect = false`
 
@@ -358,14 +342,14 @@ Well-modeled computed properties can participate in:
 That is the difference between a plain transient field and a true ORM-modeled
 derived property.
 
-This is why a reusable `bookCount` model property is valuable: the same field
+This is why a reusable derived model property can be valuable: the same field
 can participate in:
 
 ```java
-easyEntityQuery.queryable(BookStore.class)
-    .where(s -> s.bookCount().gt(100L))
-    .orderBy(s -> s.bookCount().desc())
-    .select(BookStoreListVO.class)
+easyEntityQuery.queryable(AggregateRoot.class)
+    .where(s -> s.derivedCount().gt(100L))
+    .orderBy(s -> s.derivedCount().desc())
+    .select(ResultVO.class)
     .toList();
 ```
 
@@ -377,8 +361,8 @@ easyEntityQuery.queryable(BookStore.class)
 QueryRuntimeContext runtimeContext = easyEntityQuery.getRuntimeContext();
 QueryConfiguration configuration = runtimeContext.getQueryConfiguration();
 
-configuration.applyColumnValueSQLConverter(new BookCountColumnValueSQLConverter());
-configuration.applyColumnValueSQLConverter(new FullNameColumnValueSQLConverter());
+configuration.applyColumnValueSQLConverter(new DerivedCountColumnValueSQLConverter());
+configuration.applyColumnValueSQLConverter(new AnotherColumnValueSQLConverter());
 ```
 
 ### Spring Boot starter
@@ -421,9 +405,9 @@ Prefer query-time relation aggregate when:
 Prefer entity computed property when:
 
 - the metric is reused across multiple services/endpoints
-- the business treats it like a stable concept (`bookCount`, `studentSize`,
-  `certStatus`, `fullName`, `age`)
+- the business/prompt likely treats it like a stable concept
 - filters/sorts/grouping should consistently reuse the same SQL definition
+- centralizing the SQL once is likely to reduce repeated service/VO logic
 
 ## 13. Common Mistakes
 
@@ -433,11 +417,13 @@ Prefer entity computed property when:
   converter
 - Treating every list-page aggregate as a permanent model field when it was
   really a one-off projection
+- Going too far the other way and refusing model-side computed properties even
+  when the metric is clearly becoming shared business semantics
 - Forgetting `@InsertIgnore` / `@UpdateIgnore` on derived fields
 - Forgetting `autoSelect = false` when wondering why a heavy computed field was
   not returned
 - Repeating the same `books().count()` logic in many VOs/services instead of
-  modeling a stable reusable property once
+  making an explicit model-vs-query decision
 - Modeling a UI-only label as a database-derived property
 - Trusting older docs about `isMergeSubQuery()` when the current project source
   no longer exposes that method
