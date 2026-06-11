@@ -170,7 +170,7 @@ If the result target is a DTO graph, prefer `selectAutoInclude(...)` before
 | `.all(...)` | Every row in the current relation slice passes | `implicit-controls.md` |
 | `.first()` | First ranked child in a relation slice | `implicit-query.md` |
 | `.element(index)` | Zero-based nth ranked child | `implicit-query.md` |
-| `.elements(start,end)` | Zero-based inclusive ranked child window | `implicit-query.md` |
+| `.elements(start,end)` | Zero-based inclusive ranked child window; returns a queryable slice that can continue with aggregate/predicate/joining APIs | `implicit-query.md` |
 | `.joining(...)` on relation chain | Concatenate relation rows, often after `orderBy(...)` / `elements(...)` | `implicit-query.md` |
 | `.flatElement()` | Flatten to-many path for traversal or `toList(...)` | `implicit-controls.md` |
 | `.notEmptyAll(...)` | Non-empty and every matched row passes | `implicit-controls.md` |

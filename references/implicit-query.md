@@ -110,6 +110,9 @@ Useful rules:
 - `first()` is the partition-style "first ranked child"
 - `element(index)` is zero-based
 - `elements(start,end)` is zero-based and end-inclusive
+- current source interface returns `SQLQueryable` after `elements(...)`, so the
+  ranked slice can continue into `where/distinct/count/sum/avg/max/min/joining`
+  style APIs instead of stopping at projection-only usage
 - For partition-style operators, require deterministic ordering from
   `orderBy(...)`, `orderByProps`, or `partitionOrder`; do not assume database
   natural order.
@@ -221,6 +224,22 @@ Copyable patterns:
   `root.children().orderBy(...).elements(start,end)`
 - top-N rows projected as string/list-like aggregate:
   `root.children().orderBy(...).elements(...).joining(...)`
+- top-N window after slicing then aggregate:
+  `root.children().orderBy(...).elements(...).max(...)`
+- top-N window after slicing then filter/existence/value check:
+  `root.children().orderBy(...).elements(...).where(...).noneValue()`
+
+Source-backed evidence:
+
+- docs/examples explicitly show `elements(...).joining(...)` and
+  `elements(...).where(...).noneValue()`
+- current proxy API `SQLManyQueryable.elements(...)` returns `SQLQueryable`
+- `SQLQueryable` exposes `count/sum/avg/max/min/joining/where/distinct`
+- current tests directly show `elements(3, 5).max(x -> x.code())`
+
+That means `elements(...).max(...)` is directly evidenced, while
+`elements(...).count/sum/avg/min(...)` follow from the current interface return
+type even if the exact same aggregate is not shown in the nearby docs/tests.
 
 Annotation comment notes:
 

@@ -28,6 +28,7 @@
         "id": "implicit-core",
         "purpose": "Implicit group, partition, joining, boolean relation projection, and structured relation loading.",
         "eval_ids": [
+          52,
           7,
           8,
           17,
@@ -157,6 +158,7 @@
       "p0_must_pass_eval_ids": [
         1,
         7,
+        52,
         8,
         10,
         11,
@@ -595,13 +597,20 @@
       "expected_output": "Must return the exact current-source imports: `com.easy.query.core.basic.extension.conversion.ColumnValueSQLConverter`, `com.easy.query.core.basic.extension.logicdel.LogicDeleteStrategy`, `com.easy.query.core.basic.extension.version.VersionStrategy`, `com.easy.query.core.sharding.initializer.ShardingInitializer`, `com.easy.query.core.basic.extension.encryption.EncryptionStrategy`, `com.easy.query.core.sharding.route.table.TableRoute`, `com.easy.query.core.sharding.route.datasource.DataSourceRoute`, `com.easy.query.core.basic.extension.navigate.NavigateExtraFilterStrategy`, `com.easy.query.core.basic.extension.navigate.NavigateValueSetter`, `com.easy.query.core.expression.implicit.EntityRelationPropertyProvider`, `com.easy.query.sql.starter.config.EasyQueryTrackProperties`, `com.easy.query.core.api.dynamic.executor.query.ConfigureArgument`, and `com.easy.query.core.enums.EasyBehaviorEnum`.",
       "files": []
     },
-      {
-        "id": 51,
-        "name": "computed-property-book-count-modeling",
-        "prompt": "假设某个根实体和子实体是一对多关系。现在业务里经常要按根实体返回某个子项数量、按这个数量筛选、排序，而且这个含义比较稳定，不想每次都在 VO 里临时拼。请结合 easy-query 源码说明：这种场景什么时候该沉淀成实体计算属性，什么时候只做一次性投影；如果沉淀到实体，这个数量属性应该怎么建模，`ColumnValueSQLConverter` 里的 `selectColumnConvert/propertyColumnConvert/valueConvert/isRealColumn` 分别怎么理解；`autoSelect=false`、注册方式、以及为什么当前源码不能再把 `isMergeSubQuery()` 当成现行接口方法，也要讲清楚。",
-        "expected_output": "Must explain the modeling boundary without treating every relation count as an automatic computed-property candidate, but also without making entity modeling artificially hard to choose: the answer should frame it as a judgment call based on project context, prompt semantics, likely reuse, and maintenance cost. One-off report/list metrics can stay as query-time relation aggregate projection, while repeated stable business semantics are good candidates for entity-side computed-property modeling. It must show or clearly describe a root entity with a stable one-to-many path and `@Column(sqlConversion = DerivedCountColumnValueSQLConverter.class, autoSelect = false)` paired with `@InsertIgnore` and `@UpdateIgnore`. It must explain `selectColumnConvert(...)` as select-side SQL, `propertyColumnConvert(...)` as left-hand expression rewrite for where/orderBy/groupBy, `valueConvert(...)` as right-hand compare/store value handling, and `isRealColumn()` as false for non-physical derived count fields. It must mention manual registration through `QueryConfiguration.applyColumnValueSQLConverter(...)` and starter auto-collection of `ColumnValueSQLConverter` beans. It must also explicitly correct older docs by stating that the current inspected `ColumnValueSQLConverter` source does not expose `isMergeSubQuery()` as a current interface method.",
-        "files": []
-      }
+    {
+      "id": 51,
+      "name": "computed-property-book-count-modeling",
+      "prompt": "假设某个根实体和子实体是一对多关系。现在业务里经常要按根实体返回某个子项数量、按这个数量筛选、排序，而且这个含义比较稳定，不想每次都在 VO 里临时拼。请结合 easy-query 源码说明：这种场景什么时候该沉淀成实体计算属性，什么时候只做一次性投影；如果沉淀到实体，这个数量属性应该怎么建模，`ColumnValueSQLConverter` 里的 `selectColumnConvert/propertyColumnConvert/valueConvert/isRealColumn` 分别怎么理解；`autoSelect=false`、注册方式、以及为什么当前源码不能再把 `isMergeSubQuery()` 当成现行接口方法，也要讲清楚。",
+      "expected_output": "Must explain the modeling boundary without treating every relation count as an automatic computed-property candidate, but also without making entity modeling artificially hard to choose: the answer should frame it as a judgment call based on project context, prompt semantics, likely reuse, and maintenance cost. One-off report/list metrics can stay as query-time relation aggregate projection, while repeated stable business semantics are good candidates for entity-side computed-property modeling. It must show or clearly describe a root entity with a stable one-to-many path and `@Column(sqlConversion = DerivedCountColumnValueSQLConverter.class, autoSelect = false)` paired with `@InsertIgnore` and `@UpdateIgnore`. It must explain `selectColumnConvert(...)` as select-side SQL, `propertyColumnConvert(...)` as left-hand expression rewrite for where/orderBy/groupBy, `valueConvert(...)` as right-hand compare/store value handling, and `isRealColumn()` as false for non-physical derived count fields. It must mention manual registration through `QueryConfiguration.applyColumnValueSQLConverter(...)` and starter auto-collection of `ColumnValueSQLConverter` beans. It must also explicitly correct older docs by stating that the current inspected `ColumnValueSQLConverter` source does not expose `isMergeSubQuery()` as a current interface method.",
+      "files": []
+    },
+    {
+      "id": 52,
+      "name": "elements-window-then-aggregate",
+      "prompt": "请说明 easy-query 里 `elements(m,n)` 后面还能不能继续做聚合，而不只是 `joining(...)`。比如用户问“如果不是最近第 2 次，而是最近 2 次加起来呢”，你要结合源码说清楚：`elements(...)` 返回的到底是什么、为什么它后面还能继续 `where/distinct/count/sum/avg/max/min/joining` 这一类链式能力；哪些是当前测试/文档有直接证据，哪些是从返回类型可直接推出的能力。不要把它误讲成只能接 `joining(...)`。",
+      "expected_output": "Must explicitly state that current source `SQLManyQueryable.elements(...)` returns `SQLQueryable`, and `SQLQueryable` exposes aggregate/predicate APIs such as `where`, `distinct`, `count`, `sum`, `avg`, `max`, `min`, and `joining`. It must cite or describe direct evidence that `elements(...).joining(...)` is documented and that current tests directly show `elements(...).max(...)`. It must then clearly mark that `elements(...).count/sum/avg/min(...)` are justified from the current return type/API surface even if the exact same aggregate is not shown in the nearby docs/tests. It must not describe `elements(...)` as a joining-only terminal feature.",
+      "files": []
+    }
   ]
 }
 

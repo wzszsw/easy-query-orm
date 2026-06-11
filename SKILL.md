@@ -283,6 +283,9 @@ most one secondary reference when a boundary rule below says it is needed.
   in-memory metrics.
 - Keep grouped projections group-aware: non-key fields should come from
   aggregate expressions, grouped proxy access, or explicit window outputs.
+- Do not narrow `elements(start,end)` to string concatenation only; current
+  source returns `SQLQueryable` after `elements(...)`, so ranked-window slices
+  can continue into aggregate or predicate chains when the API surface fits.
 - Distinguish expression update from object update; do not blindly answer
   every update request with `updatable(entity).executeRows()`.
 - Distinguish expression delete from object delete; do not collapse
