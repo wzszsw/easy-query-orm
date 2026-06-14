@@ -240,6 +240,9 @@ most one secondary reference when a boundary rule below says it is needed.
 - Value conversion, auto conversion, enum/json mapping, `JdbcTypeHandler`,
   PostgreSQL `jsonb`:
   `references/value-conversion-type-handler.md`.
+- Built-in string/number/date/JSON functions, `valueConvert`, typed SQL
+  helpers, and dialect-specific function fallbacks:
+  `references/functions-native-sql.md`.
 - Interceptors, tenant/audit/data-permission,
   `useInterceptor(...)` / `noInterceptor(...)`:
   `references/interceptor.md`.

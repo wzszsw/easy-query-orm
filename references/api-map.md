@@ -171,6 +171,7 @@ If the result target is a DTO graph, prefer `selectAutoInclude(...)` before
 | `.first()` | First ranked child in a relation slice | `implicit-query.md` |
 | `.element(index)` | Zero-based nth ranked child | `implicit-query.md` |
 | `.elements(start,end)` | Zero-based inclusive ranked child window; returns a queryable slice that can continue with aggregate/predicate/joining APIs | `implicit-query.md` |
+| `.firstValue()` / `.lastValue()` / `.nthValue(...)` on offset/window chain | Window-value helpers for the offset branch | `functions-native-sql.md`, `implicit-query.md` |
 | `.joining(...)` on relation chain | Concatenate relation rows, often after `orderBy(...)` / `elements(...)` | `implicit-query.md` |
 | `.flatElement()` | Flatten to-many path for traversal or `toList(...)` | `implicit-controls.md` |
 | `.notEmptyAll(...)` | Non-empty and every matched row passes | `implicit-controls.md` |
@@ -195,6 +196,17 @@ Useful projection helpers:
 
 Read `query.md` for normal select, `query-composition.md` for advanced
 projection, and `select-auto-include.md` for DTO graphs.
+
+## Function Symbols
+
+| Symbol | Purpose | Read Next |
+|--------|---------|-----------|
+| `nullOrDefault(...)` | Cross-type SQL-side null fallback | `functions-native-sql.md` |
+| `equalsWith(...)` | Boolean equality expression helper | `functions-native-sql.md` |
+| `trim()` / `ltrim()` / `rtrim()` | String trim helpers | `functions-native-sql.md` |
+| `trimStart()` / `trimEnd()` | Lower-level trim aliases in current source | `functions-native-sql.md` |
+| `cast(..., TargetClass.class)` | SQL-side type cast helper via `fx()` | `functions-native-sql.md` |
+| `maxColumns(...)` / `minColumns(...)` | Greatest/least style multi-column comparison | `functions-native-sql.md` |
 
 ## Write, Transaction, and Save Symbols
 

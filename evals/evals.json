@@ -102,6 +102,14 @@
         ]
       },
       {
+        "id": "built-in-functions",
+        "purpose": "String, number, date, and JSON built-in function routing plus `valueConvert` vs SQL function boundaries.",
+        "eval_ids": [
+          55,
+          56
+        ]
+      },
+      {
         "id": "interceptors",
         "purpose": "EntityInterceptor, PredicateFilterInterceptor, UpdateSetInterceptor, UpdateEntityColumnInterceptor, ProtectedInterceptor, and use/noInterceptor control.",
         "eval_ids": [
@@ -625,6 +633,27 @@
       "name": "springboot-dynamic-routing-datasource-solution",
       "prompt": "我们项目已经用了 baomidou 的 dynamic-datasource，Spring 里拿到的是 `DynamicRoutingDataSource`。我想让 easy-query 跟着这个动态切库走。请给我一个正确的思路，并说明这和 easy-query 自己的 `DataSourceRoute<?>` 是不是一回事。",
       "expected_output": "Must recognize `DynamicRoutingDataSource` as the baomidou runtime-switching solution and describe it as distinct from easy-query's own `DataSourceRoute<?>` registration path. Should explain that `DynamicRoutingDataSource` is one Spring `DataSource` bean that resolves actual datasource by key at runtime, and that the doc-demo `EasyMultiEntityQuery` wrapper / scoped switching pattern is one workable integration approach but not a built-in framework type. Must not conflate `DataSourceRoute<?>` with Spring Boot multi-client wiring.",
+      "files": []
+    },
+    {
+      "id": 55,
+      "name": "built-in-string-date-number-functions",
+      "prompt": "easy-query 的内置函数里，字符串、数字和日期函数该怎么写才最符合官方风格？请给我 Java 示例，覆盖 concat/stringFormat、toLower/toUpper、trim、subString、length、abs/round/pow/sqrt、format/plusDays/year/dayOfYear，以及一个简单的 JSON 数组取对象字段的例子。",
+      "expected_output": "Must route to typed built-in function DSL rather than raw SQL. Should include representative verified examples for string concat/stringFormat, case conversion, trim, substring, length, numeric math, date format/plus/year/dayOfYear, and JSON typed access such as `asJSONArray().getJSONObject(0).getString(\"name\")`. It should not collapse everything into native SQL fragments.",
+      "files": []
+    },
+    {
+      "id": 56,
+      "name": "valueconvert-vs-sql-function-boundary",
+      "prompt": "easy-query 里 `valueConvert` 和 SQL 函数到底怎么分工？比如我要把日期格式化成 `yyyy-MM` 显示、再把 `score` 做绝对值计算。请结合源码说明哪些应该放在 SQL 函数链上，哪些只是查询结果后的内存转换。",
+      "expected_output": "Must explain that `valueConvert` is in-memory conversion after SQL execution, while SQL function chains like `format(...)`, `abs()`, `concat(...)` and similar operators change the emitted SQL or select expression. It should not use `valueConvert` to alter predicate semantics, and it should state that SQL-side function choice depends on dialect support where relevant.",
+      "files": []
+    },
+    {
+      "id": 57,
+      "name": "lesser-known-built-in-functions",
+      "prompt": "除了常见的 concat、format、abs 这些，easy-query 还有没有一些源码支持但不那么显眼的内置函数？请结合源码说明 `equalsWith`、`cast`、`trimStart/trimEnd`、`firstValue/lastValue/nthValue` 这些分别属于什么层次，哪些适合直接回答给普通用户，哪些更应该作为补充说明。",
+      "expected_output": "Must distinguish between user-facing high-level DSL and lower-level/source-backed helpers. It should mention that `equalsWith` is a real source-backed general function helper worth surfacing, `cast(..., TargetClass.class)` exists in current source via lower-level `fx()` usage, `trimStart/trimEnd` exist but user-facing docs usually emphasize `ltrim/rtrim`, and `firstValue/lastValue/nthValue` belong to the offset/window branch rather than ordinary string/date/math functions. It should avoid presenting obscure internal names like `bank/notBank/empty/notEmpty` as mainstream end-user function recommendations.",
       "files": []
     }
   ]
