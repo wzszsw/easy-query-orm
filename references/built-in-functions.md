@@ -1,12 +1,18 @@
 # Built-in Functions
 
-Use this reference when the requirement is still inside easy-query's typed DSL:
-string/number/date/JSON functions, general typed helpers, or `valueConvert`
-boundaries.
+Use this reference when the requirement is still inside easy-query's typed
+database-function layer: string/number/date/JSON functions, general typed
+helpers, or `valueConvert` boundaries.
 
 Do not use this file for raw SQL fragments, `sqlQuery(...)`, `sqlExecute(...)`,
 `queryable(rawSql, ...)`, or custom native-function wrappers. Those belong in
 `native-sql.md`.
+
+This is still SQL-side capability, not an abstraction away from the database.
+The difference from `native-sql.md` is not "no SQL involved", but "easy-query
+already gives you a typed function surface". Dialect and version support can
+still matter here, for example when one database exposes a function only on a
+newer version.
 
 ## Fast Routing
 

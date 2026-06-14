@@ -63,9 +63,11 @@ most one secondary reference when a boundary rule below says it is needed.
 15. For derived fields/metrics, let project context, prompt semantics, likely
     reuse, and complexity of the equivalent query shape guide the choice
     between entity-side computed-property modeling and query-time projection.
-16. Split function questions from raw SQL questions:
-    `built-in-functions.md` is typed DSL only; `native-sql.md` is raw SQL,
-    fragments, wrappers, and fallback entrypoints.
+16. Split function questions from raw SQL questions, but keep the boundary
+    honest: `built-in-functions.md` is the typed database-function layer,
+    still SQL-side and still subject to dialect/version support; `native-sql.md`
+    is the handwritten SQL escape hatch for fragments, wrappers, and fallback
+    entrypoints when the typed surface is insufficient.
 17. If the project version differs from the reference version, prefer the
     project and say which API or behavior may have moved.
 

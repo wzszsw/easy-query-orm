@@ -7,6 +7,12 @@ DSL query, or a reusable wrapper for an unsupported database function.
 If the requirement can already be expressed by built-in typed easy-query
 functions, use `built-in-functions.md` instead.
 
+The real boundary is:
+
+- `built-in-functions.md`: easy-query has already type-wrapped the database
+  function
+- `native-sql.md`: you need to write the SQL shape or function call yourself
+
 ## Fast Routing
 
 Use this file when the request mentions any of these:
