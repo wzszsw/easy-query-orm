@@ -63,7 +63,10 @@ most one secondary reference when a boundary rule below says it is needed.
 15. For derived fields/metrics, let project context, prompt semantics, likely
     reuse, and complexity of the equivalent query shape guide the choice
     between entity-side computed-property modeling and query-time projection.
-16. If the project version differs from the reference version, prefer the
+16. Split function questions from raw SQL questions:
+    `built-in-functions.md` is typed DSL only; `native-sql.md` is raw SQL,
+    fragments, wrappers, and fallback entrypoints.
+17. If the project version differs from the reference version, prefer the
     project and say which API or behavior may have moved.
 
 ## Triage
@@ -102,7 +105,8 @@ most one secondary reference when a boundary rule below says it is needed.
   `query-composition.md` is explicit joins/projection/proxy VO `.set(...)`;
   `subquery-explicit.md` is explicit subquery/derived table/CTE promotion;
   `implicit-query.md` and `implicit-controls.md` are relation-driven SQL;
-  `functions-native-sql.md` is only for function helpers or raw SQL fragments.
+  `built-in-functions.md` is typed function DSL;
+  `native-sql.md` is raw SQL fragments and raw SQL entrypoints.
 - Search form:
   `search-form-page.md` is endpoint workflow;
   `dto-object-query.md` is `whereObject/orderByObject/@EasyWhereCondition`;
@@ -191,8 +195,6 @@ most one secondary reference when a boundary rule below says it is needed.
   `references/subquery-explicit.md`.
   Pair with `references/implicit-query.md` only when a relation-driven
   alternative or `subQueryToGroupJoin(...)` tradeoff matters.
-- SQL functions, expression helpers, or native SQL fragments:
-  `references/functions-native-sql.md`.
 - Implicit relation capabilities: implicit join, scalar subquery, group join,
   ranked child, tree:
   `references/implicit-query.md`.
@@ -213,6 +215,14 @@ most one secondary reference when a boundary rule below says it is needed.
   `references/dto-object-query.md`.
 - `EasySearch`, `@EasyCond`, `sql-search` operator inference:
   `references/easy-search.md`.
+
+### Functions & Native SQL
+
+- Built-in string/number/date/JSON functions, `valueConvert`, and typed DSL
+  helpers:
+  `references/built-in-functions.md`.
+- Raw SQL entrypoints, fragments, wrappers, and dialect fallback:
+  `references/native-sql.md`.
 
 ### Write & Cross-Cutting
 
@@ -240,9 +250,6 @@ most one secondary reference when a boundary rule below says it is needed.
 - Value conversion, auto conversion, enum/json mapping, `JdbcTypeHandler`,
   PostgreSQL `jsonb`:
   `references/value-conversion-type-handler.md`.
-- Built-in string/number/date/JSON functions, `valueConvert`, typed SQL
-  helpers, and dialect-specific function fallbacks:
-  `references/functions-native-sql.md`.
 - Interceptors, tenant/audit/data-permission,
   `useInterceptor(...)` / `noInterceptor(...)`:
   `references/interceptor.md`.
@@ -290,6 +297,20 @@ most one secondary reference when a boundary rule below says it is needed.
 - For AP/reporting answers, prefer DSL aggregation / CTE / UNION / partition
   APIs over Java Stream regrouping, manual SQL strings, or post-query
   in-memory metrics.
+- For built-in function questions, keep the answer inside typed DSL and do not
+  drift into raw SQL fragment advice unless the typed surface is truly missing.
+- For native SQL answers, do not jump straight to `sqlQuery(...)` if the raw
+  SQL is only the `FROM` seed and the rest should still use easy-query DSL;
+  prefer `queryable(rawSql, Entity.class, params)` in that case.
+- Prefer current-source proxy native-fragment names `rawSQLCommand(...)` and
+  `rawSQLStatement(...)` over older `expression().sql(...)` /
+  `expression().sqlSegment(...)` compatibility forms unless the project code
+  already uses the older surface or the answer specifically needs lower-level
+  `format(...)` / `messageFormat()` control.
+- When recommending raw SQL fragments, distinguish JDBC parameters
+  `value(...)` from literal insertion `format(...)`, and mention
+  `messageFormat()` / keep-style quoting if the SQL template itself contains
+  quoted literals plus placeholders.
 - Keep grouped projections group-aware: non-key fields should come from
   aggregate expressions, grouped proxy access, or explicit window outputs.
 - Do not narrow `elements(start,end)` to string concatenation only; current

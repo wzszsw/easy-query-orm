@@ -304,6 +304,7 @@ First fix:
 
 Read next:
 
-- `functions-native-sql.md`
+- `built-in-functions.md`
+- `native-sql.md`
 - `setup-spring-boot.md`
 - `advanced.md`

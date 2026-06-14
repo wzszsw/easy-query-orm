@@ -364,6 +364,6 @@ Use both when:
 ## Read next
 
 - SQL-side column transformations such as encryption/database functions:
-  `functions-native-sql.md`
+  `native-sql.md`
 - entity annotation surface and column metadata basics: `entity-mapping.md`
 - PostgreSQL JSON examples in docs: `easy-query-doc/src/prop/json-prop.md`

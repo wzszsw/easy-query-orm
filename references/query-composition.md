@@ -141,6 +141,11 @@ user.bankCards().count().as(DocUserVO.Fields.cardCount)
 
 ## Native SQL Fragment
 
+For current-source native SQL guidance, entrypoint choice, reusable wrapper
+patterns, and quote/format boundaries, prefer `native-sql.md`.
+The snippets here are only quick examples inside the broader projection/join
+reference.
+
 Predicate fragment:
 
 ```java

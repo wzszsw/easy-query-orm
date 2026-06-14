@@ -43,6 +43,9 @@ If the missing symbol is really a method/field rather than a type, switch to
 | `DefaultEasyEntityQuery` | `import com.easy.query.api.proxy.client.DefaultEasyEntityQuery;` |
 | `EasyQueryClient` | `import com.easy.query.core.api.client.EasyQueryClient;` |
 | `EasyQueryBootstrapper` | `import com.easy.query.core.bootstrapper.EasyQueryBootstrapper;` |
+| `EasyProxyParamExpressionUtil` | `import com.easy.query.api.proxy.util.EasyProxyParamExpressionUtil;` |
+| `Expression` | `import com.easy.query.core.proxy.core.Expression;` |
+| `PropTypeColumn` | `import com.easy.query.core.proxy.PropTypeColumn;` |
 | `ProxyEntityAvailable` | `import com.easy.query.core.proxy.ProxyEntityAvailable;` |
 | `Transaction` | `import com.easy.query.core.basic.jdbc.tx.Transaction;` |
 

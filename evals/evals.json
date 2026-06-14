@@ -103,10 +103,20 @@
       },
       {
         "id": "built-in-functions",
-        "purpose": "String, number, date, and JSON built-in function routing plus `valueConvert` vs SQL function boundaries.",
+        "purpose": "String, number, date, JSON, and general typed function routing plus `valueConvert` vs SQL function boundaries.",
         "eval_ids": [
           55,
-          56
+          56,
+          57
+        ]
+      },
+      {
+        "id": "native-sql",
+        "purpose": "Raw SQL entrypoints, raw-SQL-backed derived tables, proxy/property native fragments, reusable custom native wrappers, and quote/format boundaries.",
+        "eval_ids": [
+          58,
+          59,
+          60
         ]
       },
       {
@@ -649,13 +659,34 @@
       "expected_output": "Must explain that `valueConvert` is in-memory conversion after SQL execution, while SQL function chains like `format(...)`, `abs()`, `concat(...)` and similar operators change the emitted SQL or select expression. It should not use `valueConvert` to alter predicate semantics, and it should state that SQL-side function choice depends on dialect support where relevant.",
       "files": []
     },
-    {
-      "id": 57,
-      "name": "lesser-known-built-in-functions",
-      "prompt": "除了常见的 concat、format、abs 这些，easy-query 还有没有一些源码支持但不那么显眼的内置函数？请结合源码说明 `equalsWith`、`cast`、`trimStart/trimEnd`、`firstValue/lastValue/nthValue` 这些分别属于什么层次，哪些适合直接回答给普通用户，哪些更应该作为补充说明。",
-      "expected_output": "Must distinguish between user-facing high-level DSL and lower-level/source-backed helpers. It should mention that `equalsWith` is a real source-backed general function helper worth surfacing, `cast(..., TargetClass.class)` exists in current source via lower-level `fx()` usage, `trimStart/trimEnd` exist but user-facing docs usually emphasize `ltrim/rtrim`, and `firstValue/lastValue/nthValue` belong to the offset/window branch rather than ordinary string/date/math functions. It should avoid presenting obscure internal names like `bank/notBank/empty/notEmpty` as mainstream end-user function recommendations.",
-      "files": []
-    }
-  ]
-}
+      {
+        "id": 57,
+        "name": "lesser-known-built-in-functions",
+        "prompt": "除了常见的 concat、format、abs 这些，easy-query 还有没有一些源码支持但不那么显眼的内置函数？请结合源码说明 `equalsWith`、`cast`、`trimStart/trimEnd`、`firstValue/lastValue/nthValue` 这些分别属于什么层次，哪些适合直接回答给普通用户，哪些更应该作为补充说明。",
+        "expected_output": "Must distinguish between user-facing high-level DSL and lower-level/source-backed helpers. It should mention that `equalsWith` is a real source-backed general function helper worth surfacing, `cast(..., TargetClass.class)` exists in current source via lower-level `fx()` usage, `trimStart/trimEnd` exist but user-facing docs usually emphasize `ltrim/rtrim`, and `firstValue/lastValue/nthValue` belong to the offset/window branch rather than ordinary string/date/math functions. It should avoid presenting obscure internal names like `bank/notBank/empty/notEmpty` as mainstream end-user function recommendations.",
+        "files": []
+      },
+      {
+        "id": 58,
+        "name": "native-sql-derived-table-vs-sqlquery",
+        "prompt": "我已经有一段旧 SQL：`select * from t_topic where deleted = 0`。现在还想继续用 easy-query 给它加 `title like keyword`、稳定分页、并且后面可能还要 join 其他表。这个场景应该用 `sqlQuery(...)` 还是别的入口？请给 Java 示例，并说明为什么不要先 `sqlQuery` 出来再内存过滤分页。",
+        "expected_output": "Must prefer `easyEntityQuery.queryable(rawSql, Topic.class, params)` or equivalent raw-SQL-backed queryable as the primary answer, then continue with DSL `where/orderBy/toPageResult` and optionally later join composition. It must explain that `sqlQuery(...)` is for already-final SQL result materialization, while this scenario needs a derived table that still participates in later DSL composition. It must not answer with `sqlQuery(...)` plus Java-side filtering/paging.",
+        "files": []
+      },
+      {
+        "id": 59,
+        "name": "native-sql-static-wrapper-pattern",
+        "prompt": "easy-query 某个数据库函数 DSL 里还没有，比如 MySQL 的 `FIND_IN_SET`。如果我这个函数会在很多查询里复用，应该怎么封装才符合 easy-query 风格？请结合源码给 Java 示例，并说明 `parseContextExpressionByParameters(...)` 有什么前提。",
+        "expected_output": "Must recommend wrapping the fragment as a reusable static helper around `rawSQLCommand(...)` or `rawSQLStatement(...)`, using `EasyProxyParamExpressionUtil.parseContextExpressionByParameters(...)` to recover the expression context from a proxy column/expression parameter. It must explain that this helper requires at least one argument carrying easy-query context and cannot infer context when every argument is only a plain scalar. It should not fall back to copying ad hoc string fragments into every service method.",
+        "files": []
+      },
+      {
+        "id": 60,
+        "name": "native-sql-format-value-messageformat-boundary",
+        "prompt": "我在 easy-query 的原生 SQL 片段里写 `DATE_FORMAT({0}, '%Y-%m-%d')`，有时候又带参数占位。这里 `value(...)`、`format(...)`、引号双写、`messageFormat()` 到底怎么分？请按源码现状说明，不要只给一个模糊建议。",
+        "expected_output": "Must explain the current-source formatting boundary: `value(...)` becomes JDBC parameters, `format(...)` injects literal text through `MessageFormat`, native fragments default to keep-style quote escaping, and when the SQL template itself contains quoted literals plus placeholders the common safe patterns are doubled single quotes or moving the literal into `format(...)`. It should mention `messageFormat()` as the way to disable default keep-style quote escaping when lower-level control is needed. It must not confuse `value(...)` and `format(...)` or imply they have the same SQL semantics.",
+        "files": []
+      }
+    ]
+  }
 

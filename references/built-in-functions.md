@@ -1,8 +1,12 @@
-# Functions and Native SQL
+# Built-in Functions
 
-Use this reference when a query needs SQL functions, typed expression conversion, or raw SQL fragments.
+Use this reference when the requirement is still inside easy-query's typed DSL:
+string/number/date/JSON functions, general typed helpers, or `valueConvert`
+boundaries.
 
-Prefer typed DSL functions first. Use raw SQL only for dialect-specific fragments, legacy SQL, or a function not exposed by easy-query.
+Do not use this file for raw SQL fragments, `sqlQuery(...)`, `sqlExecute(...)`,
+`queryable(rawSql, ...)`, or custom native-function wrappers. Those belong in
+`native-sql.md`.
 
 ## Fast Routing
 
@@ -13,17 +17,22 @@ Use this file when the request mentions any of these:
 - date formatting / date math / date properties / duration
 - JSON object or JSON array field access
 - `valueConvert` vs SQL-side function conversion
+- lesser-known typed helpers such as `equalsWith`, `nullOrDefault`,
+  `maxColumns/minColumns`
 
-If the user only wants ordinary comparison or null checks, stay in the main
-query docs instead.
+If the user is asking for a SQL fragment, whole SQL string, or unsupported
+dialect function fallback, switch to `native-sql.md`.
 
 ## Type Expression Helpers
 
 Source interfaces expose useful typed helpers:
 
-- `StringTypeExpression`: `asStr`, `isBlank`, `isNotBlank`, `isEmpty`, `isNotEmpty`, `startsWith`, `endsWith`, `contains`, `notStartsWith`, `notEndsWith`, `notContains`.
-- `ObjectTypeExpression`: `asAny`, `valueConvert`.
-- `NumberTypeExpression`: numeric function support through `ColumnNumberFunctionAvailable`.
+- `StringTypeExpression`: `asStr`, `isBlank`, `isNotBlank`, `isEmpty`,
+  `isNotEmpty`, `startsWith`, `endsWith`, `contains`, `notStartsWith`,
+  `notEndsWith`, `notContains`
+- `ObjectTypeExpression`: `asAny`, `valueConvert`
+- `NumberTypeExpression`: numeric function support through
+  `ColumnNumberFunctionAvailable`
 
 Examples:
 
@@ -35,9 +44,11 @@ query.where(user -> {
 });
 ```
 
-Use `asAny()`/`asAnyType(...)` only to satisfy compile-time typing when the SQL expression type is known but the DSL type is too narrow.
+Use `asAny()` / `asAnyType(...)` only to satisfy compile-time typing when the
+SQL expression type is known but the DSL type is too narrow.
 
-Docs note that `toStr`/`toNumber` are database-level functions, while `asAny()` and `asAnyType(...)` are compile-time type adaptation.
+Docs note that `toStr` / `toNumber` are database-level functions, while
+`asAny()` and `asAnyType(...)` are compile-time type adaptation.
 
 ## valueConvert
 
@@ -51,9 +62,10 @@ List<TopicVO> rows = easyEntityQuery.queryable(Topic.class)
     .toList();
 ```
 
-Do not use `valueConvert` to change SQL predicate semantics. It converts result values after SQL execution.
+Do not use `valueConvert` to change SQL predicate semantics. It converts result
+values after SQL execution.
 
-## Date and String Functions
+## Function Families
 
 Docs under `easy-query-doc/src/func` show date, string, number, aggregate, and
 JSON functions. Prefer local function DSL such as:
@@ -65,7 +77,8 @@ user.name().toLower().eq("tom");
 
 High-value verified shapes:
 
-- string concat / stringFormat: `code().concat("x")`, `expression().stringFormat(...)`
+- string concat / stringFormat: `code().concat("x")`,
+  `expression().stringFormat(...)`
 - string case / trim / length / compare:
   `toLower()`, `toUpper()`, `trim()`, `ltrim()`, `rtrim()`, `length()`,
   `compareTo(...)`
@@ -74,7 +87,8 @@ High-value verified shapes:
 - date format / add / extract:
   `format(...)`, `plusDays(...)`, `plusMonths(...)`, `year()`, `month()`,
   `day()`, `hour()`, `minute()`, `second()`, `dayOfYear()`, `dayOfWeek()`,
-  `dayOfWeekSunDayIsLastDay()`, `duration(...).toDays()/toHours()/toMinutes()/toSeconds()`
+  `dayOfWeekSunDayIsLastDay()`,
+  `duration(...).toDays()/toHours()/toMinutes()/toSeconds()`
 - numeric math:
   `abs()`, `sign()`, `floor()`, `ceiling()`, `round()`, `round(decimals)`,
   `log()`, `log10()`, `pow(...)`, `sqrt()`, `cos()`, `sin()`, `tan()`,
@@ -86,20 +100,6 @@ High-value verified shapes:
 
 Confirm the exact method exists in the target project version before using less
 common functions.
-
-Additional source-backed items worth knowing:
-
-- `equalsWith(...)` for boolean equality expression
-- `cast(..., TargetClass.class)` for SQL-side type cast in lower-level `fx()`
-  usage
-- `trimStart()` / `trimEnd()` exist in current source; user-facing DSL often
-  appears as `ltrim()` / `rtrim()`
-- offset/window functions also expose `firstValue()` / `lastValue()` /
-  `nthValue(...)`, but they belong to the offset/window branch rather than the
-  ordinary string/date/math branch
-- `JSONArrayLengthSQLFunction` exists in current source, but unless the target
-  project version or nearby code proves the surfaced DSL method, do not
-  confidently answer with a JSON-array-length chain from memory
 
 ## String Functions
 
@@ -119,9 +119,9 @@ easyEntityQuery.queryable(DocBankCard.class)
     .toList();
 ```
 
-Use `toLower()`, `toUpper()`, `trim()` / `ltrim()` / `rtrim()`, `subString(...)`,
-`leftPad(...)`, `rightPad(...)`, `length()`, and `compareTo(...)` as verified
-string DSL.
+Use `toLower()`, `toUpper()`, `trim()` / `ltrim()` / `rtrim()`,
+`subString(...)`, `leftPad(...)`, `rightPad(...)`, `length()`, and
+`compareTo(...)` as verified string DSL.
 
 If the user asks specifically about left-trim / right-trim naming, mention
 that current source also has lower-level `trimStart()` / `trimEnd()` helpers,
@@ -197,7 +197,7 @@ conservatively instead of inventing the exact chain.
 Some source-backed function helpers live outside the obvious string/date/math
 grouping and are easy to miss:
 
-- `nullOrDefault(...)`: cross-type null fallback
+- `nullOrDefault(...)`: cross-type SQL-side null fallback
 - `equalsWith(...)`: compare two values and return a boolean expression
 - `maxColumns(...)` / `minColumns(...)`: greatest/least style multi-column
   comparison where supported
@@ -216,64 +216,17 @@ easyEntityQuery.queryable(DocBankCard.class)
 Use these before dropping to raw SQL for simple null/default or equality
 expression cases.
 
-## Native Predicate Segment
+## Lesser-Known but Real
 
-Predicate SQL fragment:
+Additional source-backed items worth knowing:
 
-```java
-user.expression().sql("{0} != {1}", c -> {
-    c.expression(user.name());
-    c.value("x");
-});
-```
+- `cast(..., TargetClass.class)` for SQL-side type cast in lower-level `fx()`
+  usage
+- `trimStart()` / `trimEnd()` exist in current source; user-facing DSL often
+  appears as `ltrim()` / `rtrim()`
+- offset/window functions also expose `firstValue()` / `lastValue()` /
+  `nthValue(...)`, but they belong to the offset/window branch rather than the
+  ordinary string/date/math branch
 
-Use placeholders and `c.value(...)` for values. Do not concatenate user input into SQL fragments.
-
-## Native Select Segment
-
-Select SQL fragment:
-
-```java
-query.select(UserVO.class, user -> Select.of(
-    user.expression()
-        .sqlSegment("IFNULL({0}, 1)", c -> c.expression(user.age()), Integer.class)
-        .as(UserVO.Fields.ageOrDefault)
-));
-```
-
-Proxy assignment:
-
-```java
-query.select(user -> new UserVOProxy()
-    .ageOrDefault().setSQL("IFNULL({0}, 1)", c -> c.expression(user.age())));
-```
-
-Expression update:
-
-```java
-easyEntityQuery.updatable(User.class)
-    .setColumns(user -> {
-        user.version().setSQL("ifnull({0},0)+{1}", c -> {
-            c.expression(user.version());
-            c.value(1);
-        });
-    })
-    .where(user -> user.id().eq(id))
-    .executeRows();
-```
-
-State the dialect assumption when using functions like `IFNULL`, `SUBSTR`, JSON operators, or database-specific date formats.
-
-## Native SQL Query
-
-Main proxy client exposes:
-
-```java
-easyEntityQuery.sqlQuery(sql, Result.class);
-easyEntityQuery.sqlQuery(sql, Result.class, parameters);
-easyEntityQuery.sqlEasyQuery(sql, Result.class, sqlParameters);
-easyEntityQuery.sqlQueryMap(sql);
-easyEntityQuery.sqlExecute(sql);
-```
-
-Prefer DSL unless raw SQL is part of the requirement or the SQL already exists.
+These are worth surfacing as supplement, but they are not the mainstream first
+answer for ordinary function questions.

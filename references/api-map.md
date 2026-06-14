@@ -19,7 +19,8 @@ Common top-level methods:
 
 `queryable(...)`, `insertable(...)`, `updatable(...)`, `deletable(...)`,
 `mapInsertable(...)`, `mapUpdatable(...)`, `savable(...)`,
-`beginTransaction()`, `sqlQuery(...)`, `sqlQueryMap(...)`, `sqlExecute(...)`
+`beginTransaction()`, `sqlQuery(...)`, `sqlEasyQuery(...)`,
+`sqlQueryMap(...)`, `sqlExecute(...)`
 
 ## Entity and Mapping Symbols
 
@@ -171,7 +172,7 @@ If the result target is a DTO graph, prefer `selectAutoInclude(...)` before
 | `.first()` | First ranked child in a relation slice | `implicit-query.md` |
 | `.element(index)` | Zero-based nth ranked child | `implicit-query.md` |
 | `.elements(start,end)` | Zero-based inclusive ranked child window; returns a queryable slice that can continue with aggregate/predicate/joining APIs | `implicit-query.md` |
-| `.firstValue()` / `.lastValue()` / `.nthValue(...)` on offset/window chain | Window-value helpers for the offset branch | `functions-native-sql.md`, `implicit-query.md` |
+| `.firstValue()` / `.lastValue()` / `.nthValue(...)` on offset/window chain | Window-value helpers for the offset branch | `built-in-functions.md`, `implicit-query.md` |
 | `.joining(...)` on relation chain | Concatenate relation rows, often after `orderBy(...)` / `elements(...)` | `implicit-query.md` |
 | `.flatElement()` | Flatten to-many path for traversal or `toList(...)` | `implicit-controls.md` |
 | `.notEmptyAll(...)` | Non-empty and every matched row passes | `implicit-controls.md` |
@@ -201,12 +202,29 @@ projection, and `select-auto-include.md` for DTO graphs.
 
 | Symbol | Purpose | Read Next |
 |--------|---------|-----------|
-| `nullOrDefault(...)` | Cross-type SQL-side null fallback | `functions-native-sql.md` |
-| `equalsWith(...)` | Boolean equality expression helper | `functions-native-sql.md` |
-| `trim()` / `ltrim()` / `rtrim()` | String trim helpers | `functions-native-sql.md` |
-| `trimStart()` / `trimEnd()` | Lower-level trim aliases in current source | `functions-native-sql.md` |
-| `cast(..., TargetClass.class)` | SQL-side type cast helper via `fx()` | `functions-native-sql.md` |
-| `maxColumns(...)` / `minColumns(...)` | Greatest/least style multi-column comparison | `functions-native-sql.md` |
+| `nullOrDefault(...)` | Cross-type SQL-side null fallback | `built-in-functions.md` |
+| `equalsWith(...)` | Boolean equality expression helper | `built-in-functions.md` |
+| `trim()` / `ltrim()` / `rtrim()` | String trim helpers | `built-in-functions.md` |
+| `trimStart()` / `trimEnd()` | Lower-level trim aliases in current source | `built-in-functions.md` |
+| `cast(..., TargetClass.class)` | SQL-side type cast helper via `fx()` | `built-in-functions.md` |
+| `maxColumns(...)` / `minColumns(...)` | Greatest/least style multi-column comparison | `built-in-functions.md` |
+| `rawSQLCommand(...)` | Recommended proxy-side execution fragment for `where` / `orderBy` / `having` | `native-sql.md` |
+| `rawSQLStatement(...)` | Recommended proxy-side typed native fragment expression | `native-sql.md` |
+| `setSQL(...)` | Native SQL assignment for proxy projection/update field setters | `native-sql.md` |
+| `sqlNativeSegment(...)` | Property-mode or lower-level native SQL fragment entry | `native-sql.md` |
+| `EasyProxyParamExpressionUtil.parseContextExpressionByParameters(...)` | Recover expression context for reusable custom native function wrappers | `native-sql.md`, `symbol-imports.md` |
+| `messageFormat()` | Disable default keep-style quote escaping in native fragment formatting | `native-sql.md` |
+
+## Native SQL Entry Symbols
+
+| Symbol | Purpose | Read Next |
+|--------|---------|-----------|
+| `sqlQuery(...)` | Execute existing full SQL and materialize typed rows | `native-sql.md` |
+| `sqlEasyQuery(...)` | Execute existing full SQL with explicit `SQLParameter` list | `native-sql.md` |
+| `sqlQueryMap(...)` | Execute existing full SQL and return maps | `native-sql.md` |
+| `sqlExecute(...)` | Execute existing raw DML/DDL SQL | `native-sql.md` |
+| `queryable(String sql, Class<T> clazz, Collection<Object> params)` | Treat raw SQL as a derived table and continue with DSL composition | `native-sql.md` |
+| `mapQueryable(String sql)` | Raw-SQL-backed map queryable when no entity type is appropriate | `native-sql.md` |
 
 ## Write, Transaction, and Save Symbols
 
