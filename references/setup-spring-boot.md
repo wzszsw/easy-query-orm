@@ -25,23 +25,26 @@ for Java**, **KSP (`sql-ksp-processor`) for Kotlin** (Kotlin Spring projects sho
 </dependency>
 <dependency>
     <groupId>com.easy-query</groupId>
-    <artifactId>sql-mysql</artifactId>      <!-- dialect -->
-    <version>3.2.10</version>
-</dependency>
-<dependency>
-    <groupId>com.easy-query</groupId>
     <artifactId>sql-processor</artifactId>  <!-- APT; KSP instead for Kotlin -->
     <version>3.2.10</version>
     <scope>provided</scope>
 </dependency>
 ```
 
+Current source shows `sql-springboot-starter` already includes the mainstream
+easy-query dialect modules on its own compile path. For a normal Spring Boot
+starter project, do not repeat `sql-mysql` / `sql-pgsql` / `sql-mssql` /
+`sql-oracle` and similar easy-query dialect artifacts unless the project has a
+very specific dependency-management reason. What you still need separately is
+the JDBC driver, for example `mysql-connector-j` or the PostgreSQL driver.
+
 ## 2. application.yml
 
 The config prefix is `easy-query`. In current starter source,
 `easy-query.enable` is optional unless you want to turn the starter off with
-`false`. The important property for successful client construction is the
-database dialect.
+`false`. The important property for successful client construction is
+`easy-query.database`, which selects the dialect from the starter-bundled
+dialect modules.
 
 ```yaml
 spring:
@@ -117,7 +120,10 @@ for disabling that aspect is `easy-query-track.enable: false`, not the older
 - Omitting `easy-query.database` or leaving it on the unknown default → starter throws `Please select the correct database dialect`.
 - Setting `easy-query.enable: false` → starter bootstrap beans are disabled.
 - Setting `easy-query.build: false` without defining replacement `EasyQueryClient` / `EasyEntityQuery` beans.
-- `easy-query.database` not matching the `sql-*` dialect artifact on the classpath.
+- Setting `easy-query.database` to the wrong dialect value for the actual
+  database in use.
+- Repeating `sql-mysql` / `sql-pgsql` / other easy-query dialect artifacts
+  alongside `sql-springboot-starter` without a specific reason.
 - Adding `@Transactional` *and* a manual `beginTransaction()` in the same method (double transaction).
 - Forgetting the proxy processor (APT/KSP) — entities compile but proxies are missing.
 - Having multiple `DataSource` beans but expecting the default starter to choose the right one automatically.

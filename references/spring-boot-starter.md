@@ -31,6 +31,15 @@ The starter registers three auto-configuration classes:
 Boot 2/3 use `sql-springboot-starter`. Boot 4 uses
 `sql-springboot4-starter` with the same role split.
 
+Current source also shows that `sql-springboot-starter` already has compile
+dependencies on the mainstream easy-query dialect artifacts such as
+`sql-mysql`, `sql-pgsql`, `sql-mssql`, `sql-oracle`, `sql-h2`, `sql-sqlite`,
+`sql-db2`, `sql-clickhouse`, `sql-dameng`, `sql-kingbase-es`,
+`sql-gauss-db`, `sql-tsdb`, and `sql-duckdb`. So for ordinary starter usage,
+do not tell users to add another easy-query dialect artifact on top of the
+starter unless they have a concrete dependency-management reason. The separate
+thing users still need is the JDBC driver for their database.
+
 ## Condition semantics that matter
 
 Current source behavior is:
@@ -55,6 +64,9 @@ Practical reading:
 - `easy-query.build=false` is the clean escape hatch when you want to keep
   starter property binding + component collection but build your own
   `EasyQueryClient`.
+- `easy-query.database` is still required because the starter chooses among its
+  bundled dialect modules by property; bundling the artifacts does not remove
+  the need to set the dialect value.
 
 ## Auto-collected extension beans
 
