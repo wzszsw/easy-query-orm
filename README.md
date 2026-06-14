@@ -16,13 +16,19 @@ emphasis on verified API names and practical routing.
 
 ## Install
 
-Clone or copy this repository into your Codex skills directory:
+Install from GitHub with the `skills` CLI:
+
+```text
+npx skills add wzszsw/easy-query-orm
+```
+
+If you prefer a manual install, clone or copy this repository into your Codex skills directory:
 
 ```text
 ~/.codex/skills/easy-query-orm
 ```
 
-Restart Codex after installation so the skill can be discovered cleanly.
+Restart Codex after a manual installation so the skill can be discovered cleanly.
 
 ## Use
 
