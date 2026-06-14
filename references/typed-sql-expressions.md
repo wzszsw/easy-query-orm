@@ -35,6 +35,9 @@ and convert them to typed expressions".
 
 Use this file when the request mentions any of these:
 
+- database functions that easy-query may already type-wrap
+- string/date/math/JSON functions such as `concat`, formatting, extraction,
+  path access, cast, and conversion
 - string formatting / concatenation / trimming / case conversion / padding
 - numeric math functions such as abs, round, floor, ceiling, log, pow, sqrt
 - date formatting / date math / date properties / duration

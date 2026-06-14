@@ -107,8 +107,10 @@ most one secondary reference when a boundary rule below says it is needed.
   `query-composition.md` is explicit joins/projection/proxy VO `.set(...)`;
   `subquery-explicit.md` is explicit subquery/derived table/CTE promotion;
   `implicit-query.md` and `implicit-controls.md` are relation-driven SQL;
-  `typed-sql-expressions.md` is typed SQL expressions;
-  `native-sql.md` is raw SQL fragments and raw SQL entrypoints.
+  `typed-sql-expressions.md` is typed SQL expressions and typed database
+  functions;
+  `native-sql.md` is raw SQL fragments, raw SQL entrypoints, and fallback
+  database-function writing.
 - Search form:
   `search-form-page.md` is endpoint workflow;
   `dto-object-query.md` is `whereObject/orderByObject/@EasyWhereCondition`;
@@ -221,9 +223,11 @@ most one secondary reference when a boundary rule below says it is needed.
 ### Functions & Native SQL
 
 - Typed SQL expressions such as string/number/date/JSON capabilities,
-  `valueConvert`, casts, and path access:
+  `valueConvert`, casts, path access, and typed database-function writing such
+  as `concat` / date functions / math functions / JSON functions:
   `references/typed-sql-expressions.md`.
-- Raw SQL entrypoints, fragments, wrappers, and dialect fallback:
+- Raw SQL entrypoints, fragments, wrappers, and dialect fallback for database
+  functions that are not already exposed by the typed surface:
   `references/native-sql.md`.
 
 ### Write & Cross-Cutting

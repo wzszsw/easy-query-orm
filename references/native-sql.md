@@ -17,6 +17,8 @@ The real boundary is:
 
 Use this file when the request mentions any of these:
 
+- a database function is not surfaced by easy-query's typed layer
+- custom database function / dialect function / handwritten function call
 - `sqlQuery(...)`, `sqlEasyQuery(...)`, `sqlQueryMap(...)`, `sqlExecute(...)`
 - `queryable(rawSql, Entity.class, params)` or `mapQueryable(String sql)`
 - native SQL fragment in `where` / `orderBy` / `having` / `select` / `set`
