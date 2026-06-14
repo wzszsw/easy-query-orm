@@ -146,31 +146,15 @@ patterns, and quote/format boundaries, prefer `native-sql.md`.
 The snippets here are only quick examples inside the broader projection/join
 reference.
 
-Predicate fragment:
-
-```java
-user.expression().sql("{0} != {1}", c -> {
-    c.expression(user.name());
-    c.value("x");
-});
-```
-
-Select fragment:
-
-```java
-user.expression()
-    .sqlSegment("IFNULL({0}, 1)", c -> c.expression(user.age()), Integer.class)
-    .as(DocUserVO.Fields.cardCount)
-```
-
 Proxy assignment:
 
 ```java
 r.cardCount().setSQL("IFNULL({0},1)", c -> c.expression(user.age()));
 ```
 
-Prefer typed DSL functions first. Only drop to SQL fragments for dialect-specific
-behavior or APIs not covered by easy-query.
+For predicate/select fragment defaults, wrapper patterns, and current-source
+`rawSQLCommand(...)` / `rawSQLStatement(...)` naming, read `native-sql.md`
+instead of treating this file as the primary raw-SQL guide.
 
 ## Chunking and Streaming
 

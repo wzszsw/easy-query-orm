@@ -198,7 +198,7 @@ Useful projection helpers:
 Read `query.md` for normal select, `query-composition.md` for advanced
 projection, and `select-auto-include.md` for DTO graphs.
 
-## Function Symbols
+## Typed Expression and Native SQL Symbols
 
 | Symbol | Purpose | Read Next |
 |--------|---------|-----------|
