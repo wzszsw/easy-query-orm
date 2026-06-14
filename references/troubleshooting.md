@@ -304,7 +304,7 @@ First fix:
 
 Read next:
 
-- `built-in-functions.md`
+- `typed-sql-expressions.md`
 - `native-sql.md`
 - `setup-spring-boot.md`
 - `advanced.md`

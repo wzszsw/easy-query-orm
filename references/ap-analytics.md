@@ -268,8 +268,8 @@ Source anchors:
   `implicit-query.md`
 - predicate/branch controls around relation analytics:
   `implicit-controls.md`
-- typed functions:
-  `built-in-functions.md`
+- typed SQL expressions:
+  `typed-sql-expressions.md`
 - raw SQL fragments when a metric truly needs lower-level customization:
   `native-sql.md`
 - code-first DDL / sharding / multi-datasource after analytics setup:

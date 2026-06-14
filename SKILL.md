@@ -63,11 +63,11 @@ most one secondary reference when a boundary rule below says it is needed.
 15. For derived fields/metrics, let project context, prompt semantics, likely
     reuse, and complexity of the equivalent query shape guide the choice
     between entity-side computed-property modeling and query-time projection.
-16. Split function questions from raw SQL questions, but keep the boundary
-    honest: `built-in-functions.md` is the typed database-function layer,
-    still SQL-side and still subject to dialect/version support; `native-sql.md`
-    is the handwritten SQL escape hatch for fragments, wrappers, and fallback
-    entrypoints when the typed surface is insufficient.
+16. Split typed SQL expression questions from raw SQL questions, but keep the
+    boundary honest: `typed-sql-expressions.md` is the typed SQL expression
+    layer, still SQL-side and still subject to dialect/version support;
+    `native-sql.md` is the handwritten SQL escape hatch for fragments,
+    wrappers, and fallback entrypoints when the typed surface is insufficient.
 17. If the project version differs from the reference version, prefer the
     project and say which API or behavior may have moved.
 
@@ -107,7 +107,7 @@ most one secondary reference when a boundary rule below says it is needed.
   `query-composition.md` is explicit joins/projection/proxy VO `.set(...)`;
   `subquery-explicit.md` is explicit subquery/derived table/CTE promotion;
   `implicit-query.md` and `implicit-controls.md` are relation-driven SQL;
-  `built-in-functions.md` is typed function DSL;
+  `typed-sql-expressions.md` is typed SQL expressions;
   `native-sql.md` is raw SQL fragments and raw SQL entrypoints.
 - Search form:
   `search-form-page.md` is endpoint workflow;
@@ -220,9 +220,9 @@ most one secondary reference when a boundary rule below says it is needed.
 
 ### Functions & Native SQL
 
-- Built-in string/number/date/JSON functions, `valueConvert`, and typed DSL
-  helpers:
-  `references/built-in-functions.md`.
+- Typed SQL expressions such as string/number/date/JSON capabilities,
+  `valueConvert`, casts, and path access:
+  `references/typed-sql-expressions.md`.
 - Raw SQL entrypoints, fragments, wrappers, and dialect fallback:
   `references/native-sql.md`.
 
@@ -299,8 +299,9 @@ most one secondary reference when a boundary rule below says it is needed.
 - For AP/reporting answers, prefer DSL aggregation / CTE / UNION / partition
   APIs over Java Stream regrouping, manual SQL strings, or post-query
   in-memory metrics.
-- For built-in function questions, keep the answer inside typed DSL and do not
-  drift into raw SQL fragment advice unless the typed surface is truly missing.
+- For typed SQL expression questions, keep the answer inside the typed surface
+  and do not drift into raw SQL fragment advice unless that surface is truly
+  missing.
 - For native SQL answers, do not jump straight to `sqlQuery(...)` if the raw
   SQL is only the `FROM` seed and the rest should still use easy-query DSL;
   prefer `queryable(rawSql, Entity.class, params)` in that case.

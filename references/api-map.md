@@ -172,7 +172,7 @@ If the result target is a DTO graph, prefer `selectAutoInclude(...)` before
 | `.first()` | First ranked child in a relation slice | `implicit-query.md` |
 | `.element(index)` | Zero-based nth ranked child | `implicit-query.md` |
 | `.elements(start,end)` | Zero-based inclusive ranked child window; returns a queryable slice that can continue with aggregate/predicate/joining APIs | `implicit-query.md` |
-| `.firstValue()` / `.lastValue()` / `.nthValue(...)` on offset/window chain | Window-value helpers for the offset branch | `built-in-functions.md`, `implicit-query.md` |
+| `.firstValue()` / `.lastValue()` / `.nthValue(...)` on offset/window chain | Window-value helpers for the offset branch | `typed-sql-expressions.md`, `implicit-query.md` |
 | `.joining(...)` on relation chain | Concatenate relation rows, often after `orderBy(...)` / `elements(...)` | `implicit-query.md` |
 | `.flatElement()` | Flatten to-many path for traversal or `toList(...)` | `implicit-controls.md` |
 | `.notEmptyAll(...)` | Non-empty and every matched row passes | `implicit-controls.md` |
@@ -202,12 +202,12 @@ projection, and `select-auto-include.md` for DTO graphs.
 
 | Symbol | Purpose | Read Next |
 |--------|---------|-----------|
-| `nullOrDefault(...)` | Cross-type SQL-side null fallback | `built-in-functions.md` |
-| `equalsWith(...)` | Boolean equality expression helper | `built-in-functions.md` |
-| `trim()` / `ltrim()` / `rtrim()` | String trim helpers | `built-in-functions.md` |
-| `trimStart()` / `trimEnd()` | Lower-level trim aliases in current source | `built-in-functions.md` |
-| `cast(..., TargetClass.class)` | SQL-side type cast helper via `fx()` | `built-in-functions.md` |
-| `maxColumns(...)` / `minColumns(...)` | Greatest/least style multi-column comparison | `built-in-functions.md` |
+| `nullOrDefault(...)` | Cross-type SQL-side null fallback | `typed-sql-expressions.md` |
+| `equalsWith(...)` | Boolean equality expression helper | `typed-sql-expressions.md` |
+| `trim()` / `ltrim()` / `rtrim()` | String trim helpers | `typed-sql-expressions.md` |
+| `trimStart()` / `trimEnd()` | Lower-level trim aliases in current source | `typed-sql-expressions.md` |
+| `cast(..., TargetClass.class)` | SQL-side type cast helper via `fx()` | `typed-sql-expressions.md` |
+| `maxColumns(...)` / `minColumns(...)` | Greatest/least style multi-column comparison | `typed-sql-expressions.md` |
 | `rawSQLCommand(...)` | Recommended proxy-side execution fragment for `where` / `orderBy` / `having` | `native-sql.md` |
 | `rawSQLStatement(...)` | Recommended proxy-side typed native fragment expression | `native-sql.md` |
 | `setSQL(...)` | Native SQL assignment for proxy projection/update field setters | `native-sql.md` |

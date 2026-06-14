@@ -102,8 +102,8 @@
         ]
       },
       {
-        "id": "built-in-functions",
-        "purpose": "String, number, date, JSON, and general typed function routing plus `valueConvert` vs SQL function boundaries.",
+        "id": "typed-sql-expressions",
+        "purpose": "String, number, date, JSON, cast/path-access, and general typed SQL expression routing plus `valueConvert` vs SQL expression boundaries.",
         "eval_ids": [
           55,
           56,
@@ -649,7 +649,7 @@
       "id": 55,
       "name": "built-in-string-date-number-functions",
       "prompt": "easy-query 的内置函数里，字符串、数字和日期函数该怎么写才最符合官方风格？请给我 Java 示例，覆盖 concat/stringFormat、toLower/toUpper、trim、subString、length、abs/round/pow/sqrt、format/plusDays/year/dayOfYear，以及一个简单的 JSON 数组取对象字段的例子。",
-      "expected_output": "Must route to typed built-in function DSL rather than raw SQL. Should include representative verified examples for string concat/stringFormat, case conversion, trim, substring, length, numeric math, date format/plus/year/dayOfYear, and JSON typed access such as `asJSONArray().getJSONObject(0).getString(\"name\")`. It should not collapse everything into native SQL fragments.",
+      "expected_output": "Must route to typed SQL expressions rather than raw SQL. Should include representative verified examples for string concat/stringFormat, case conversion, trim, substring, length, numeric math, date format/plus/year/dayOfYear, and JSON typed access such as `asJSONArray().getJSONObject(0).getString(\"name\")`. It should not collapse everything into native SQL fragments.",
       "files": []
     },
     {

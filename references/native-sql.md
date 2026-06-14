@@ -4,13 +4,13 @@ Use this reference only when the answer truly needs raw SQL:
 whole-SQL execution, raw-SQL-backed derived tables, native fragments inside a
 DSL query, or a reusable wrapper for an unsupported database function.
 
-If the requirement can already be expressed by built-in typed easy-query
-functions, use `built-in-functions.md` instead.
+If the requirement can already be expressed by easy-query's typed SQL
+expression surface, use `typed-sql-expressions.md` instead.
 
 The real boundary is:
 
-- `built-in-functions.md`: easy-query has already type-wrapped the database
-  function
+- `typed-sql-expressions.md`: easy-query has already exposed a typed SQL
+  expression surface
 - `native-sql.md`: you need to write the SQL shape or function call yourself
 
 ## Fast Routing
