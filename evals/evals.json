@@ -122,7 +122,9 @@
         "purpose": "Starter auto-configuration topology, property semantics, collected Spring beans, StarterConfigurer, tracking AOP, and multi-datasource/manual-build boundaries.",
         "eval_ids": [
           30,
-          31
+          31,
+          53,
+          54
         ]
       },
       {
@@ -609,6 +611,20 @@
       "name": "elements-window-then-aggregate",
       "prompt": "请说明 easy-query 里 `elements(m,n)` 后面还能不能继续做聚合，而不只是 `joining(...)`。比如用户问“如果不是最近第 2 次，而是最近 2 次加起来呢”，你要结合源码说清楚：`elements(...)` 返回的到底是什么、为什么它后面还能继续 `where/distinct/count/sum/avg/max/min/joining` 这一类链式能力；哪些是当前测试/文档有直接证据，哪些是从返回类型可直接推出的能力。不要把它误讲成只能接 `joining(...)`。",
       "expected_output": "Must explicitly state that current source `SQLManyQueryable.elements(...)` returns `SQLQueryable`, and `SQLQueryable` exposes aggregate/predicate APIs such as `where`, `distinct`, `count`, `sum`, `avg`, `max`, `min`, and `joining`. It must cite or describe direct evidence that `elements(...).joining(...)` is documented and that current tests directly show `elements(...).max(...)`. It must then clearly mark that `elements(...).count/sum/avg/min(...)` are justified from the current return type/API surface even if the exact same aggregate is not shown in the nearby docs/tests. It must not describe `elements(...)` as a joining-only terminal feature.",
+      "files": []
+    },
+    {
+      "id": 53,
+      "name": "springboot-multids-doc-demo-vs-built-in",
+      "prompt": "Spring Boot 多数据源里，easy-query 官方文档提到 `EasyMultiEntityQuery`。这个类型是框架内建 API 吗？如果我要在项目里同时注入两个固定数据源的 easy-query client，应该沿默认 starter 自动装配走，还是自己建 bean？请结合源码说明。",
+      "expected_output": "Must explicitly say `EasyMultiEntityQuery` / `DefaultEasyMultiEntityQuery` are doc-demo wrapper types from `easy-query-doc`, not current-source built-in framework APIs. Must explain that the default starter build path injects a single `DataSource`, so two fixed datasources usually mean custom `EasyQueryClient` / `EasyEntityQuery` beans, often with `easy-query.build=false`, rather than pretending the default starter auto-builds one client per datasource.",
+      "files": []
+    },
+    {
+      "id": 54,
+      "name": "springboot-dynamic-routing-datasource-solution",
+      "prompt": "我们项目已经用了 baomidou 的 dynamic-datasource，Spring 里拿到的是 `DynamicRoutingDataSource`。我想让 easy-query 跟着这个动态切库走。请给我一个正确的思路，并说明这和 easy-query 自己的 `DataSourceRoute<?>` 是不是一回事。",
+      "expected_output": "Must recognize `DynamicRoutingDataSource` as the baomidou runtime-switching solution and describe it as distinct from easy-query's own `DataSourceRoute<?>` registration path. Should explain that `DynamicRoutingDataSource` is one Spring `DataSource` bean that resolves actual datasource by key at runtime, and that the doc-demo `EasyMultiEntityQuery` wrapper / scoped switching pattern is one workable integration approach but not a built-in framework type. Must not conflate `DataSourceRoute<?>` with Spring Boot multi-client wiring.",
       "files": []
     }
   ]

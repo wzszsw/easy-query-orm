@@ -135,6 +135,12 @@ most one secondary reference when a boundary rule below says it is needed.
   multi-datasource starter limits:
   `references/spring-boot-starter.md`.
   Pair with `references/configuration-starter.md` only for property impact.
+- Spring Boot multi-datasource, multiple `EasyQueryClient` beans, baomidou
+  `DynamicRoutingDataSource`, `@DS`, or `@EasyQueryTrack(tag=...)` across
+  several clients:
+  `references/multi-datasource.md`.
+  Pair with `references/spring-boot-starter.md` when the answer also depends
+  on starter internals or collected extension beans.
 - Starter defaults, `easy-query.enable` / `easy-query.build`, or behavior
   drift from code:
   `references/configuration-starter.md`.
@@ -351,6 +357,8 @@ most one secondary reference when a boundary rule below says it is needed.
   build path injects a single `DataSource`; recommend `@Primary` only when one
   default client is acceptable, otherwise use custom beans or
   `easy-query.build=false`.
+- Do not present doc-demo wrapper types such as `EasyMultiEntityQuery` as
+  built-in framework APIs unless the project itself defines them.
 - When non-obvious easy-query types appear in code or explanation, include an
   import line or FQCN on first mention if the original snippet omitted it.
 ## Evidence Policy
