@@ -662,8 +662,8 @@
       {
         "id": 57,
         "name": "lesser-known-built-in-functions",
-        "prompt": "除了常见的 concat、format、abs 这些，easy-query 还有没有一些源码支持但不那么显眼的内置函数？请结合源码说明 `equalsWith`、`cast`、`trimStart/trimEnd`、`firstValue/lastValue/nthValue` 这些分别属于什么层次，哪些适合直接回答给普通用户，哪些更应该作为补充说明。",
-        "expected_output": "Must distinguish between user-facing high-level DSL and lower-level/source-backed helpers. It should mention that `equalsWith` is a real source-backed general function helper worth surfacing, `cast(..., TargetClass.class)` exists in current source via lower-level `fx()` usage, `trimStart/trimEnd` exist but user-facing docs usually emphasize `ltrim/rtrim`, and `firstValue/lastValue/nthValue` belong to the offset/window branch rather than ordinary string/date/math functions. It should avoid presenting obscure internal names like `bank/notBank/empty/notEmpty` as mainstream end-user function recommendations.",
+        "prompt": "除了常见的 concat、format、abs 这些，easy-query 还有没有一些源码支持但不那么显眼的能力？请结合源码说明 `cast`、`trimStart/trimEnd`、`firstValue/lastValue/nthValue` 这些分别属于什么层次，哪些适合直接回答给普通用户，哪些更应该作为补充说明。顺手说明布尔相等投影现在为什么更适合用 `expression().valueOf(...)` 而不是旧 helper。",
+        "expected_output": "Must distinguish between user-facing high-level typed expressions and lower-level/source-backed helpers. It should mention that `cast(..., TargetClass.class)` exists in current source via lower-level `fx()` usage, `trimStart/trimEnd` exist but user-facing docs usually emphasize `ltrim/rtrim`, and `firstValue/lastValue/nthValue` belong to the offset/window branch rather than ordinary string/date/math expressions. It should also explain that boolean-equality projection is better expressed with `expression().valueOf(...)` than deprecated older helpers such as `equalsWith(...)`. It should avoid presenting obscure internal names like `bank/notBank/empty/notEmpty` as mainstream end-user recommendations.",
         "files": []
       },
       {

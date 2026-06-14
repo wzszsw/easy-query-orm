@@ -203,7 +203,6 @@ projection, and `select-auto-include.md` for DTO graphs.
 | Symbol | Purpose | Read Next |
 |--------|---------|-----------|
 | `nullOrDefault(...)` | Cross-type SQL-side null fallback | `typed-sql-expressions.md` |
-| `equalsWith(...)` | Boolean equality expression helper | `typed-sql-expressions.md` |
 | `trim()` / `ltrim()` / `rtrim()` | String trim helpers | `typed-sql-expressions.md` |
 | `trimStart()` / `trimEnd()` | Lower-level trim aliases in current source | `typed-sql-expressions.md` |
 | `cast(..., TargetClass.class)` | SQL-side type cast helper via `fx()` | `typed-sql-expressions.md` |

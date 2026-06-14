@@ -44,7 +44,7 @@ Use this file when the request mentions any of these:
 - JSON object or JSON array field access
 - typed casts such as `asJSONObject`, `asJSONArray`, `toStr`, `toNumber`
 - `valueConvert` vs SQL-side expression conversion
-- lesser-known typed helpers such as `equalsWith`, `nullOrDefault`,
+- lesser-known typed helpers such as `nullOrDefault`,
   `maxColumns/minColumns`
 
 If the user is asking for a SQL fragment, whole SQL string, or unsupported
@@ -245,7 +245,6 @@ Some source-backed typed helpers live outside the obvious string/date/math
 grouping and are easy to miss:
 
 - `nullOrDefault(...)`: SQL-side null fallback
-- `equalsWith(...)`: boolean equality expression helper
 - `maxColumns(...)` / `minColumns(...)`: greatest/least style multi-column
   comparison where supported
 
@@ -254,7 +253,9 @@ Example:
 ```java
 easyEntityQuery.queryable(DocBankCard.class)
     .select(card -> Select.DRAFT.of(
-        card.id().equalsWith("123"),
+        card.expression().valueOf(() -> {
+            card.id().eq("123");
+        }),
         card.code().nullOrDefault("noCode")
     ))
     .toList();
@@ -277,3 +278,7 @@ Additional source-backed items worth knowing:
 
 These are worth surfacing as supplement, but they are not the mainstream first
 answer for ordinary typed-expression questions.
+
+Do not recommend deprecated helpers such as `equalsWith(...)` as the default
+way to produce a boolean-equality projection; prefer
+`expression().valueOf(() -> column.eq(...))`.
