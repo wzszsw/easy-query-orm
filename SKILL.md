@@ -73,6 +73,9 @@ most one secondary reference when a boundary rule below says it is needed.
     layer, still SQL-side and still subject to dialect/version support;
     `native-sql.md` is the handwritten SQL escape hatch for fragments,
     wrappers, and fallback entrypoints when the typed surface is insufficient.
+    When the needed string/date/math/JSON capability already exists in the
+    typed surface, explicitly say to stay in
+    `references/typed-sql-expressions.md` and do not recommend raw SQL first.
 17. If the project version differs from the reference version, prefer the
     project and say which API or behavior may have moved.
 
@@ -342,9 +345,13 @@ most one secondary reference when a boundary rule below says it is needed.
 - When using `updatable(entity).setColumns(...)`, mention `whereColumns(...)`
   when the write condition must stay explicit.
 - Do not claim `asTracking()` alone enables diff update; mention the tracking
-  context requirement (`@EasyQueryTrack` or manual `TrackManager.begin()`).
+  context requirement (`@EasyQueryTrack` or manual `TrackManager.begin()`),
+  and also mention the tracked entity requirement: the entity itself must have
+  been added to the active tracking context via `asTracking()` or
+  `addTracking(...)`.
 - Do not explain `savable(...)` as if transaction or track context were
-  optional; current source requires both before execution.
+  optional; current source requires both before execution, and the root or
+  child entities being diff-saved must also be in the active tracking context.
 - Do not teach `savable(...)` as a generic recursive save for aggregate-root
   navigations such as many-to-one parent objects.
 - Do not recommend `ALLOW_OWNERSHIP_CHANGE` casually; it changes ownership
@@ -381,9 +388,9 @@ most one secondary reference when a boundary rule below says it is needed.
   `noInterceptor(name)`.
 - Separate soft-delete semantics from physical delete semantics; do not teach
   `disableLogicDelete()` as a harmless default.
-- Mention `tableLogicDelete(...)` and relation
-  `.configure(q -> q.disableLogicDelete())` when only part of a query graph
-  should ignore logical delete.
+- Mention `tableLogicDelete(...)` for a joined table and relation
+  `.configure(q -> q.disableLogicDelete())` for a relation path when only part
+  of a query graph should ignore logical delete.
 - Do not assume outer logic-delete toggles or arbitrary custom `ValueFilter`
   automatically propagate to independent explicit subqueries.
 - For Spring Boot starter answers, do not claim `easy-query.enable: true` is
