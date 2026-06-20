@@ -1,0 +1,223 @@
+[
+  {
+    "id": "eq-test-001",
+    "task_type": "boundary",
+    "task_description": "Skill should not teach disableLogicDelete as a default",
+    "question": "What warning should the skill preserve about `disableLogicDelete()` when answering delete or recovery questions?",
+    "context": "Held-out check for soft-delete safety semantics.",
+    "answer_kind": "rule",
+    "rule_checks": [
+      { "op": "contains", "arg": "disableLogicDelete" },
+      { "op": "contains", "arg": "not" },
+      { "op": "contains", "arg": "harmless" }
+    ],
+    "reference_text": "logic-delete.md and review checks: do not teach disableLogicDelete() as a harmless default."
+  },
+  {
+    "id": "eq-test-002",
+    "task_type": "boundary",
+    "task_description": "Skill should keep expression update separate from object update",
+    "question": "When answering update questions, what distinction should the skill explicitly preserve instead of collapsing everything to one update shape?",
+    "context": "Held-out check for write-path precision.",
+    "answer_kind": "rule",
+    "rule_checks": [
+      { "op": "contains", "arg": "expression update" },
+      { "op": "contains", "arg": "object update" }
+    ],
+    "reference_text": "write-update.md and review checks: distinguish expression update from object update."
+  },
+  {
+    "id": "eq-test-003",
+    "task_type": "boundary",
+    "task_description": "Skill should preserve route for missing imports to symbol-imports",
+    "question": "If a type name is mentioned without imports and the problem is package/FQCN resolution rather than API semantics, which reference should the skill consult first?",
+    "context": "Held-out check for import-resolution discipline.",
+    "answer_kind": "rule",
+    "rule_checks": [
+      { "op": "contains", "arg": "symbol-imports.md" }
+    ],
+    "reference_text": "Triage rule: use references/symbol-imports.md first when the missing piece is the package/import/FQCN."
+  },
+  {
+    "id": "eq-test-004",
+    "task_type": "boundary",
+    "task_description": "Skill should not treat executeRows(true) as needed for Java-side generators",
+    "question": "What should the skill avoid implying about `executeRows(true)` when the project uses a Java-side `PrimaryKeyGenerator`?",
+    "context": "Held-out check for PK generation timing.",
+    "answer_kind": "rule",
+    "rule_checks": [
+      { "op": "contains", "arg": "not" },
+      { "op": "contains", "arg": "PrimaryKeyGenerator" },
+      { "op": "contains", "arg": "executeRows(true)" }
+    ],
+    "reference_text": "primary-key-generation.md: do not teach executeRows(true) as if Java-side PrimaryKeyGenerator needed it."
+  },
+  {
+    "id": "eq-test-005",
+    "task_type": "boundary",
+    "task_description": "Skill should preserve map-write key semantics",
+    "question": "What key naming rule must the skill preserve for `mapInsertable(...)` and `mapUpdatable(...)`?",
+    "context": "Held-out check for low-level mutation correctness.",
+    "answer_kind": "rule",
+    "rule_checks": [
+      { "op": "contains", "arg": "column names" },
+      { "op": "contains", "arg": "not entity property names" }
+    ],
+    "reference_text": "write references and review checks: map-write keys are column names, not entity property names."
+  },
+  {
+    "id": "eq-test-006",
+    "task_type": "boundary",
+    "task_description": "Skill should preserve native rawSql-derived-table guidance",
+    "question": "If the raw SQL is only the seed and later where/join/paging should still use DSL, what should the skill prefer over `sqlQuery(...)`?",
+    "context": "Held-out check for native SQL entrypoint choice.",
+    "answer_kind": "rule",
+    "rule_checks": [
+      { "op": "contains", "arg": "queryable(rawSql, Entity.class, params)" }
+    ],
+    "reference_text": "native-sql.md: prefer queryable(rawSql, Entity.class, params) when the raw SQL should become a derived table for later DSL composition."
+  },
+  {
+    "id": "eq-test-007",
+    "task_type": "boundary",
+    "task_description": "Skill should preserve selectAutoInclude DTO-only semantics",
+    "question": "What should the skill avoid implying when someone proposes `selectAutoInclude(Entity.class)` for a structured return?",
+    "context": "Held-out check for DTO/VO result-shape discipline.",
+    "answer_kind": "rule",
+    "rule_checks": [
+      { "op": "contains", "arg": "DTO" },
+      { "op": "contains", "arg": "entity" },
+      { "op": "contains", "arg": "not" }
+    ],
+    "reference_text": "select-auto-include.md: do not use a database entity class as the selectAutoInclude result class; use DTO/VO."
+  },
+  {
+    "id": "eq-test-008",
+    "task_type": "boundary",
+    "task_description": "Skill should preserve tree seed-versus-recursive filtering semantics",
+    "question": "When answering `asTreeCTE()` filtering questions, what distinction should the skill explicitly keep between outer `where(...)` and recursive filtering?",
+    "context": "Held-out check for tree-query correctness.",
+    "answer_kind": "rule",
+    "rule_checks": [
+      { "op": "contains", "arg": "seed" },
+      { "op": "contains", "arg": "setChildFilter" }
+    ],
+    "reference_text": "implicit-query.md: outer where controls seed rows, while recursive filtering belongs in setChildFilter(...)."
+  },
+  {
+    "id": "eq-test-009",
+    "task_type": "boundary",
+    "task_description": "Skill should preserve local logic-delete bypass guidance",
+    "question": "If only one relation path should ignore logic-delete filtering, what local configuration pattern should the skill prefer?",
+    "context": "Held-out check for scoped soft-delete control.",
+    "answer_kind": "rule",
+    "rule_checks": [
+      { "op": "contains", "arg": "configure(q -> q.disableLogicDelete())" }
+    ],
+    "reference_text": "logic-delete.md: use relation-local configure(q -> q.disableLogicDelete()) when only one relation path should ignore soft delete."
+  },
+  {
+    "id": "eq-test-010",
+    "task_type": "boundary",
+    "task_description": "Skill should preserve repeated to-many relation optimization guidance",
+    "question": "What should the skill recommend when the same to-many relation is reused multiple times in one query for filters or aggregates?",
+    "context": "Held-out check for relation-performance guidance.",
+    "answer_kind": "rule",
+    "rule_checks": [
+      { "op": "contains", "arg": "subQueryToGroupJoin" }
+    ],
+    "reference_text": "implicit-query.md: repeated to-many relation usage should steer toward subQueryToGroupJoin(...)."
+  },
+  {
+    "id": "eq-test-011",
+    "task_type": "routing",
+    "task_description": "Held-out check for direct-answer routing on local review checks",
+    "question": "If the answer is already stated as a review check in the skill file itself, what should the skill do before opening any external reference?",
+    "context": "Held-out check for the restored direct-answer router behavior.",
+    "answer_kind": "rule",
+    "rule_checks": [
+      { "op": "contains", "arg": "answer directly" },
+      { "op": "contains", "arg": "without opening external reference files" }
+    ],
+    "reference_text": "SKILL.md: directly targeted review-check questions should be answered locally before opening references."
+  },
+  {
+    "id": "eq-test-012",
+    "task_type": "boundary",
+    "task_description": "Held-out check for starter dual-condition semantics",
+    "question": "What should the skill say if a user insists the starter needs both `easy-query.enable=true` and `easy-query.build=true` explicitly configured to work?",
+    "context": "Held-out check for the more specific current-source condition wording.",
+    "answer_kind": "rule",
+    "rule_checks": [
+      { "op": "contains", "arg": "matchIfMissing=true" },
+      { "op": "contains", "arg": "easy-query.enable" },
+      { "op": "contains", "arg": "easy-query.build" }
+    ],
+    "reference_text": "configuration-starter.md: both conditions use matchIfMissing=true, so explicit true is not required."
+  },
+  {
+    "id": "eq-test-013",
+    "task_type": "boundary",
+    "task_description": "Held-out check for entity-side conditional navigation",
+    "question": "If a relation should only participate for roots whose discriminator-like property matches a fixed value, what annotation should the skill preserve for that entity-side gating?",
+    "context": "Held-out coverage for the new 3.2.13 navigation condition feature.",
+    "answer_kind": "rule",
+    "rule_checks": [
+      { "op": "contains", "arg": "@IncludeOnProperty" }
+    ],
+    "reference_text": "entity-modeling-navigate.md: @IncludeOnProperty is the entity-side conditional navigation annotation."
+  },
+  {
+    "id": "eq-test-014",
+    "task_type": "boundary",
+    "task_description": "Held-out check for keeping root rows while gating relation participation",
+    "question": "What should the skill preserve if the user wants other roots to stay in the result, but only some roots to activate a relation path?",
+    "context": "Held-out check for relation gating versus root filtering.",
+    "answer_kind": "rule",
+    "rule_checks": [
+      { "op": "contains", "arg": "@IncludeOnProperty" },
+      { "op": "contains", "arg": "root" },
+      { "op": "contains", "arg": "stay" }
+    ],
+    "reference_text": "entity-modeling-navigate.md: @IncludeOnProperty keeps the root rows and only gates whether the relation path participates."
+  },
+  {
+    "id": "eq-test-015",
+    "task_type": "boundary",
+    "task_description": "Held-out check for savable dual prerequisites",
+    "question": "When explaining `savable(...)`, what dual prerequisite should the skill preserve instead of making execution sound unconditional?",
+    "context": "Held-out check for aggregate-save safety semantics.",
+    "answer_kind": "rule",
+    "rule_checks": [
+      { "op": "contains", "arg": "transaction" },
+      { "op": "contains", "arg": "tracking context" }
+    ],
+    "reference_text": "savable references: savable(...) requires both a transaction and a tracking context before execution."
+  },
+  {
+    "id": "eq-test-016",
+    "task_type": "boundary",
+    "task_description": "Held-out check for raw-SQL derived-table guidance",
+    "question": "If a user only needs raw SQL for the base FROM seed but still wants the rest composed in easy-query, what should the skill prefer over full `sqlQuery(...)`?",
+    "context": "Held-out check for native-SQL entrypoint discipline.",
+    "answer_kind": "rule",
+    "rule_checks": [
+      { "op": "contains", "arg": "queryable(rawSql" },
+      { "op": "contains", "arg": "not" },
+      { "op": "contains", "arg": "sqlQuery" }
+    ],
+    "reference_text": "native-sql.md and review checks: prefer queryable(rawSql, Entity.class, params) when raw SQL is only the FROM seed."
+  },
+  {
+    "id": "eq-test-017",
+    "task_type": "query-shape",
+    "task_description": "Held-out check for DTO graph return shape",
+    "question": "If the user wants a nested DTO/VO graph rather than entity objects, what should the skill preserve as the first-class result-shape API?",
+    "context": "Held-out check for selectAutoInclude versus include result-shape guidance.",
+    "answer_kind": "rule",
+    "rule_checks": [
+      { "op": "contains", "arg": "selectAutoInclude(ResultDTO.class)" }
+    ],
+    "reference_text": "include-structured-loading.md and select-auto-include.md: nested DTO/VO graph return should prefer selectAutoInclude(ResultDTO.class)."
+  }
+]

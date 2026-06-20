@@ -1,0 +1,32 @@
+_base_: ./easy-query-orm-mimo.yaml
+
+train:
+  num_epochs: 1
+  train_size: 0
+  batch_size: 25
+  accumulation: 1
+
+gradient:
+  minibatch_size: 4
+  merge_batch_size: 4
+  analyst_workers: 2
+  failure_only: true
+  max_analyst_rounds: 3
+
+optimizer:
+  learning_rate: 2
+  min_learning_rate: 2
+  lr_scheduler: cosine
+  lr_control_mode: fixed
+  skill_update_mode: patch
+  use_slow_update: false
+  use_meta_skill: false
+
+evaluation:
+  use_gate: true
+  eval_test: false
+
+env:
+  workers: 2
+  max_completion_tokens: 12000
+  limit: 0

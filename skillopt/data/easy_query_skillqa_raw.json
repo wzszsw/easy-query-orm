@@ -1,0 +1,140 @@
+[
+  {
+    "id": "doc_0001",
+    "task_type": "docs-routing",
+    "task_description": "Route a question using doc topic ability/batch.md",
+    "question": "User asks about the topic covered by `ability/batch.md`. Explain the right easy-query guidance concisely and point to the most relevant reference path.",
+    "context": "---\ntitle: Batch批处理\n---\n# Batch批处理\n`easy-query`如果需要使用batch功能首先需要在链接字符串添加`rewriteBatchedStatements=true`启用参数（mysql）,默认框架会在配置参数阈值到达后自动合并sql调用`executeBatch`合并,如果需要手动调用或者手动限制不调用可以通过调用`batch`方法\n\n文档提供的链接字符串设置不一定适合所有版本请以实际情况为准可以通过本地库进行10w级别的插入来进行测试判断是否生效\n\n`mysql`需要链接字符串启用批处理参数`rewriteBatchedStatements=true`,其他数据库自行查询相关的说明也可能不需要 `addBatch`、`executeBatch`\n\n`sqlserver`将 `useBulkCopyForBatchInsert=true;` 添加到连接字符串可启用此功能。 批处理相关链接 https://learn.microsoft.com/zh-cn/sql/connect/jdbc/use-bulk-copy-api-batch-insert-operation?view=sql-server-ver16 \n\n## 例如\n`jdbc:mysql://127.0.0.1:3306/easy-query-test?serverTimezo",
+    "answer_kind": "rule",
+    "rule_checks": [
+      {
+        "op": "contains",
+        "arg": "batch"
+      },
+      {
+        "op": "contains",
+        "arg": "reference"
+      }
+    ],
+    "reference_text": "Expected grounding doc: ability/batch.md\nThe optimized skill should route to the matching reference instead of inventing APIs.",
+    "metadata": {
+      "source_kind": "docs",
+      "path": "D:\\develop\\SOURCE_CODE\\easy-query-doc\\src\\ability\\batch.md"
+    }
+  },
+  {
+    "id": "doc_0002",
+    "task_type": "docs-routing",
+    "task_description": "Route a question using doc topic ability/delete.md",
+    "question": "User asks about the topic covered by `ability/delete.md`. Explain the right easy-query guidance concisely and point to the most relevant reference path.",
+    "context": "---\ntitle: 删除\norder: 40\n---\n\n\n## 逻辑删除\n\nEasy Query支持物理删除和逻辑删除，默认情况下使用逻辑删除。\n\n要使用逻辑删除，需要声明字段，例如：\n\n```java\n@LogicDelete(strategy = LogicDeleteStrategyEnum.BOOLEAN)\nprivate Boolean deleted;\n```\n\n调用`deletable`方法将会修改`deleted`为`true`，因此如果不声明字段，那么将会抛出异常。\n\n```java\n    @Test\n    public void testLogicDelete1() {\n        //默认情况下，EasyQuery使用逻辑删除 自增id\n        Company company = new Company();\n        company.setName(\"新公司\");\n        company.setDeleted(false);\n        easyEntityQuery.insertable(company).executeRows(true);//回填自增id\n        long rows = easyEntityQuery.deletable(Company.class)\n                .wher",
+    "answer_kind": "rule",
+    "rule_checks": [
+      {
+        "op": "contains",
+        "arg": "delete"
+      },
+      {
+        "op": "contains",
+        "arg": "reference"
+      }
+    ],
+    "reference_text": "Expected grounding doc: ability/delete.md\nThe optimized skill should route to the matching reference instead of inventing APIs.",
+    "metadata": {
+      "source_kind": "docs",
+      "path": "D:\\develop\\SOURCE_CODE\\easy-query-doc\\src\\ability\\delete.md"
+    }
+  },
+  {
+    "id": "doc_0003",
+    "task_type": "docs-routing",
+    "task_description": "Route a question using doc topic ability/dynamic-table-name.md",
+    "question": "User asks about the topic covered by `ability/dynamic-table-name.md`. Explain the right easy-query guidance concisely and point to the most relevant reference path.",
+    "context": "---\ntitle: 动态表名\norder: 60\n---\n\n# 动态表名\n`easy-query`针对分表对象目前已经支持了动态表名的处理,但是后续会将这一部分全部简化掉让用户无感。\n\n## api\n\n方法  | 参数 | 返回  | 描述\n--- | --- | --- | --- \nasTable(String tableName) |  String | this | 设置最近表名名称\nasTable(Function<String,String> tableNameAs) | Function<String,String>  | this | 设置最近表名名称\n\n- `asTable(String tableName)`将当前表达式最近的一张表的表名修改成`tableName`,如果当前最近的表是正常的数据库表名,那么直接将表名改写,如果当前最近的表是匿名表比如嵌套queryable的表那么将alias改成对应的表名\n- `asTable(Function<String,String> tableNameAs)`将当前表达式最近的一张表的表名修改成`tableNameAs`返回的表名,如果当前最近的表是正常的数据库表名,那么直接将表名改写,如果当前最近的表是匿名表比如嵌套queryable的表那么将alias改成对应的表名\n- `asTable(Function<Stri",
+    "answer_kind": "rule",
+    "rule_checks": [
+      {
+        "op": "contains",
+        "arg": "dynamic-table-name"
+      },
+      {
+        "op": "contains",
+        "arg": "reference"
+      }
+    ],
+    "reference_text": "Expected grounding doc: ability/dynamic-table-name.md\nThe optimized skill should route to the matching reference instead of inventing APIs.",
+    "metadata": {
+      "source_kind": "docs",
+      "path": "D:\\develop\\SOURCE_CODE\\easy-query-doc\\src\\ability\\dynamic-table-name.md"
+    }
+  },
+  {
+    "id": "code_0001",
+    "task_type": "code-grounding",
+    "task_description": "Ground an answer in source/test file sql-test/src/main/java/com/easy/query/test/AbcMain.java",
+    "question": "Based on the verified easy-query source or tests in `sql-test/src/main/java/com/easy/query/test/AbcMain.java`, state what API pattern or behavior this file demonstrates.",
+    "context": "//package com.easy.query.test;\n//\n//import com.easy.query.api.proxy.client.DefaultEasyEntityQuery;\n//import com.easy.query.api.proxy.client.DefaultEasyProxyQuery;\n//import com.easy.query.api.proxy.client.EasyEntityQuery;\n//import com.easy.query.api.proxy.client.EasyProxyQuery;\n//import com.easy.query.core.api.client.EasyQueryClient;\n//import com.easy.query.core.bootstrapper.EasyQueryBootstrapper;\n//import com.easy.query.core.logging.LogFactory;\n//import com.easy.query.mysql.config.MySQLDatabaseConfiguration;\n//import com.easy.query.test.entity.Topic;\n//import com.zaxxer.hikari.HikariDataSource",
+    "answer_kind": "rule",
+    "rule_checks": [
+      {
+        "op": "contains",
+        "arg": "AbcMain"
+      },
+      {
+        "op": "max_chars",
+        "arg": 1200
+      }
+    ],
+    "reference_text": "Expected grounding file: sql-test/src/main/java/com/easy/query/test/AbcMain.java\nA good answer should cite the demonstrated API or behavior from this concrete source file.",
+    "metadata": {
+      "source_kind": "code",
+      "path": "D:\\develop\\SOURCE_CODE\\easy-query\\sql-test\\src\\main\\java\\com\\easy\\query\\test\\AbcMain.java"
+    }
+  },
+  {
+    "id": "code_0002",
+    "task_type": "code-grounding",
+    "task_description": "Ground an answer in source/test file sql-test/src/main/java/com/easy/query/test/annotation/EnumValue.java",
+    "question": "Based on the verified easy-query source or tests in `sql-test/src/main/java/com/easy/query/test/annotation/EnumValue.java`, state what API pattern or behavior this file demonstrates.",
+    "context": "package com.easy.query.test.annotation;\n\nimport java.lang.annotation.Documented;\nimport java.lang.annotation.ElementType;\nimport java.lang.annotation.Retention;\nimport java.lang.annotation.RetentionPolicy;\nimport java.lang.annotation.Target;\n\n/**\n * create time 2023/10/17 08:33\n * 文件说明\n *\n * @author xuejiaming\n */\n@Documented\n@Retention(RetentionPolicy.RUNTIME)\n@Target({ElementType.FIELD, ElementType.ANNOTATION_TYPE})\npublic @interface EnumValue {\n}",
+    "answer_kind": "rule",
+    "rule_checks": [
+      {
+        "op": "contains",
+        "arg": "EnumValue"
+      },
+      {
+        "op": "max_chars",
+        "arg": 1200
+      }
+    ],
+    "reference_text": "Expected grounding file: sql-test/src/main/java/com/easy/query/test/annotation/EnumValue.java\nA good answer should cite the demonstrated API or behavior from this concrete source file.",
+    "metadata": {
+      "source_kind": "code",
+      "path": "D:\\develop\\SOURCE_CODE\\easy-query\\sql-test\\src\\main\\java\\com\\easy\\query\\test\\annotation\\EnumValue.java"
+    }
+  },
+  {
+    "id": "code_0003",
+    "task_type": "code-grounding",
+    "task_description": "Ground an answer in source/test file sql-test/src/main/java/com/easy/query/test/BaseEntityQueryAggregateTest1.java",
+    "question": "Based on the verified easy-query source or tests in `sql-test/src/main/java/com/easy/query/test/BaseEntityQueryAggregateTest1.java`, state what API pattern or behavior this file demonstrates.",
+    "context": "package com.easy.query.test;\n\nimport com.easy.query.api.proxy.entity.select.EntityQueryable;\nimport com.easy.query.api.proxy.entity.select.EntityQueryable10;\nimport com.easy.query.api.proxy.entity.select.EntityQueryable2;\nimport com.easy.query.api.proxy.entity.select.EntityQueryable3;\nimport com.easy.query.api.proxy.entity.select.EntityQueryable4;\nimport com.easy.query.api.proxy.entity.select.EntityQueryable5;\nimport com.easy.query.api.proxy.entity.select.EntityQueryable6;\nimport com.easy.query.api.proxy.entity.select.EntityQueryable7;\nimport com.easy.query.api.proxy.entity.select.EntityQuerya",
+    "answer_kind": "rule",
+    "rule_checks": [
+      {
+        "op": "contains",
+        "arg": "BaseEntityQueryAggregateTest1"
+      },
+      {
+        "op": "max_chars",
+        "arg": 1200
+      }
+    ],
+    "reference_text": "Expected grounding file: sql-test/src/main/java/com/easy/query/test/BaseEntityQueryAggregateTest1.java\nA good answer should cite the demonstrated API or behavior from this concrete source file.",
+    "metadata": {
+      "source_kind": "code",
+      "path": "D:\\develop\\SOURCE_CODE\\easy-query\\sql-test\\src\\main\\java\\com\\easy\\query\\test\\BaseEntityQueryAggregateTest1.java"
+    }
+  }
+]

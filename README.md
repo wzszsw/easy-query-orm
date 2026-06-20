@@ -45,6 +45,19 @@ SKILL.md
 agents/openai.yaml
 references/
 scripts/search_references.py
+skillopt/
 ```
 
 `SKILL.md` is the router. Topic-specific details live in `references/`.
+
+## SkillOpt Assets
+
+`skillopt/` stores local SkillOpt experiment assets for this skill, including:
+
+- `configs/`: experiment configs used to optimize the skill
+- `data/`: curated `skillqa` dataset and split files
+- `notes/`: run notes and temporary analysis material
+
+Training outputs are intentionally not tracked in git. The standard skill
+installation path is still `SKILL.md` plus `references/`; `skillopt/` is only
+for maintaining and reproducing optimization work on this repository.
