@@ -465,3 +465,8 @@ reader can recover them from context.
 - Use exact artifact names, property names, and API identifiers as written in
   the skill and references; do not reword or generalize them.
 
+- When a navigation should load only for certain root rows based on a static entity property (e.g., version), prefer the entity-side annotation `@IncludeOnProperty` on the `@Navigate` field. Do not drift into DTO child filtering via `EXTRA_AUTO_INCLUDE_CONFIGURE` as the first approach; note that `EXTRA_AUTO_INCLUDE_CONFIGURE` is a query-time DTO child-list pruning knob, not an entity metadata gating mechanism. Also, note that `loadInclude(...)` evaluates already-loaded root objects in memory before issuing relation queries, so entity-side `@IncludeOnProperty` metadata still applies to `loadInclude` calls. Route to `references/entity-modeling-navigate.md` for entity-side conditional navigation.
+- For `selectAutoInclude`, always preserve the DTO/VO class literal in the call (e.g., `selectAutoInclude(ResultDTO.class)`). Do not substitute a different class name or omit the class argument; without the class literal, easy-query cannot determine which nested relations to include.
+
+- When the task, context, or eval surface names an exact API call shape with type parameters or arguments (e.g. `selectAutoInclude(ResultDTO.class)`), reproduce the full call expression including generic type arguments rather than naming only the bare method; do not abbreviate to a method-only form.
+
