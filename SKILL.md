@@ -412,6 +412,9 @@ most one secondary reference when a boundary rule below says it is needed.
   built-in framework APIs unless the project itself defines them.
 - When non-obvious easy-query types appear in code or explanation, include an
   import line or FQCN on first mention if the original snippet omitted it.
+- Always resolve the exact package from `references/symbol-imports.md`; never
+  construct or guess the FQCN from partial domain knowledge or inferred
+  package hierarchy.
 ## Evidence Policy
 
 Order of truth:
@@ -444,9 +447,21 @@ reader can recover them from context.
   config to control the recursive step.
 
 - When a question directly targets a boundary rule or review check already
-  stated in this file, answer directly from that guidance without opening
-  external reference files. Use the exact phrasing from the review check as
-  the authoritative source; do not paraphrase or substitute entity/type names.
-  Only open a reference when the question needs API-level detail, code
-  examples, or deeper explanation beyond what the review checks state.
+  stated in this file, answer directly from that guidance and answer directly
+  without opening external reference files. Use the exact phrasing from the
+  review check as the authoritative source; do not paraphrase or substitute
+  entity/type names. Only open a reference when the question needs API-level
+  detail, code examples, or deeper explanation beyond what the review checks
+  state.
+
+- When the question asks what the skill recommends, enforces, warns against,
+  or should say, quote the relevant review-check wording directly in the
+  answer, including negatives such as `do not`, `not`, `without`, or
+  `requires both`, rather than paraphrasing.
+- When a question mentions a type name or asks for its import, include the
+  actual import line or FQCN in the answer from
+  `references/symbol-imports.md`; do not defer to the reference for that
+  concrete value.
+- Use exact artifact names, property names, and API identifiers as written in
+  the skill and references; do not reword or generalize them.
 
