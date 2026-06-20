@@ -75,7 +75,8 @@ most one secondary reference when a boundary rule below says it is needed.
     wrappers, and fallback entrypoints when the typed surface is insufficient.
     When the needed string/date/math/JSON capability already exists in the
     typed surface, explicitly say to stay in
-    `references/typed-sql-expressions.md`. Do not recommend raw SQL first.
+    `references/typed-sql-expressions.md`. The answer should say: do not
+    recommend raw SQL first.
 17. If the project version differs from the reference version, prefer the
     project and say which API or behavior may have moved.
 
@@ -344,11 +345,11 @@ most one secondary reference when a boundary rule below says it is needed.
   reason.
 - When using `updatable(entity).setColumns(...)`, mention `whereColumns(...)`
   when the write condition must stay explicit.
-- Do not claim `asTracking()` alone enables diff update; mention the tracking
-  context requirement (`@EasyQueryTrack` or manual `TrackManager.begin()`),
-  and also mention the tracked entity requirement: the entity itself must have
-  been added to the active tracking context via `asTracking()` or
-  `addTracking(...)`.
+- Do not claim `asTracking()` alone enables diff update; explicitly mention an
+  active tracking context (`@EasyQueryTrack` or manual
+  `TrackManager.begin()`), and explicitly mention the tracked entity
+  requirement: the tracked entity itself must have been added to the active
+  tracking context via `asTracking()` or `addTracking(...)`.
 - Do not explain `savable(...)` as if transaction or track context were
   optional; current source requires both before execution, and the root or
   child entities being diff-saved must also be in the active tracking context.
@@ -395,9 +396,11 @@ most one secondary reference when a boundary rule below says it is needed.
   automatically propagate to independent explicit subqueries.
 - For Spring Boot starter answers, do not claim `easy-query.enable: true` is
   mandatory unless the project version proves a different condition
-  implementation. Prefer `references/configuration-starter.md`, and state that
-  the property being absent keeps the auto-configuration enabled by default
-  unless the project version proves a different condition implementation.
+  implementation. Both `easy-query.enable` and `easy-query.build` conditions
+  use `matchIfMissing=true`, so the property being absent keeps the
+  auto-configuration enabled by default. Only setting the property to `false`
+  explicitly disables the corresponding behavior. Prefer
+  `references/configuration-starter.md` for version-specific details.
 - For Spring Boot extension registration, do not claim a plain
   `JdbcTypeHandler` bean auto-binds globally; mention
   `JdbcTypeHandlerReplaceConfigurer`.
@@ -439,4 +442,11 @@ reader can recover them from context.
   recursive-member filtering: outer `.where(...)` before `.asTreeCTE(...)`
   filters only the seed rows; use `setChildFilter(...)` or equivalent tree CTE
   config to control the recursive step.
+
+- When a question directly targets a boundary rule or review check already
+  stated in this file, answer directly from that guidance without opening
+  external reference files. Use the exact phrasing from the review check as
+  the authoritative source; do not paraphrase or substitute entity/type names.
+  Only open a reference when the question needs API-level detail, code
+  examples, or deeper explanation beyond what the review checks state.
 
