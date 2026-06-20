@@ -173,6 +173,73 @@ Rules:
 - mapped field type must match the entity-path value type
 - `prefix = true` only for reusable path prefixes
 
+## `@IncludeOnProperty`
+
+`3.2.13` adds entity-side conditional navigation include metadata through
+`@IncludeOnProperty`.
+
+Use it when:
+
+- the root row should still be returned
+- a relation path should only participate for some root rows
+- the gating condition depends on root entity property values already loaded in
+  memory
+
+Example pattern from current-source tests:
+
+```java
+import com.easy.query.core.annotation.IncludeOnProperty;
+import com.easy.query.core.annotation.Navigate;
+import com.easy.query.core.enums.RelationTypeEnum;
+
+@Navigate(
+    value = RelationTypeEnum.OneToMany,
+    selfProperty = {MyTaskProxy.Fields.id},
+    targetProperty = {MySubTask1Proxy.Fields.taskId}
+)
+@IncludeOnProperty(name = "version", value = "1")
+private List<MySubTask1> mySubTask1List;
+
+@Navigate(
+    value = RelationTypeEnum.OneToOne,
+    selfProperty = {MyTaskProxy.Fields.id},
+    targetProperty = {MyTask1ExtProxy.Fields.taskId}
+)
+@IncludeOnProperty(name = "version", value = "1")
+private MyTask1Ext myTask1Ext;
+```
+
+Meaning:
+
+- rows with `version = 1` can load those relations
+- rows with other versions skip that include path entirely
+- the root `MyTask` row still remains in the result
+
+Current source marks `@IncludeOnProperty` as `@Repeatable`, so multiple root
+property checks can be stacked on the same navigation field. `matchNull = true`
+means the dependent root property must be null or blank for the navigation to
+participate.
+
+Practical boundary:
+
+- use `@IncludeOnProperty` for static entity-level relation gating
+- use `EXTRA_AUTO_INCLUDE_CONFIGURE.where(...)` for DTO-contract child-list
+  pruning or request-aware filters
+- use root `.where(...)` / `.any(...)` when root-row eligibility itself should
+  change
+
+Important behavior from current source:
+
+- gating is evaluated in memory from root-row values, before the relation query
+  for that path is executed
+- the navigation dependency columns are carried as hidden relation-extra values
+  so `include`, `include2`, `loadInclude`, and `selectAutoInclude` can decide
+  whether to issue that relation query for a given root row
+- this is entity-side metadata; DTO-only `@Navigate` fields do not replace it
+
+Use it for version-discriminated extensions, type-specific child collections,
+or nullable discriminator-driven optional relation branches.
+
 ## `directMapping`, `@EasyTree`, `@Encryption`
 
 `directMapping` is for x-to-one traversal through intermediate properties when the

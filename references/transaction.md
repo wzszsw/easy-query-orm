@@ -91,4 +91,4 @@ public class OrderService {
 ## Sources
 - 源码验证: `sql-test/.../DirectRelationTest.java`, `.../mysql8/M8Save2Test.java` (try-with-resources +
   commit/rollback); `Transaction` @ `com.easy.query.core.basic.jdbc.tx`.
-- 官方文档: `easy-query-doc/src/ability/transaction.md`. Skill baseline 3.2.10.
+- 官方文档: `easy-query-doc/src/ability/transaction.md`. Skill baseline 3.2.13.

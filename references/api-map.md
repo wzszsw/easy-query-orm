@@ -46,6 +46,7 @@ Common top-level methods:
 | `@Version` | Optimistic lock | `write-update.md`, `write-delete.md` |
 | `@LogicDelete` | Logic-delete column and strategy binding | `logic-delete.md` |
 | `@Navigate` | Relation metadata | `relation-query.md`, `entity-modeling-navigate.md` |
+| `@IncludeOnProperty` | Conditionally enable a navigation/include path based on root property values | `entity-modeling-navigate.md`, `include-structured-loading.md`, `select-auto-include.md` |
 | `@NavigateFlat` | DTO/VO path flattening | `entity-modeling-navigate.md` |
 | `@EasyTree` | Mark which self `List<SelfType>` navigation is the tree children path | `entity-modeling-navigate.md`, `implicit-query.md` |
 | `ProxyEntityAvailable<TEntity, TProxy>` | Proxy-enabled entity contract | `entity-mapping.md` |
@@ -140,6 +141,7 @@ For non-form dynamic query composition, read `query.md` instead.
 | `.include(...)` | Load entity relations | `include-structured-loading.md` |
 | `.include2(...)` | Complex nested include paths | `include-structured-loading.md` |
 | `loadInclude(...)` | Load relations after query | `include-structured-loading.md` |
+| `@IncludeOnProperty(matchNull = true)` | Include the relation only when the dependent root property is null/blank | `entity-modeling-navigate.md`, `include-structured-loading.md` |
 | `expression().subQueryable(Entity.class)` | Context-aware explicit subquery bound to the current expression | `subquery-explicit.md` |
 | `expression().subQuery(query)` | Wrap a query as a scalar subquery expression | `subquery-explicit.md` |
 | `exists(query)` / `notExists(query)` | Explicit subquery predicate on the current expression | `subquery-explicit.md` |

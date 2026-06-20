@@ -42,6 +42,36 @@ Important behavior:
 - Relation subqueries can use `where`, `orderBy`, `limit`, `asTracking/asNoTracking`, and `disableLogicDelete`.
 - `include` is for returning database object instances. For DTO object graphs, prefer `selectAutoInclude`.
 
+### Entity-side conditional include with `@IncludeOnProperty`
+
+Current `3.2.13` source adds entity-side conditional relation gating through
+`@IncludeOnProperty` on a `@Navigate` field.
+
+```java
+@Navigate(value = RelationTypeEnum.OneToOne, selfProperty = {MyTaskProxy.Fields.id}, targetProperty = {MyTask1ExtProxy.Fields.taskId})
+@IncludeOnProperty(name = "version", value = "1")
+private MyTask1Ext myTask1Ext;
+```
+
+Effect:
+
+- roots are still queried normally
+- only roots whose `version` matches the condition participate in that
+  relation-load path
+- for non-matching roots, easy-query skips issuing that relation fetch for that
+  row/path combination
+
+Use this when the relation branch is structurally version/type-specific.
+
+Do not use it as a substitute for:
+
+- query-instance child filtering with `include(..., q -> q.where(...))`
+- request-aware DTO child pruning with `EXTRA_AUTO_INCLUDE_CONFIGURE.where(...)`
+- root-row eligibility filtering with root `.where(...)`
+
+`matchNull = true` means the root property must be null or blank for the
+relation path to participate.
+
 ## include2
 
 `include2` is available in the proxy API and the docs describe it as the preferred replacement for complex nested include cases in `3.1.47+`.
@@ -83,6 +113,10 @@ easyEntityQuery.loadInclude(users, u -> u.bankCards());
 ```
 
 This is useful in service flows where the root set is produced by another branch, then relation loading is conditional.
+
+Entity-side `@IncludeOnProperty` still applies here because `loadInclude(...)`
+evaluates the already-loaded root objects in memory before issuing relation
+queries.
 
 ## fillOne/fillMany
 

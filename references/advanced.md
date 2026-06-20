@@ -112,4 +112,4 @@ List<Order> orders = multiEntityQuery.executeScope("ds2", eq ->
   `h2/H2BaseTest.java` (`applyShardingInitializer`). `DatabaseCodeFirst`/`CodeFirstCommand` @
   `com.easy.query.core.basic.api.database`.
 - 官方文档: `easy-query-doc/src/ability/select/group.md`, `src/super/*` (sharding),
-  `src/guide/sb-multi-datasource.md`, `src/guide/spring-boot.md` (code-first). Skill baseline 3.2.10.
+  `src/guide/sb-multi-datasource.md`, `src/guide/spring-boot.md` (code-first). Skill baseline 3.2.13.

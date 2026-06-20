@@ -186,7 +186,7 @@ most one secondary reference when a boundary rule below says it is needed.
   `references/relation-query.md`.
   Tree/self-relation entity modeling also starts here.
 - Advanced relation metadata, DTO-side navigation, `@NavigateFlat`,
-  navigate extras:
+  `@IncludeOnProperty`, navigate extras:
   `references/entity-modeling-navigate.md`.
 - Entity graph loading with `include`, `include2`, `loadInclude`,
   `fillOne/fillMany`:

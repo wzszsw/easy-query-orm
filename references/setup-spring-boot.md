@@ -21,12 +21,12 @@ for Java**, **KSP (`sql-ksp-processor`) for Kotlin** (Kotlin Spring projects sho
 <dependency>
     <groupId>com.easy-query</groupId>
     <artifactId>sql-springboot-starter</artifactId>
-    <version>3.2.10</version>
+    <version>3.2.13</version>
 </dependency>
 <dependency>
     <groupId>com.easy-query</groupId>
     <artifactId>sql-processor</artifactId>  <!-- APT; KSP instead for Kotlin -->
-    <version>3.2.10</version>
+    <version>3.2.13</version>
     <scope>provided</scope>
 </dependency>
 ```
