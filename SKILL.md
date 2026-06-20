@@ -478,4 +478,10 @@ reader can recover them from context.
 - For "which API/method/call" questions, prefer the callable method or exact
   builder-chain call over the backing class, generator, or interface name when
   the question is asking what the user should invoke.
+- When the question asks for an exact call shape, or when an argument value is
+  what makes the API semantically correct, include the necessary argument
+  value instead of truncating to the bare method name. For example,
+  `allowDeleteStatement(true)` is materially different from
+  `allowDeleteStatement()`, and `queryable(rawSql, Entity.class, params)` is
+  more precise than a bare `queryable`.
 
