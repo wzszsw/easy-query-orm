@@ -30,7 +30,12 @@ most one secondary reference when a boundary rule below says it is needed.
    for `easy-query` unless surrounding project context clearly proves
    otherwise.
 3. Missing `*Proxy` usually means setup or compile-chain trouble first. Java
-   uses APT; Kotlin uses KSP, not KAPT.
+   uses APT via the `sql-processor` annotation processor artifact; Kotlin uses
+   KSP via the `sql-ksp-processor` artifact, not KAPT. When
+   `annotationProcessorPaths` is already configured, the corresponding
+   processor artifact must appear there explicitly. Having the easy-query
+   dependency on the compile classpath alone is not enough for the processor
+   to fire.
 4. `@EntityProxy` is the generation trigger. `ProxyEntityAvailable` helps with
    typed proxy usage but is not the switch that makes APT/KSP generate the
    class.
@@ -289,7 +294,10 @@ most one secondary reference when a boundary rule below says it is needed.
   default `query ids first -> .in(...) -> build tree` template.
 - Prefer `singleOrNull()` for unique business keys.
 - Push filter/sort/page/aggregate work into DSL.
-- Use DTO/VO result types for `selectAutoInclude`.
+- Use DTO/VO result types for `selectAutoInclude`, not database entity
+  classes. Explain that nested child data is fetched by separate
+  include-style relation queries per relation path, not by a single joined
+  SQL statement.
 - For `selectAutoInclude`, distinguish root filtering from child-list pruning:
   use root `.where(...)` for root eligibility, and prefer
   `EXTRA_AUTO_INCLUDE_CONFIGURE.where(...)` when child rows should be pruned
@@ -414,4 +422,12 @@ non-obvious API, SQL-shape, or version caveat.
 If compile-ready code uses non-obvious easy-query annotations, enums, starter
 SPI, or extension types, include the needed imports instead of assuming the
 reader can recover them from context.
+
+- For true physical delete when logic delete is active, both
+  `disableLogicDelete()` and `allowDeleteStatement(true)` are required; do not
+  omit the latter.
+- In tree CTE answers, distinguish anchor/seed filtering from
+  recursive-member filtering: outer `.where(...)` before `.asTreeCTE(...)`
+  filters only the seed rows; use `setChildFilter(...)` or equivalent tree CTE
+  config to control the recursive step.
 
