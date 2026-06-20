@@ -45,7 +45,6 @@ SKILL.md
 agents/openai.yaml
 references/
 scripts/search_references.py
-evals/
 ```
 
 `SKILL.md` is the router. Topic-specific details live in `references/`.
