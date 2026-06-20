@@ -434,6 +434,12 @@ and the next concrete check or fix. For AP/reporting, state the
 code when that framing prevents wrong SQL structure. Cite a reference only for
 non-obvious API, SQL-shape, or version caveat.
 
+- If the question is identifier-only, such as "which API", "what method",
+  "name the property", or "what exact call", override the code-first rule and
+  answer with only the bare identifier or exact call shape. Do not add code
+  blocks, FQCNs, signatures, or extra explanation unless the user explicitly
+  asks for "how", "why", or "explain".
+
 If compile-ready code uses non-obvious easy-query annotations, enums, starter
 SPI, or extension types, include the needed imports instead of assuming the
 reader can recover them from context.
@@ -469,4 +475,7 @@ reader can recover them from context.
 - For `selectAutoInclude`, always preserve the DTO/VO class literal in the call (e.g., `selectAutoInclude(ResultDTO.class)`). Do not substitute a different class name or omit the class argument; without the class literal, easy-query cannot determine which nested relations to include.
 
 - When the task, context, or eval surface names an exact API call shape with type parameters or arguments (e.g. `selectAutoInclude(ResultDTO.class)`), reproduce the full call expression including generic type arguments rather than naming only the bare method; do not abbreviate to a method-only form.
+- For "which API/method/call" questions, prefer the callable method or exact
+  builder-chain call over the backing class, generator, or interface name when
+  the question is asking what the user should invoke.
 

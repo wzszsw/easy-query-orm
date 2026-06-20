@@ -1,0 +1,30 @@
+[
+  {
+    "uid": "eq-officeqa-test-001",
+    "question": "Which exact interface name is used for SQL-side computed property conversion?",
+    "ground_truth": "ColumnValueSQLConverter",
+    "category": "type",
+    "source_files": ["ColumnValueSQLConverter.java"]
+  },
+  {
+    "uid": "eq-officeqa-test-002",
+    "question": "Which exact interface name is used for automatic matching value converters?",
+    "ground_truth": "ValueAutoConverter",
+    "category": "type",
+    "source_files": ["ValueAutoConverter.java"]
+  },
+  {
+    "uid": "eq-officeqa-test-003",
+    "question": "Which exact interface name is used for tenant or permission predicate interception?",
+    "ground_truth": "PredicateFilterInterceptor",
+    "category": "type",
+    "source_files": ["PredicateFilterInterceptor.java"]
+  },
+  {
+    "uid": "eq-officeqa-test-004",
+    "question": "Which exact API name is used for relation analytics group-join rewriting?",
+    "ground_truth": "subQueryToGroupJoin",
+    "category": "api",
+    "source_files": ["group.md"]
+  }
+]

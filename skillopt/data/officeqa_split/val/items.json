@@ -1,0 +1,30 @@
+[
+  {
+    "uid": "eq-officeqa-val-001",
+    "question": "Which exact method name is used to request DTO structured mapping in the basic DTO mapping doc?",
+    "ground_truth": "selectAutoInclude",
+    "category": "api",
+    "source_files": ["map1.md"]
+  },
+  {
+    "uid": "eq-officeqa-val-002",
+    "question": "Which exact method name is used to set safe backend primary keys for child entities in savable flows?",
+    "ground_truth": "saveEntitySetPrimaryKey",
+    "category": "api",
+    "source_files": ["set-save-key.md"]
+  },
+  {
+    "uid": "eq-officeqa-val-003",
+    "question": "Which exact method is shown for disabling logic delete on a joined table scope?",
+    "ground_truth": "tableLogicDelete",
+    "category": "api",
+    "source_files": ["delete.md"]
+  },
+  {
+    "uid": "eq-officeqa-val-004",
+    "question": "Which exact method name is used to convert a query into a CTE in the CTE docs?",
+    "ground_truth": "toCteAs",
+    "category": "api",
+    "source_files": ["cte.md"]
+  }
+]

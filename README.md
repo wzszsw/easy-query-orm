@@ -42,7 +42,6 @@ Use $easy-query-orm to implement this repository query with verified easy-query 
 
 ```text
 SKILL.md
-agents/openai.yaml
 references/
 scripts/search_references.py
 skillopt/
@@ -52,12 +51,16 @@ skillopt/
 
 ## SkillOpt Assets
 
-`skillopt/` stores local SkillOpt experiment assets for this skill, including:
+`skillopt/` stores local SkillOpt experiment assets for this skill.
 
-- `configs/`: experiment configs used to optimize the skill
-- `data/`: curated `skillqa` dataset and split files
-- `notes/`: run notes and temporary analysis material
+The standard path in this repository is the built-in `officeqa` env. The
+tracked assets include:
 
-Training outputs are intentionally not tracked in git. The standard skill
-installation path is still `SKILL.md` plus `references/`; `skillopt/` is only
-for maintaining and reproducing optimization work on this repository.
+- `configs/officeqa/`: standard SkillOpt configs that target the built-in `officeqa` env
+- `configs/_base_/`: shared model and training defaults for the local SkillOpt runs
+- `data/officeqa_split/`: short-answer train/val/test items for standard `officeqa` EM/F1 evaluation
+
+Training outputs under `skillopt/runs/` are intentionally not tracked in git.
+The installed Codex skill surface remains `SKILL.md` plus `references/`;
+`skillopt/` only exists to maintain and reproduce optimization work on this
+repository.
