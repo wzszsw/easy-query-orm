@@ -72,6 +72,7 @@ import com.easy.query.core.annotation.EasyTree;
 import com.easy.query.core.annotation.ShardingTableKey;
 import com.easy.query.core.annotation.EasyQueryTrack;
 import com.easy.query.core.annotation.EasyWhereCondition;
+import com.easy.query.core.annotation.Enumerated;  // on the enum TYPE, not the field
 ```
 
 Related enums that commonly pair with those annotations:
@@ -116,6 +117,7 @@ import com.easy.query.core.basic.extension.generated.SaveEntitySetPrimaryKeyGene
 ```java
 import com.easy.query.core.basic.extension.conversion.ValueConverter;
 import com.easy.query.core.basic.extension.conversion.ValueAutoConverter;
+import com.easy.query.core.basic.extension.conversion.NamedEnumValueAutoConverter;
 import com.easy.query.core.basic.extension.conversion.ColumnValueSQLConverter;
 import com.easy.query.core.basic.jdbc.types.handler.JdbcTypeHandler;
 import com.easy.query.core.basic.extension.interceptor.Interceptor;

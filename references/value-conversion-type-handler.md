@@ -138,29 +138,130 @@ conversion.
 
 ## 3. Built-in Auto Enum Path: `@Enumerated`
 
-Source shows `QueryConfiguration` registers
-`NamedEnumValueAutoConverter.INSTANCE` by default.
+This is the framework-supported way to map an enum by its `name()`. It is
+zero-config at the property level: the enum type carries the annotation, and
+every column of that enum type stores/reads the `name()` string automatically.
 
-That converter applies when the enum type itself has `@Enumerated`.
+Backing types (verified from current source):
+
+- annotation: `com.easy.query.core.annotation.Enumerated`
+  - `@Retention(RUNTIME)`, `@Target(TYPE)` (put it on the enum, never on the
+    entity field)
+  - empty marker annotation, no attributes
+- converter: `com.easy.query.core.basic.extension.conversion.NamedEnumValueAutoConverter`
+  - `ValueAutoConverter<Enum<?>, Object>`
+  - `QueryConfiguration` registers `NamedEnumValueAutoConverter.INSTANCE` in its
+    own constructor, so it is on by default; you do not call
+    `applyValueConverter(...)` for it
+
+### `apply(...)` matching rule
+
+`NamedEnumValueAutoConverter.apply(entityClass, propertyType, property)` returns
+true only when **both** hold:
 
 ```java
+Enum.class.isAssignableFrom(propertyType)
+    && propertyType.isAnnotationPresent(Enumerated.class);
+```
+
+Implications:
+
+- the annotation lives on the enum type, so the same enum mapped across many
+  entity fields is converted on every one of them with no per-field
+  `@Column(conversion=...)`
+- an enum that does not carry `@Enumerated` is not handled here; it falls
+  through to a custom `ValueConverter` / `ValueAutoConverter` (e.g. the
+  `IEnum` code path) or to basic-type handling
+- this is an auto converter, so an explicit
+  `@Column(conversion = Xxx.class)` on a specific field overrides it (see §2
+  precedence rules)
+
+### Serialize / deserialize behavior
+
+- `serialize(Enum, ...)` writes `enum.name()` (returns `null` for `null`)
+- `deserialize(Object, ...)`:
+  - `null` in, `null` out
+  - accepts only `String`; any other JDBC type throws
+    `UnsupportedOperationException`
+  - looks up the constant by `name()`; an unknown name throws
+    `IllegalArgumentException`
+
+So the database column must hold the exact `name()` string of a declared
+constant.
+
+### DDL column type
+
+`DefaultMigrationEntityParser.getColumnDbType(...)` resolves the column type
+from a `propertyType -> ColumnDbTypeResult` map. When the enum property type is
+not in that map **and** the type carries `@Enumerated`, it falls back to
+`String.class`'s column type (i.e. a varchar family type), honoring any
+`@Column(length=...)`. Without `@Enumerated`, an unmapped enum property type
+throws `entity:[...] field name:[...] not found column db type.` during code-first
+DDL. So `@Enumerated` is also what makes code-first DDL accept an enum column.
+
+### End-to-end example (mirrors `sql-test`)
+
+Enum:
+
+```java
+import com.easy.query.core.annotation.Enumerated;
+
 @Enumerated
 public enum NamedEnum {
-    CREATED,
-    PAID,
-    CLOSED
+    USER,
+    TEACHER,
+    BOOK
 }
 ```
 
-Meaning:
+Entity: plain field, no `@Column(conversion=...)`:
 
-- database stores enum `name()` strings
-- read path converts string back to the enum constant
-- this is global/automatic for that enum type; no field-level
-  `@Column(conversion=...)` is required
+```java
+@EntityProxy
+@Table("t_named_enum")
+public class NamedEnumEntity implements ProxyEntityAvailable<NamedEnumEntity, NamedEnumEntityProxy> {
+    private String id;
+    private String name;
+    private NamedEnum type;   // stored as "USER" / "TEACHER" / "BOOK"
+}
+```
 
-This is a different pattern from code-value enums. For `1/2/3` style storage,
-use a custom `ValueConverter` or `ValueAutoConverter`.
+Query and assertion (verified SQL + parameter shape):
+
+```java
+NamedEnumEntity row = entityQuery.queryable(NamedEnumEntity.class)
+        .where(n -> n.type().eq(NamedEnum.BOOK))
+        .singleNotNull();
+// emitted SQL:  SELECT "id","name","type" FROM "t_named_enum" WHERE "type" = ?
+// bound param:  BOOK(String)
+```
+
+### When to use which enum mapping
+
+- enum names are a stable contract and you want zero per-field config: put
+  `@Enumerated` on the enum type and store `name()`.
+- numeric / external code values (`1/2/3`, business codes): implement
+  `IEnum<TEnum>` (or any custom code) and register a `ValueConverter` /
+  `ValueAutoConverter` that reads `getCode()`. Do **not** add `@Enumerated` to
+  such enums — that would route them through the name-based converter instead.
+- need a different strategy on one specific field only: keep
+  `@Column(conversion = Xxx.class)` on that field; it overrides the
+  `@Enumerated` auto converter for that field.
+
+### Common mistakes
+
+- Putting `@Enumerated` on the entity field instead of the enum type. It is
+  `@Target(TYPE)` and is matched against the property type, so it has no effect
+  on a field.
+- Expecting `@Enumerated` to store `1/2/3` codes. It stores `name()` only; use
+  the `IEnum` + `ValueConverter` path for numeric codes.
+- Storing a non-`String` value (e.g. a JDBC int) into an `@Enumerated` column
+  and expecting round-trip; `deserialize` throws
+  `UnsupportedOperationException` for non-String values.
+- Assuming a custom `ValueConverter` on one field coexists equally with the
+  `@Enumerated` auto converter; explicit `@Column(conversion=...)` wins for
+  that field, and `@Enumerated` keeps applying to every other field of the
+  same enum type.
 
 ## 4. `JdbcTypeHandler`
 

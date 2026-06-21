@@ -270,8 +270,8 @@ most one secondary reference when a boundary rule below says it is needed.
   `savePath`, root controls, ownership/cascade, or child key safety, start at
   `references/savable-aggregate.md` and follow its router instead of opening
   all savable references at once.
-- Value conversion, auto conversion, enum/json mapping, `JdbcTypeHandler`,
-  PostgreSQL `jsonb`:
+- Value conversion, auto conversion, enum/json mapping, enum-`name()`
+  mapping via `@Enumerated`, `JdbcTypeHandler`, PostgreSQL `jsonb`:
   `references/value-conversion-type-handler.md`.
 - Interceptors, tenant/audit/data-permission,
   `useInterceptor(...)` / `noInterceptor(...)`:
@@ -383,6 +383,14 @@ most one secondary reference when a boundary rule below says it is needed.
   sufficient.
 - Do not recommend `ValueConverter` alone when the real problem is JDBC
   binding/driver behavior such as PostgreSQL `jsonb` `PGobject` writes.
+- For enum-by-name mapping, prefer the built-in `@Enumerated` on the enum type
+  (it is `@Target(TYPE)`, registered globally via
+  `NamedEnumValueAutoConverter`, stores `name()` as a varchar, and needs no
+  per-field `@Column`). Do not put `@Enumerated` on the entity field; it has no
+  effect there. For numeric/code enums keep the `IEnum` + `ValueConverter`
+  path and do not add `@Enumerated` to those enums. An explicit
+  `@Column(conversion = Xxx.class)` on a field still overrides the
+  `@Enumerated` auto converter for that field only.
 - Do not conflate `generatedKey`, `generatedSQLColumnGenerator`,
   `primaryKeyGenerator`, and `saveEntitySetPrimaryKey(...)`; they solve
   different phases of key assignment.

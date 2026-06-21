@@ -38,7 +38,7 @@ Common top-level methods:
 | `@Column(primaryKey = true, generatedKey = true)` | Database-generated primary key | `primary-key-generation.md`, `write-insert-upsert.md` |
 | `@Column(primaryKey = true, primaryKeyGenerator = ...)` | Java-side primary key generation | `primary-key-generation.md` |
 | `@Column(generatedSQLColumnGenerator=...)` | Database function/expression generated key SQL | `primary-key-generation.md` |
-| `@Enumerated` | Built-in enum-name auto conversion trigger | `value-conversion-type-handler.md` |
+| `@Enumerated` | Built-in enum-`name()` auto conversion (put on the enum TYPE; stored as varchar) | `value-conversion-type-handler.md` |
 | `@ColumnIgnore` / `@InsertIgnore` / `@UpdateIgnore` | Advanced persistence-scope controls for fields | `entity-modeling-advanced.md` |
 | `@TableIndex` / `@TableIndexes` | Code-first table index metadata | `entity-modeling-advanced.md` |
 | `@ValueObject` | Deprecated current-source value-object field modeling | `entity-computed-properties.md`, `entity-modeling-advanced.md` |
