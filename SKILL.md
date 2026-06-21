@@ -264,10 +264,12 @@ most one secondary reference when a boundary rule below says it is needed.
   `references/write-tracking.md`.
 - Plain transaction API or Spring `@Transactional`:
   `references/transaction.md`.
-- Aggregate graph save with `savable(...)`:
+- Aggregate graph save with `savable(...)`, including `@SaveKey` non-PK
+  matching for many-to-many middle tables:
   `references/savable-aggregate.md`.
 - If the savable question is explicitly about execution preconditions,
-  `savePath`, root controls, ownership/cascade, or child key safety, start at
+  `savePath`, root controls, ownership/cascade, `@SaveKey` business-key
+  matching, or child key safety, start at
   `references/savable-aggregate.md` and follow its router instead of opening
   all savable references at once.
 - Value conversion, auto conversion, enum/json mapping, enum-`name()`
@@ -394,6 +396,14 @@ most one secondary reference when a boundary rule below says it is needed.
 - Do not conflate `generatedKey`, `generatedSQLColumnGenerator`,
   `primaryKeyGenerator`, and `saveEntitySetPrimaryKey(...)`; they solve
   different phases of key assignment.
+- For `savable(...)` many-to-many middle tables whose rows should match by a
+  business composite key (e.g. `(rootId, manyId)`) rather than a surrogate PK,
+  put `@SaveKey` (`com.easy.query.core.annotation.SaveKey`, `@Target(FIELD)`)
+  on those fields. It is an in-memory matching identity used only inside the
+  savable diff — it does NOT change generated SQL `WHERE`/`SET` (still PK-based)
+  and has no effect on direct `insertable/updatable/deletable`. Do not confuse
+  it with `saveEntitySetPrimaryKey(...)` (backend PK assignment for untracked
+  children); they are orthogonal. See `savable-relation-rules.md` §5.5.
 - Do not teach `executeRows(true)` as if Java-side `PrimaryKeyGenerator`
   needed it.
 - Prefer interceptor abstraction for cross-cutting tenant, audit, and

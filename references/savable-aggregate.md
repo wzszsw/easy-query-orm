@@ -38,7 +38,8 @@ first-class prerequisites, not optional polish.
 
 - Need the "how do I call `savable(...)` safely" answer:
   `savable-execution.md`
-- Need to understand why a relation is or is not saved recursively:
+- Need to understand why a relation is or is not saved recursively, or need
+  `@SaveKey` non-PK matching for many-to-many middle tables:
   `savable-relation-rules.md`
 - Need to prevent frontend child ids from corrupting inserts:
   `savable-key-safety.md`

@@ -73,6 +73,7 @@ import com.easy.query.core.annotation.ShardingTableKey;
 import com.easy.query.core.annotation.EasyQueryTrack;
 import com.easy.query.core.annotation.EasyWhereCondition;
 import com.easy.query.core.annotation.Enumerated;  // on the enum TYPE, not the field
+import com.easy.query.core.annotation.SaveKey;  // on the entity FIELD, non-PK savable matching key
 ```
 
 Related enums that commonly pair with those annotations:

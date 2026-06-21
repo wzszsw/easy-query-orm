@@ -310,6 +310,7 @@ projection, and `select-auto-include.md` for DTO graphs.
 | `SaveBehaviorEnum.ALLOW_OWNERSHIP_CHANGE` | Permit value-object ownership reassignment | `savable-relation-rules.md` |
 | `SaveBehaviorEnum.IGNORE_NULL` / `IGNORE_EMPTY` / `IGNORE_LOGIC_DELETE` | Advanced savable behavior switches | `savable-execution.md` |
 | `easyEntityQuery.saveEntitySetPrimaryKey(entity)` | Assign safe backend keys for request-built child rows | `savable-key-safety.md`, `primary-key-generation.md` |
+| `@SaveKey` | Non-PK in-memory matching identity for `savable(...)` diff (middle-table business key); does not change SQL | `savable-relation-rules.md` |
 
 ## Tracking Symbols
 
