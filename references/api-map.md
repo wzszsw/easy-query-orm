@@ -113,6 +113,9 @@ Common operators:
 |--------|---------|-----------|
 | `EasySearch.of(...)` | Search object factory (`com.easy.query.search`) | `easy-search.md` |
 | `@EasyCond` | Search/filter/sort metadata with type-driven default operators (`com.easy.query.search.annotation`) | `easy-search.md` |
+| `SearchInjectConfiguration` | Wire EasySearch-specific query/sort executors into the standard dynamic-query extension points | `easy-search.md` |
+| `EasySearchObjectSortQueryExecutor` | EasySearch-aware `ObjectSortQueryExecutor` used by `orderByObject(search)` | `easy-search.md` |
+| `EasySearchOptionBuilder.setSortParam(...)` | Change the incoming sort request parameter key from the default `sort` | `easy-search.md` |
 
 Typical chain:
 
@@ -192,6 +195,11 @@ If the result target is a DTO graph, prefer `selectAutoInclude(...)` before
 
 ## Select and Projection Symbols
 
+| Symbol | Purpose | Read Next |
+|--------|---------|-----------|
+| `Select.DRAFT.of(...)` | Build a lightweight typed draft tuple projection for ad hoc metrics or intermediate shapes | `ap-analytics.md`, `query-composition.md` |
+| `rowNumberOver(...)` | Window row-number function for partition/ranking queries | `ap-analytics.md` |
+
 Useful projection helpers:
 
 `Select.of(...)`, `Select.DRAFT`, `Select.TUPLE`, `Select.PART`,
@@ -238,6 +246,8 @@ projection, and `select-auto-include.md` for DTO graphs.
 | `mapUpdatable(...)` | Update column-value map rows | `write-update.md` |
 | `onConflictThen(...)` | Conflict/upsert handling on insert | `write-insert-upsert.md` |
 | `setSQLStrategy(...)` | Control insert/update column emission strategy | `write-insert-upsert.md`, `write-update.md`, `configuration-starter.md` |
+| `setColumns(...)` on `updatable(Entity.class)` | Build expression-update `SET` clauses on the current update chain | `write-update.md` |
+| `setColumns(...)` on `updatable(entity)` | Narrow object-update column selection for the current entity update | `write-update.md`, `write-tracking.md` |
 | `set(...)` / `setWithColumn(...)` / `setSQLFunction(...)` on `updatable(Class)` | Low-level expression-update setters | `write-update.md` |
 | `setIgnoreColumns(...)` | Exclude selected object-update columns from `SET` | `write-update.md` |
 | `whereColumns(...)` | Choose object-update or object-delete key columns | `write-update.md`, `write-delete.md` |
@@ -272,6 +282,8 @@ projection, and `select-auto-include.md` for DTO graphs.
 | `.asNoTracking()` | Explicitly opt out of tracking on the current query | `write-tracking.md` |
 | `easyEntityQuery.addTracking(entity)` | Manually add an entity to the current tracking context | `write-tracking.md` |
 | `TrackManager.begin()` / `release()` | Manual tracking scope lifecycle | `write-tracking.md` |
+| `TrackManager.currentThreadTracking()` | Check whether the current thread already has an active tracking scope | `write-tracking.md` |
+| `TrackManager.getCurrentTrackContext()` | Access the current `TrackContext`; lower-level/manual helper that can be `null` outside a scope | `write-tracking.md` |
 | `@EasyQueryTrack` | Framework-managed tracking scope for public methods | `write-tracking.md`, `spring-boot-starter.md` |
 
 ## Advanced Symbols

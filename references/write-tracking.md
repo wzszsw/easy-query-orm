@@ -127,7 +127,27 @@ Non-tracked object update:
 That is the operational reason why tracking and plain object update must not be
 explained as the same thing.
 
-## 7. High-Value Caveats
+## 7. Exact `TrackManager` Helpers
+
+For lower-level/manual tracking inspection, current source exposes two exact
+helper methods on `TrackManager`:
+
+- `currentThreadTracking()` — checks whether the current thread already has an
+  active tracking scope
+- `getCurrentTrackContext()` — returns the current `TrackContext`; it can be
+  `null` outside a tracking scope
+
+Source-backed nuance:
+
+- `currentThreadTracking()` is effectively a convenience check over
+  `getCurrentTrackContext() != null`
+- these helpers do **not** replace the existing two requirements for diff
+  update: an active tracking context and a tracked entity
+- use them for inspection / defensive branching, not as a substitute for
+  `@EasyQueryTrack`, `TrackManager.begin()`, `asTracking()`, or
+  `addTracking(entity)`
+
+## 8. High-Value Caveats
 
 ### `asTracking()` without active context
 

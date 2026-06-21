@@ -107,6 +107,15 @@ whereEnabled = true
 orderEnabled = true
 ```
 
+Exact symbol cues from current source:
+
+- `EasySearchOptionBuilder.setSortParam(...)` changes the incoming sort request
+  parameter key from the default `sort`
+- `SearchInjectConfiguration` wires
+  `ObjectSortQueryExecutor -> EasySearchObjectSortQueryExecutor`, so
+  `orderByObject(search)` keeps using the standard dynamic-sort extension point
+  with an EasySearch-specific implementation
+
 Condition parameter format:
 
 ```text
