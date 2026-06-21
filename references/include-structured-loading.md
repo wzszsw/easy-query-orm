@@ -120,7 +120,8 @@ queries.
 
 ## fillOne/fillMany
 
-Docs describe `fillOne/fillMany` as able to handle arbitrary programmatic nesting, with one critical requirement: both sides must expose enough key columns to match parent and child rows.
+Use `fillOne/fillMany` for arbitrary programmatic nesting when relation metadata
+or DTO auto-include is not the right fit.
 
 Use this when:
 
@@ -128,7 +129,98 @@ Use this when:
 - A query returns a custom DTO shape but still needs in-memory relation assembly.
 - Relation selection is too custom for `include`.
 
-Avoid it when `selectAutoInclude` or `include2` can express the same graph with existing navigation metadata.
+Avoid it when `selectAutoInclude` or `include2` can express the same graph with
+existing navigation metadata.
+
+### Prefer the `FillContext` form in new examples
+
+Current source still supports the older string overloads, but the
+`FillContext` consumer form is the clearer and non-deprecated surface:
+
+```java
+List<Province> rows = easyEntityQuery.queryable(Province.class)
+    .fillMany(() -> {
+        return easyEntityQuery.queryable(City.class)
+            .where(c -> c.code().eq("3306"));
+    }, c -> {
+        c.self_target("code", "provinceCode", false);
+    }, (province, cities) -> {
+        province.setCities(new ArrayList<>(cities));
+    })
+    .toList();
+```
+
+Matching rule in `self_target(...)`:
+
+- first argument = `selfProp` on the current/root query object
+- second argument = `targetProp` on the fill-query result object
+- third argument = `consumeNull`
+
+So in the example above:
+
+- root/self side: `Province.code`
+- fill/target side: `City.provinceCode`
+
+For a to-one fill:
+
+```java
+List<City> rows = easyEntityQuery.queryable(City.class)
+    .fillOne(() -> {
+        return easyEntityQuery.queryable(Province.class);
+    }, c -> {
+        c.self_target("provinceCode", "code", false);
+    }, (city, province) -> {
+        city.setProvince(province);
+    })
+    .toList();
+```
+
+### String overload still exists, but the parameter order is different
+
+Current source still accepts the older overloads:
+
+```java
+List<Province> rows = easyEntityQuery.queryable(Province.class)
+    .fillMany(() -> {
+        return easyEntityQuery.queryable(City.class)
+            .where(c -> c.code().eq("3306"));
+    }, "provinceCode", "code", (province, cities) -> {
+        province.setCities(new ArrayList<>(cities));
+    }, false)
+    .toList();
+```
+
+Important direction rule:
+
+- string overload order is `targetProperty`, then `selfProperty`
+- `self_target(...)` order is `selfProp`, then `targetProp`
+
+Do not swap them. This is the easiest way to write a compilable-looking example
+that never actually matches rows.
+
+### Practical rules
+
+- Both sides must expose the matching key fields in the selected columns.
+  Full-entity queries naturally satisfy this; custom DTO projections must retain
+  the `selfProp` / `targetProp` fields.
+- The fill subquery can still use normal DSL such as `where(...)` and
+  `limit(...)`.
+- When generated proxies are available, prefer field-name constants like
+  `CityProxy.TABLE.provinceCode().getValue()` and
+  `ProvinceProxy.TABLE.code().getValue()` over fragile raw string literals.
+- Do not invent proxy-only `fillMany` / `fillOne` builders. Current public
+  source-backed guidance is the `Query<T>` surface shown above.
+
+### Source-backed examples
+
+Upstream tests use all of these verified shapes:
+
+- `fillMany(..., "provinceCode", "code", ..., false)`
+- `fillMany(..., c -> c.self_target("code", "provinceCode", false), ...)`
+- `fillOne(..., c -> c.self_target("provinceCode", "code", false), ...)`
+- proxy field-name strings such as
+  `CityProxy.TABLE.provinceCode().getValue()` and
+  `ProvinceProxy.TABLE.code().getValue()`
 
 ## Relation Null Values
 
