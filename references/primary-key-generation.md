@@ -40,6 +40,16 @@ And there is one adjacent but different safety API:
 
 Do not collapse these into one generic "主键生成" answer.
 
+There is also a second nearby concept that is **not** a key generator at all:
+
+| Need | Main mechanism | Core annotation/API |
+|---|---|---|
+| savable diff should match a child by business identity when its PK is unset/unknown | savable-only in-memory fallback identity | `@SaveKey` |
+
+`@SaveKey` does not assign ids, does not backfill ids, and does not alter SQL
+PK `WHERE` / `INSERT` behavior. It only changes how `savable(...)` matches an
+incoming child to already-tracked/database-loaded children during diff.
+
 ## 2. Database-Generated Key: `generatedKey = true`
 
 Basic auto-increment / identity style:
@@ -249,6 +259,20 @@ So this API is for:
 
 It is not the general answer for ordinary single-row insert code.
 
+Important boundary from source:
+
+- this API **partly reuses** ordinary key-generation infrastructure rather than
+  duplicating it
+- if the key column already has `PrimaryKeyGenerator`, this API calls that same
+  generator
+- only when the entity has no `PrimaryKeyGenerator` does it use runtime
+  `SaveEntitySetPrimaryKeyGenerator`
+
+So the extra value of `saveEntitySetPrimaryKey(...)` is not "another generic PK
+generator". The extra value is the **tracking-aware safety decision**:
+"only for untracked would-be inserts, replace unsafe/request-supplied ids with
+backend-generated ids".
+
 For normal insert:
 
 - prefer `generatedKey = true`
@@ -270,6 +294,8 @@ Use this quick selection rule:
   `primaryKeyGenerator = ...`
 - request-built child entity in savable/tracking flow:
   `saveEntitySetPrimaryKey(...)`
+- savable diff should match rows by business key when PK is missing/unset:
+  `@SaveKey`
 
 ## 8. Common Mistakes
 
@@ -281,6 +307,7 @@ Use this quick selection rule:
 - Assuming starter auto-collects `SaveEntitySetPrimaryKeyGenerator` by plain
   bean type
 - Teaching `saveEntitySetPrimaryKey(...)` outside tracking context
+- Explaining `@SaveKey` as if it were another primary-key generation strategy
 - Forgetting that `PrimaryKeyGenerator` runs before insert interceptors
 
 ## Sources

@@ -57,6 +57,37 @@ Source behavior:
 So this is not "always generate a new key". It is "if this child is not a
 tracked existing row, assign a proper backend key for insert".
 
+## What Overlaps With Ordinary PK Generation, and What Does Not
+
+Current source shows that `saveEntitySetPrimaryKey(...)` is **not** a totally
+separate id-generation universe:
+
+- if the entity key column already has a `PrimaryKeyGenerator`,
+  `DefaultEasyQueryClient.saveEntitySetPrimaryKey(...)` directly reuses that
+  same generator
+- only when the key column has **no** `PrimaryKeyGenerator` does it fall back
+  to runtime `SaveEntitySetPrimaryKeyGenerator`
+
+So there is real overlap with ordinary Java-side primary-key generation, but
+the API adds a **savable/tracking-specific safety gate** on top:
+
+- it first checks whether the object is already tracked
+- only untracked entities are treated as would-be inserts and have their key
+  reassigned
+
+That is why this API is not redundant with ordinary insert-time key generation.
+Its job is not merely "generate an id", but "in a tracking/savable merge,
+decide whether this request-built child should keep its incoming id or be
+re-keyed as a new insert".
+
+Also note the inverse boundary: current `savable(...)` source does **not**
+implicitly call `saveEntitySetPrimaryKey(...)` for you. The helper is an
+explicit caller-side safety step for request-built children. If the entity has
+no `PrimaryKeyGenerator` and the runtime
+`SaveEntitySetPrimaryKeyGenerator` remains the default unsupported
+implementation, calling `saveEntitySetPrimaryKey(...)` throws instead of
+quietly inventing an id.
+
 ## 1. Safe One-to-Many Merge Shape
 
 ```java
@@ -154,6 +185,8 @@ Prefer `saveEntitySetPrimaryKey(...)` when the standard behavior is enough.
 - Trusting frontend child ids in a savable update flow
 - Calling `saveEntitySetPrimaryKey(...)` without an active tracking context
 - Assuming it always generates a new id regardless of track state
+- Assuming `savable(...)` automatically performs the same safety step for
+  request-built children
 - Forgetting that unsupported generator configuration can still fail
 
 ## Sources
@@ -164,5 +197,7 @@ Prefer `saveEntitySetPrimaryKey(...)` when the standard behavior is enough.
   `EasyQueryClient`
 - source:
   `DefaultEasyQueryClient.saveEntitySetPrimaryKey(...)`
+- source:
+  `UnSupportSaveEntitySetPrimaryKeyGenerator`
 - source:
   `SaveEntitySetPrimaryKeyGenerator`
