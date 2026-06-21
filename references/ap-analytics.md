@@ -194,13 +194,11 @@ public Supplier<Query<M8UserTemp2>> viewConfigure(QueryRuntimeContext runtimeCon
 Source-level window functions exposed by easy-query:
 
 - `rowNumberOver(...)`
-- `rankNumberOver(...)`
-- `denseRankNumberOver(...)`
-- `countOver(...)`
-- `sumOver(...)`
-- `avgOver(...)`
-- `maxOver(...)`
-- `minOver(...)`
+- proxy window rank builders: `rankOver()` and `denseRankOver()`
+- aggregate-over builders: `countOver(...)`, `sumOver(...)`, `avgOver(...)`,
+  `maxOver(...)`, `minOver(...)`
+- lower-level SQL function names in the core layer: `rankNumberOver(...)` and
+  `denseRankNumberOver(...)`
 
 Use deterministic ordering for partition analytics. Do not rely on natural row
 order.

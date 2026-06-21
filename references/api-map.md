@@ -60,6 +60,13 @@ Normal query chain: `where(...)`, `where(condition, ...)`, `whereById(...)`,
 `firstOrNull()`, `singleOrNull()`, `findNotNull(...)`, `toPageResult(...)`,
 `toChunk(...)`, `streamBy(...)`
 
+High-value exact terminals and pagination helpers:
+
+- `.any()`
+- `.count()`
+- `.limit(n)`
+- `.limit(offset, rows)`
+
 ## Predicate Symbols
 
 Common operators:
@@ -78,6 +85,7 @@ Common operators:
 | `orderByObject(sort)` | Search-form DTO sort / request-driven sort | `dto-object-query.md` |
 | `selectAutoInclude(ResultDTO.class)` | DTO graph result | `select-auto-include.md` |
 | `TABLE.EXTRA_AUTO_INCLUDE_CONFIGURE()` | Root/nested `selectAutoInclude` include-query shaping hook | `select-auto-include.md` |
+| `.configure(o -> o.setConfigureArgument(req))` | Pass request-scoped arguments into `selectAutoInclude` extra configure hooks | `select-auto-include.md` |
 | `.ignoreNavigateConfigure()` on extra auto include | Make DTO-local include shaping ignore inherited `@Navigate` order/limit settings | `select-auto-include.md` |
 | `@EasyWhereCondition` | Query-form filter metadata: `DEFAULT`, `MULTI_OR`, range/in/notIn, relation-path filters | `dto-object-query.md` |
 | `ObjectSortBuilder` | Sort allowlist / builder API (`com.easy.query.core.api.dynamic.sort`) | `dto-object-query.md` |
@@ -112,10 +120,25 @@ Common operators:
 | Symbol | Purpose | Read Next |
 |--------|---------|-----------|
 | `EasySearch.of(...)` | Search object factory (`com.easy.query.search`) | `easy-search.md` |
+| `EasySearch.table(...)` | Bind a named EasySearch sub-search class with default dynamic table matching | `easy-search.md` |
+| `EasySearch.tableAlias(...)` | Bind a named EasySearch sub-search class to an explicit table alias | `easy-search.md` |
+| `EasySearch.tableIndex(...)` | Bind a named EasySearch sub-search class to an explicit joined-table index | `easy-search.md` |
+| `EasySearch.param(...)` | Add one or more request-style search parameters to the current `EasySearch` instance | `easy-search.md` |
+| `EasySearch.paramMap(...)` | Bulk-load request-style search parameters from a map or `ParamMap` | `easy-search.md` |
+| `EasySearch.addDefaultSort(...)` | Add fallback sort expressions used when the incoming sort parameter is absent or empty | `easy-search.md` |
 | `@EasyCond` | Search/filter/sort metadata with type-driven default operators (`com.easy.query.search.annotation`) | `easy-search.md` |
 | `SearchInjectConfiguration` | Wire EasySearch-specific query/sort executors into the standard dynamic-query extension points | `easy-search.md` |
 | `EasySearchObjectSortQueryExecutor` | EasySearch-aware `ObjectSortQueryExecutor` used by `orderByObject(search)` | `easy-search.md` |
 | `EasySearchOptionBuilder.setSortParam(...)` | Change the incoming sort request parameter key from the default `sort` | `easy-search.md` |
+| `EasySearchOptionBuilder.setStrict(...)` | Enable or disable strict parameter validation in EasySearch parsing | `easy-search.md` |
+| `EasySearchOptionBuilder.setDefaultEnabled(...)` | Control whether unannotated fields participate in EasySearch by default | `easy-search.md` |
+| `EasySearchOptionBuilder.setIndexEnabled(...)` | Enable or disable indexed parameter names such as `name-1` | `easy-search.md` |
+| `EasySearchOptionBuilder.setWhereEnabled(...)` | Enable or disable EasySearch where-condition execution | `easy-search.md` |
+| `EasySearchOptionBuilder.setOrderEnabled(...)` | Enable or disable EasySearch sort execution | `easy-search.md` |
+| `EasySearchOptionBuilder.setGroupSplitter(...)` | Change the group-prefix separator used in EasySearch parameter keys | `easy-search.md` |
+| `EasySearchOptionBuilder.setClassSplitter(...)` | Change the class-prefix separator used in EasySearch parameter keys | `easy-search.md` |
+| `EasySearchOptionBuilder.setParamSplitter(...)` | Change the operator suffix separator used in EasySearch parameter keys | `easy-search.md` |
+| `EasySearchOptionBuilder.setOrderSplitter(...)` | Change the sort-direction separator used in EasySearch sort parameters | `easy-search.md` |
 
 Typical chain:
 
@@ -144,6 +167,8 @@ For non-form dynamic query composition, read `query.md` instead.
 | `.include(...)` | Load entity relations | `include-structured-loading.md` |
 | `.include2(...)` | Complex nested include paths | `include-structured-loading.md` |
 | `loadInclude(...)` | Load relations after query | `include-structured-loading.md` |
+| `fillOne(...)` | Programmatically backfill a to-one relation or nested object graph without `@Navigate` metadata | `include-structured-loading.md` |
+| `fillMany(...)` | Programmatically backfill a to-many relation or nested object graph without `@Navigate` metadata | `include-structured-loading.md` |
 | `@IncludeOnProperty(matchNull = true)` | Include the relation only when the dependent root property is null/blank | `entity-modeling-navigate.md`, `include-structured-loading.md` |
 | `expression().subQueryable(Entity.class)` | Context-aware explicit subquery bound to the current expression | `subquery-explicit.md` |
 | `expression().subQuery(query)` | Wrap a query as a scalar subquery expression | `subquery-explicit.md` |
@@ -182,6 +207,8 @@ If the result target is a DTO graph, prefer `selectAutoInclude(...)` before
 | `.flatElement()` | Flatten to-many path for traversal or `toList(...)` | `implicit-controls.md` |
 | `.notEmptyAll(...)` | Non-empty and every matched row passes | `implicit-controls.md` |
 | `.distinct()` on relation chain | Keep distinctness inside implicit subquery | `implicit-controls.md` |
+| `.anyValue()` | Project relation existence or a relation-filter boolean as a scalar value in the select list | `implicit-query.md`, `implicit-controls.md` |
+| `.noneValue()` | Project relation non-existence or a negated relation-filter boolean as a scalar value in the select list | `implicit-query.md`, `implicit-controls.md` |
 | `expression().valueOf(...)` | Project arbitrary predicate as boolean column | `implicit-controls.md` |
 
 ## Explicit Subquery Symbols
@@ -199,6 +226,13 @@ If the result target is a DTO graph, prefer `selectAutoInclude(...)` before
 |--------|---------|-----------|
 | `Select.DRAFT.of(...)` | Build a lightweight typed draft tuple projection for ad hoc metrics or intermediate shapes | `ap-analytics.md`, `query-composition.md` |
 | `rowNumberOver(...)` | Window row-number function for partition/ranking queries | `ap-analytics.md` |
+| `rankOver()` | Proxy-side window rank builder for partition/ranking queries | `ap-analytics.md` |
+| `denseRankOver()` | Proxy-side dense-rank builder for partition/ranking queries | `ap-analytics.md` |
+| `countOver(...)` | Proxy-side window count builder for partition analytics | `ap-analytics.md` |
+| `sumOver(...)` | Proxy-side window sum builder for partition analytics | `ap-analytics.md` |
+| `avgOver(...)` | Proxy-side window average builder for partition analytics | `ap-analytics.md` |
+| `maxOver(...)` | Proxy-side window max builder for partition analytics | `ap-analytics.md` |
+| `minOver(...)` | Proxy-side window min builder for partition analytics | `ap-analytics.md` |
 
 Useful projection helpers:
 
@@ -221,6 +255,8 @@ projection, and `select-auto-include.md` for DTO graphs.
 | `rawSQLStatement(...)` | Recommended proxy-side typed native fragment expression | `native-sql.md` |
 | `setSQL(...)` | Native SQL assignment for proxy projection/update field setters | `native-sql.md` |
 | `sqlNativeSegment(...)` | Property-mode or lower-level native SQL fragment entry | `native-sql.md` |
+| `c.value(...)` | Bind a native-fragment parameter as a JDBC placeholder in `sqlNativeSegment(...)` / lower-level SQL context callbacks | `native-sql.md` |
+| `c.format(...)` | Inject a literal native-fragment text token through `MessageFormat`-style formatting rules | `native-sql.md` |
 | `EasyProxyParamExpressionUtil.parseContextExpressionByParameters(...)` | Recover expression context for reusable custom native function wrappers | `native-sql.md`, `symbol-imports.md` |
 | `messageFormat()` | Disable default keep-style quote escaping in native fragment formatting | `native-sql.md` |
 
@@ -254,6 +290,7 @@ projection, and `select-auto-include.md` for DTO graphs.
 | `columnConfigure(...)` | Per-column custom SQL generation during insert/update | `write-insert-upsert.md`, `write-update.md` |
 | `batch()` / `batch(true)` / `batch(false)` | Toggle JDBC batch execution behavior on the current write chain | `write.md` |
 | `withVersion(...)` / `ignoreVersion()` | Version handling | `write-update.md`, `write-delete.md` |
+| `executeRows(expectRows, msg)` / `executeRows(expectRows, msg, code)` | Assert the expected affected-row count and throw on mismatch | `write-update.md`, `write-delete.md`, `transaction.md` |
 | `whereById(...)` / `whereByIds(...)` on `updatable(Class)` / `deletable(Class)` | Expression-update/delete key predicates | `write-update.md`, `write-delete.md` |
 | `disableLogicDelete()` / `enableLogicDelete()` / `useLogicDelete(boolean)` | Toggle logic-delete filtering/behavior on the current chain | `logic-delete.md` |
 | `tableLogicDelete(() -> false)` | Disable logic delete for the nearest joined table in the current expression | `logic-delete.md` |
@@ -281,6 +318,7 @@ projection, and `select-auto-include.md` for DTO graphs.
 | `.asTracking()` | Mark query results for diff update tracking | `write-tracking.md` |
 | `.asNoTracking()` | Explicitly opt out of tracking on the current query | `write-tracking.md` |
 | `easyEntityQuery.addTracking(entity)` | Manually add an entity to the current tracking context | `write-tracking.md` |
+| `easyEntityQuery.getRuntimeContext().getTrackManager()` | Retrieve the `TrackManager` used for manual tracking-scope control and inspection | `write-tracking.md` |
 | `TrackManager.begin()` / `release()` | Manual tracking scope lifecycle | `write-tracking.md` |
 | `TrackManager.currentThreadTracking()` | Check whether the current thread already has an active tracking scope | `write-tracking.md` |
 | `TrackManager.getCurrentTrackContext()` | Access the current `TrackContext`; lower-level/manual helper that can be `null` outside a scope | `write-tracking.md` |
@@ -291,6 +329,9 @@ projection, and `select-auto-include.md` for DTO graphs.
 | Symbol | Purpose | Read Next |
 |--------|---------|-----------|
 | `groupBy(...)` / `GroupKeys.of(...)` | Group query (`com.easy.query.core.proxy.sql.GroupKeys`) | `ap-analytics.md`, `advanced.md` |
+| `having(...)` | Apply aggregate-level filtering after `groupBy(...)` rather than row-level filtering before grouping | `ap-analytics.md` |
+| `union(...)` | Combine same-shape query branches with de-duplication | `ap-analytics.md` |
+| `unionAll(...)` | Combine same-shape query branches without de-duplication | `ap-analytics.md` |
 | `getDatabaseCodeFirst()` | Code-first DDL | `advanced.md` |
 | `applyShardingInitializer(...)` | Sharding registration | `advanced.md` |
 | `EasyMultiEntityQuery.executeScope(...)` | Multi-datasource scope | `advanced.md` |
@@ -314,6 +355,8 @@ query code.
 | `EasyQueryInitializeOption` | Collects starter-discovered extension beans and applies them to the built client | `spring-boot-starter.md` |
 | `StarterConfigurer` | Spring Boot hook for replacing internal bootstrap services (`com.easy.query.core.bootstrapper`) | `spring-boot-starter.md` |
 | `JdbcTypeHandlerReplaceConfigurer` | Declares global JDBC handler type binding/replacement under starter | `spring-boot-starter.md`, `value-conversion-type-handler.md` |
+| `JdbcTypeHandlerReplaceConfigurer.replace()` | Decide whether the starter should replace an existing handler for the declared Java types | `spring-boot-starter.md`, `value-conversion-type-handler.md` |
+| `JdbcTypeHandlerReplaceConfigurer.allowTypes()` | Declare which Java property types this starter-managed JDBC handler should bind | `spring-boot-starter.md`, `value-conversion-type-handler.md` |
 | `SpringBootStarterBuilder.buildClient(...)` | Default starter client-construction path | `spring-boot-starter.md` |
 | `EasyQueryTrackProperties` | `easy-query-track.*` property holder | `spring-boot-starter.md` |
 | `LogicDeleteStrategy` | Starter-collected logic-delete strategy bean | `spring-boot-starter.md`, `logic-delete.md` |
