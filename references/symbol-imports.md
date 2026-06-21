@@ -143,6 +143,7 @@ import com.easy.query.core.sharding.route.datasource.DataSourceRoute;
 ### Spring Boot / Search Extension
 
 ```java
+import com.easy.query.sql.starter.SpringBootStarterBuilder;
 import com.easy.query.sql.starter.config.EasyQueryProperties;
 import com.easy.query.sql.starter.config.EasyQueryTrackProperties;
 import com.easy.query.sql.starter.config.EasyQueryInitializeOption;
