@@ -508,4 +508,8 @@ reader can recover them from context.
   `allowDeleteStatement(true)` is materially different from
   `allowDeleteStatement()`, and `queryable(rawSql, Entity.class, params)` is
   more precise than a bare `queryable`.
+- For identifier-only questions (e.g., "which method", "what property", "name
+  the API"), the answer must be only the identifier or exact call shape,
+  without code blocks, explanation, or extra context. Do not include the class
+  name, package, or usage example unless explicitly asked.
 
