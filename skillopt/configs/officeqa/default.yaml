@@ -24,8 +24,11 @@ env:
     - D:/develop/SOURCE_CODE/easy-query/sql-core/src/main/java/com/easy/query/core/basic/extension/conversion
     - D:/develop/SOURCE_CODE/easy-query/sql-core/src/main/java/com/easy/query/core/basic/extension/generated
     - D:/develop/SOURCE_CODE/easy-query/sql-core/src/main/java/com/easy/query/core/basic/extension/interceptor
+    - D:/develop/SOURCE_CODE/easy-query/sql-core/src/main/java/com/easy/query/core/basic/extension/track
     - D:/develop/SOURCE_CODE/easy-query/sql-core/src/main/java/com/easy/query/core/basic/jdbc/types/handler
-    - D:/develop/SOURCE_CODE/easy-query/sql-extension/sql-springboot-starter/src/main/java/com/easy/query/sql/starter/config
+    - D:/develop/SOURCE_CODE/easy-query/sql-core/src/main/java/com/easy/query/core/bootstrapper
+    - D:/develop/SOURCE_CODE/easy-query/sql-extension/sql-search/src/main/java/com/easy/query/search
+    - D:/develop/SOURCE_CODE/easy-query/sql-extension/sql-springboot-starter/src/main/java/com/easy/query/sql/starter
     - D:/develop/SOURCE_CODE/easy-query-doc/src/ability
     - D:/develop/SOURCE_CODE/easy-query-doc/src/ability/select
     - D:/develop/SOURCE_CODE/easy-query-doc/src/adv

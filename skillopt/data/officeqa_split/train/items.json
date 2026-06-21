@@ -222,5 +222,103 @@
     "ground_truth": "build",
     "category": "property",
     "source_files": ["EasyQueryProperties.java"]
+  },
+  {
+    "uid": "eq-officeqa-033",
+    "question": "Which builder property in EasySearchOptionBuilder defaults to false for unannotated properties?",
+    "ground_truth": "defaultEnabled",
+    "category": "property",
+    "source_files": ["EasySearchOptionBuilder.java"]
+  },
+  {
+    "uid": "eq-officeqa-034",
+    "question": "Which builder method on EasySearchOptionBuilder changes the sort parameter name?",
+    "ground_truth": "setSortParam",
+    "category": "method",
+    "source_files": ["EasySearchOptionBuilder.java"]
+  },
+  {
+    "uid": "eq-officeqa-035",
+    "question": "Which builder property in EasySearchOptionBuilder defaults to the pipe character for condition grouping?",
+    "ground_truth": "groupSplitter",
+    "category": "property",
+    "source_files": ["EasySearchOptionBuilder.java"]
+  },
+  {
+    "uid": "eq-officeqa-036",
+    "question": "Which annotation is used on fields or types to declare EasySearch query metadata?",
+    "ground_truth": "@EasyCond",
+    "category": "annotation",
+    "source_files": ["EasyCond.java"]
+  },
+  {
+    "uid": "eq-officeqa-037",
+    "question": "Which EasyCond property maps a search field to a different request parameter name?",
+    "ground_truth": "name",
+    "category": "property",
+    "source_files": ["EasyCond.java"]
+  },
+  {
+    "uid": "eq-officeqa-038",
+    "question": "Which EasyCond property restricts allowed query operators for a field?",
+    "ground_truth": "condOnly",
+    "category": "property",
+    "source_files": ["EasyCond.java"]
+  },
+  {
+    "uid": "eq-officeqa-039",
+    "question": "Which EasyCond property restricts allowed sort directions for a field?",
+    "ground_truth": "sortOnly",
+    "category": "property",
+    "source_files": ["EasyCond.java"]
+  },
+  {
+    "uid": "eq-officeqa-040",
+    "question": "Which TrackManager method reports whether the current thread has tracking enabled?",
+    "ground_truth": "currentThreadTracking",
+    "category": "method",
+    "source_files": ["TrackManager.java", "data-tracking.md"]
+  },
+  {
+    "uid": "eq-officeqa-041",
+    "question": "Which method on TrackManager returns the current thread tracking context?",
+    "ground_truth": "getCurrentTrackContext",
+    "category": "method",
+    "source_files": ["TrackManager.java", "data-tracking.md"]
+  },
+  {
+    "uid": "eq-officeqa-042",
+    "question": "Which exact interface lets starter users configure the bootstrap ServiceCollection?",
+    "ground_truth": "StarterConfigurer",
+    "category": "type",
+    "source_files": ["StarterConfigurer.java"]
+  },
+  {
+    "uid": "eq-officeqa-043",
+    "question": "Which initialization option container aggregates starter-discovered interceptors, converters, routes, and generators before addComponents runs?",
+    "ground_truth": "EasyQueryInitializeOption",
+    "category": "type",
+    "source_files": ["EasyQueryInitializeOption.java"]
+  },
+  {
+    "uid": "eq-officeqa-044",
+    "question": "Which class does SearchInjectConfiguration register as the where-object executor for EasySearch?",
+    "ground_truth": "EasySearchWhereObjectQueryExecutor",
+    "category": "type",
+    "source_files": ["SearchInjectConfiguration.java"]
+  },
+  {
+    "uid": "eq-officeqa-045",
+    "question": "Which class does SearchInjectConfiguration register as the object-sort executor for EasySearch?",
+    "ground_truth": "EasySearchObjectSortQueryExecutor",
+    "category": "type",
+    "source_files": ["SearchInjectConfiguration.java"]
+  },
+  {
+    "uid": "eq-officeqa-046",
+    "question": "Which Spring Boot AOP configuration class wraps public @EasyQueryTrack methods?",
+    "ground_truth": "EasyQueryTrackAopConfiguration",
+    "category": "type",
+    "source_files": ["EasyQueryTrackAopConfiguration.java"]
   }
 ]
