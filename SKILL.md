@@ -47,6 +47,14 @@ most one secondary reference when a boundary rule below says it is needed.
 7. If code, docs, or a user snippet mention easy-query type names without
    imports, resolve the package from `references/symbol-imports.md` first. Do
    not guess the package from memory.
+7a. When multiple candidate files are given, grep for key question terms
+    across the candidate set first to identify the relevant file and line
+    range, then read only the targeted span around the match rather than
+    loading entire documents.
+7b. For identifier-only questions, answer with only the direct invocation
+    identifier or exact call shape. Prefer the callable method or exact
+    builder-chain call the user should invoke, not the backing class,
+    interface, or generator name.
 8. For AP/reporting work, keep dimensions, grouped aggregates, partition
    ranks, and union branches in SQL DSL. Prefer explicit `groupBy` / `having`
    first; switch to `subQueryToGroupJoin` when repeated to-many relation
@@ -436,9 +444,13 @@ non-obvious API, SQL-shape, or version caveat.
 
 - If the question is identifier-only, such as "which API", "what method",
   "name the property", or "what exact call", override the code-first rule and
-  answer with only the bare identifier or exact call shape. Do not add code
-  blocks, FQCNs, signatures, or extra explanation unless the user explicitly
-  asks for "how", "why", or "explain".
+  answer with only the direct invocation identifier or exact call shape, then
+  stop. Prefer the callable method or exact builder-chain call over a backing
+  class, interface, or generator name when the user is asking what to invoke.
+  Do not add code blocks, FQCNs, import lines, package paths, signatures,
+  parameter lists, usage examples, documentation references, or extra
+  explanation unless the user explicitly asks for "how", "why", or
+  "explain".
 
 If compile-ready code uses non-obvious easy-query annotations, enums, starter
 SPI, or extension types, include the needed imports instead of assuming the
@@ -470,17 +482,29 @@ reader can recover them from context.
   concrete value.
 - Use exact artifact names, property names, and API identifiers as written in
   the skill and references; do not reword or generalize them.
-
-- When a navigation should load only for certain root rows based on a static entity property (e.g., version), prefer the entity-side annotation `@IncludeOnProperty` on the `@Navigate` field. Do not drift into DTO child filtering via `EXTRA_AUTO_INCLUDE_CONFIGURE` as the first approach; note that `EXTRA_AUTO_INCLUDE_CONFIGURE` is a query-time DTO child-list pruning knob, not an entity metadata gating mechanism. Also, note that `loadInclude(...)` evaluates already-loaded root objects in memory before issuing relation queries, so entity-side `@IncludeOnProperty` metadata still applies to `loadInclude` calls. Route to `references/entity-modeling-navigate.md` for entity-side conditional navigation.
-- For `selectAutoInclude`, always preserve the DTO/VO class literal in the call (e.g., `selectAutoInclude(ResultDTO.class)`). Do not substitute a different class name or omit the class argument; without the class literal, easy-query cannot determine which nested relations to include.
-
-- When the task, context, or eval surface names an exact API call shape with type parameters or arguments (e.g. `selectAutoInclude(ResultDTO.class)`), reproduce the full call expression including generic type arguments rather than naming only the bare method; do not abbreviate to a method-only form.
-- For "which API/method/call" questions, prefer the callable method or exact
-  builder-chain call over the backing class, generator, or interface name when
-  the question is asking what the user should invoke.
+- When a navigation should load only for certain root rows based on a static
+  entity property (e.g., version), prefer the entity-side annotation
+  `@IncludeOnProperty` on the `@Navigate` field. Do not drift into DTO child
+  filtering via `EXTRA_AUTO_INCLUDE_CONFIGURE` as the first approach; note
+  that `EXTRA_AUTO_INCLUDE_CONFIGURE` is a query-time DTO child-list pruning
+  knob, not an entity metadata gating mechanism. Also, note that
+  `loadInclude(...)` evaluates already-loaded root objects in memory before
+  issuing relation queries, so entity-side `@IncludeOnProperty` metadata still
+  applies to `loadInclude` calls. Route to
+  `references/entity-modeling-navigate.md` for entity-side conditional
+  navigation.
+- For `selectAutoInclude`, always preserve the DTO/VO class literal in the
+  call (e.g., `selectAutoInclude(ResultDTO.class)`). Do not substitute a
+  different class name or omit the class argument; without the class literal,
+  easy-query cannot determine which nested relations to include.
+- When the task, context, or eval surface names an exact API call shape with
+  type parameters or arguments (for example,
+  `selectAutoInclude(ResultDTO.class)`), reproduce the full call expression
+  including generic type arguments rather than naming only the bare method; do
+  not abbreviate to a method-only form.
 - When the question asks for an exact call shape, or when an argument value is
-  what makes the API semantically correct, include the necessary argument
-  value instead of truncating to the bare method name. For example,
+  what makes the API semantically correct, include the necessary argument value
+  instead of truncating to the bare method name. For example,
   `allowDeleteStatement(true)` is materially different from
   `allowDeleteStatement()`, and `queryable(rawSql, Entity.class, params)` is
   more precise than a bare `queryable`.
