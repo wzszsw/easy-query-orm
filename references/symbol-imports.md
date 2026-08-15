@@ -44,6 +44,8 @@ If the missing symbol is really a method/field rather than a type, switch to
 | `EasyQueryClient` | `import com.easy.query.core.api.client.EasyQueryClient;` |
 | `EasyQueryBootstrapper` | `import com.easy.query.core.bootstrapper.EasyQueryBootstrapper;` |
 | `EasyProxyParamExpressionUtil` | `import com.easy.query.api.proxy.util.EasyProxyParamExpressionUtil;` |
+| `ClientQueryable` | `import com.easy.query.core.basic.api.select.ClientQueryable;` |
+| `EntityQueryable` | `import com.easy.query.api.proxy.entity.select.EntityQueryable;` |
 | `Expression` | `import com.easy.query.core.proxy.core.Expression;` |
 | `PropTypeColumn` | `import com.easy.query.core.proxy.PropTypeColumn;` |
 | `ProxyEntityAvailable` | `import com.easy.query.core.proxy.ProxyEntityAvailable;` |
@@ -101,7 +103,9 @@ import com.easy.query.core.basic.extension.logicdel.LogicDeleteStrategyEnum;
 | Symbol | Import |
 |--------|--------|
 | `Select` | `import com.easy.query.core.proxy.sql.Select;` |
+| `Draft2` | `import com.easy.query.core.proxy.core.draft.Draft2;` |
 | `GroupKeys` | `import com.easy.query.core.proxy.sql.GroupKeys;` |
+| `AggregateQueryable` | `import com.easy.query.core.proxy.AggregateQueryable;` |
 | `EasyBehaviorEnum` | `import com.easy.query.core.enums.EasyBehaviorEnum;` |
 
 ### Key Generation

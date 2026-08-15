@@ -5,9 +5,11 @@ Two ways to get a transaction: easy-query's own `beginTransaction()` (plain Java
 
 ## When to use / not
 
-Use when multiple writes must succeed or fail together. Pure reads don't need a transaction. Keep the
-transaction boundary at the service layer, aligned with the business operation — not scattered across
-repositories or controllers.
+Use when multiple writes must succeed or fail together. Ordinary pure reads do
+not need a transaction, but a pessimistic locking read with `forUpdate()` does;
+see `query-locking.md`. Keep the transaction boundary at the service layer,
+aligned with the business operation — not scattered across repositories or
+controllers.
 
 ## Plain Java/Kotlin — `beginTransaction()` with try-with-resources
 
@@ -91,4 +93,4 @@ public class OrderService {
 ## Sources
 - 源码验证: `sql-test/.../DirectRelationTest.java`, `.../mysql8/M8Save2Test.java` (try-with-resources +
   commit/rollback); `Transaction` @ `com.easy.query.core.basic.jdbc.tx`.
-- 官方文档: `easy-query-doc/src/ability/transaction.md`. Skill baseline 3.2.13.
+- 官方文档: `easy-query-doc/src/ability/transaction.md`. Skill baseline 3.2.14.

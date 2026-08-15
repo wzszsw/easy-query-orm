@@ -104,20 +104,20 @@ If names or paths do not line up, use `entity-modeling-navigate.md`.
 
 ### Entity-side conditional navigation with `@IncludeOnProperty`
 
-Current `3.2.13` source honors entity-side `@IncludeOnProperty` when
+Current `3.2.14` source honors entity-side `@IncludeOnProperty` when
 `selectAutoInclude(...)` traverses relation metadata.
 
 Meaning:
 
 - the root DTO row can still be returned
-- a child relation path is only auto-included for roots whose backing entity
-  property values satisfy the annotation condition
-- non-matching roots do not cause that relation query branch to populate
+- a child relation path is only auto-included for navigation owners whose
+  backing entity property values satisfy the annotation condition
+- non-matching owners are excluded from that relation query branch
 
 This is different from nested `EXTRA_AUTO_INCLUDE_CONFIGURE.where(...)`:
 
-- `@IncludeOnProperty` decides whether a navigation path participates at all
-  for a given root row
+- `@IncludeOnProperty` decides whether a navigation path participates for a
+  given owner object at that path
 - nested `EXTRA_AUTO_INCLUDE_CONFIGURE.where(...)` filters rows inside the
   child query after that path is already active
 

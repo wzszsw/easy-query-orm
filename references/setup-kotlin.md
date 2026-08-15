@@ -27,10 +27,10 @@ repositories { mavenCentral() }
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation("com.easy-query:sql-core:3.2.13")
-    implementation("com.easy-query:sql-mysql:3.2.13")        // dialect: pick one (sql-h2 / sql-pgsql / ...)
-    implementation("com.easy-query:sql-api-proxy:3.2.13")    // the strong-typed proxy API
-    ksp("com.easy-query:sql-ksp-processor:3.2.13")           // ★ KSP processor — generates the proxy classes
+    implementation("com.easy-query:sql-core:3.2.14")
+    implementation("com.easy-query:sql-mysql:3.2.14")        // dialect: pick one (sql-h2 / sql-pgsql / ...)
+    implementation("com.easy-query:sql-api-proxy:3.2.14")    // the strong-typed proxy API
+    ksp("com.easy-query:sql-ksp-processor:3.2.14")           // ★ KSP processor — generates the proxy classes
     implementation("com.mysql:mysql-connector-j:9.2.0")
     implementation("com.zaxxer:HikariCP:3.3.1")
     testImplementation(kotlin("test"))
@@ -130,10 +130,12 @@ it always works.
 - Forgetting the `kotlin.srcDir("build/generated/ksp/main/kotlin")` line → proxies unresolved in the IDE.
 - KSP version not matching the Kotlin version (the `x.y.z-a.b.c` suffix is Kotlin-version-specific).
 - Passing `Topic.class` (Java) instead of `Topic::class.java` (Kotlin).
-- Missing either `@EntityProxy` or `ProxyEntityAvailable<Entity, EntityProxy>` on the entity.
+- `@EntityProxy` is required to trigger KSP generation. Add
+  `ProxyEntityAvailable<Entity, EntityProxy>` when the project uses that
+  entity-side typed contract; it is not itself a generation switch.
 
 ## Sources
 - 官方文档: `easy-query-doc/src/guide/kotlin.md` (Gradle KSP build, entity, init, infix).
 - 源码验证 (shared runtime API): `DefaultEasyEntityQuery` @ `com.easy.query.api.proxy.client`;
   `ProxyEntityAvailable` @ `com.easy.query.core.proxy`; annotations @ `com.easy.query.core.annotation`.
-- Versions in the doc example were 3.0.41; pin to your project's version (skill baseline 3.2.13).
+- Versions in the doc example were 3.0.41; pin to your project's version (skill baseline 3.2.14).

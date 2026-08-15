@@ -9,8 +9,26 @@ conditional aggregates, CTE/window analytics, or UNION-shaped reports, read
 
 ## Aggregate + groupBy + projection
 
-Group with `GroupKeys.of(...)` (`com.easy.query.core.proxy.sql`), then project keys and aggregates in `select`. Inside the select lambda,
-`g.key1()` is the first group key and `g.groupTable()` exposes the grouped columns for aggregate functions.
+For aggregate-only multi-metric projections, the no-argument `groupBy()`
+overload returns an `AggregateQueryable` proxy
+(`com.easy.query.core.proxy.AggregateQueryable`) to the select lambda. Project
+its aggregate methods directly, often with `Select.DRAFT`. When the report has
+actual dimension keys, use the keyed
+`GroupKeys.of(...)` (`com.easy.query.core.proxy.sql`) overload; it exposes
+`g.key1()` / `g.key2()` and `g.groupTable()`.
+
+Multi-metric aggregate-only shape:
+
+```java
+import com.easy.query.core.proxy.core.draft.Draft2;
+import com.easy.query.core.proxy.sql.Select;
+
+List<Draft2<Long, BigDecimal>> rows = easyEntityQuery.queryable(Topic.class)
+        .where(o -> o.stars().gt(100))
+        .groupBy()
+        .select(o -> Select.DRAFT.of(o.count(), o.avg(t -> t.stars())))
+        .toList();
+```
 
 ```java
 List<TopicGroupDTO> rows = easyEntityQuery.queryable(Topic.class)
@@ -30,8 +48,10 @@ List<TopicGroupDTO> rows = easyEntityQuery.queryable(Topic.class)
 
 Aggregate functions on a grouped column: `.count()` / `.intCount()` / `.sum()` / `.avg()` / `.max()` /
 `.min()`. There is also a `Select.DRAFT.of(...)` form from `com.easy.query.core.proxy.sql.Select` to project into a lightweight `DraftN` tuple when you
-don't want a dedicated DTO. Non-grouped aggregates (e.g. over a join) use `sumOrNull` / `sumOrDefault` /
-`maxOrNull` / `minOrNull` terminals.
+don't want a dedicated DTO. For one whole-result scalar, terminals such as
+`sumOrNull` / `sumOrDefault` / `maxOrNull` / `minOrNull` avoid an unnecessary
+projection; use no-argument `groupBy()` when one query must project several
+aggregate metrics.
 
 ## Code-first DDL (auto table sync)
 
@@ -80,8 +100,9 @@ routing/config (ranges, data-source sharding) is broader — see the sharding do
 
 ## Multi-datasource
 
-There is no `@UseDataSource` annotation; switching is done through `EasyMultiEntityQuery` (a ThreadLocal
-current-datasource model):
+There is no built-in `@UseDataSource` annotation or `EasyMultiEntityQuery` type in
+the current source. The following is a doc/demo wrapper pattern (a
+ThreadLocal current-datasource model), not an easy-query framework API:
 
 ```java
 public interface EasyMultiEntityQuery extends EasyEntityQuery {
@@ -92,7 +113,7 @@ public interface EasyMultiEntityQuery extends EasyEntityQuery {
     void clear();
 }
 ```
-Prefer the scoped form so the current datasource is always reset:
+Prefer the scoped form in such a wrapper so the current datasource is always reset:
 ```java
 List<Order> orders = multiEntityQuery.executeScope("ds2", eq ->
         eq.queryable(Order.class).where(o -> o.status().eq(1)).toList());
@@ -100,8 +121,10 @@ List<Order> orders = multiEntityQuery.executeScope("ds2", eq ->
 
 ## Common mistakes
 
-- Building a non-grouped aggregate with `groupBy(...).select(...)` machinery — use the `sumOrNull`/`maxOrNull`
-  terminals for whole-result aggregates.
+- Creating a fake keyed `groupBy(...)` just to calculate one whole-result
+  scalar; use a terminal such as `sumOrNull(...)` / `maxOrNull(...)` for one scalar,
+  or no-argument `groupBy().select(...)` when one query must project several
+  aggregate metrics.
 - Running code-first `syncTableCommand` without `arg.commit()` → nothing is applied.
 - Setting `multiEntityQuery.setCurrent(...)` without a matching `clear()` → leaks the datasource to the next
   task on the same thread; prefer `executeScope(...)`.
@@ -112,4 +135,4 @@ List<Order> orders = multiEntityQuery.executeScope("ds2", eq ->
   `h2/H2BaseTest.java` (`applyShardingInitializer`). `DatabaseCodeFirst`/`CodeFirstCommand` @
   `com.easy.query.core.basic.api.database`.
 - 官方文档: `easy-query-doc/src/ability/select/group.md`, `src/super/*` (sharding),
-  `src/guide/sb-multi-datasource.md`, `src/guide/spring-boot.md` (code-first). Skill baseline 3.2.13.
+  `src/guide/sb-multi-datasource.md`, `src/guide/spring-boot.md` (code-first). Skill baseline 3.2.14.

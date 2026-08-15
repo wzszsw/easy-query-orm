@@ -41,10 +41,14 @@ Important behavior:
 - If differential update/tracking matters, configure tracking on relation subqueries too, for example `asTracking()`.
 - Relation subqueries can use `where`, `orderBy`, `limit`, `asTracking/asNoTracking`, and `disableLogicDelete`.
 - `include` is for returning database object instances. For DTO object graphs, prefer `selectAutoInclude`.
+- In 3.2.14, partition-mode `include(..., q -> q.limit(...))` no longer
+  projects columns marked `@Column(autoSelect = false)` into its window-query
+  wrapper. This avoids the earlier `Unknown column` failure; do not re-enable
+  those columns merely as an include-limit workaround.
 
 ### Entity-side conditional include with `@IncludeOnProperty`
 
-Current `3.2.13` source adds entity-side conditional relation gating through
+Current `3.2.14` source supports entity-side conditional relation gating through
 `@IncludeOnProperty` on a `@Navigate` field.
 
 ```java
@@ -56,10 +60,10 @@ private MyTask1Ext myTask1Ext;
 Effect:
 
 - roots are still queried normally
-- only roots whose `version` matches the condition participate in that
+- only navigation owners whose `version` matches the condition participate in that
   relation-load path
-- for non-matching roots, easy-query skips issuing that relation fetch for that
-  row/path combination
+- non-matching owners are excluded from the relation ids; the branch query still
+  runs when another owner matches
 
 Use this when the relation branch is structurally version/type-specific.
 
@@ -69,12 +73,14 @@ Do not use it as a substitute for:
 - request-aware DTO child pruning with `EXTRA_AUTO_INCLUDE_CONFIGURE.where(...)`
 - root-row eligibility filtering with root `.where(...)`
 
-`matchNull = true` means the root property must be null or blank for the
-relation path to participate.
+`matchNull = true` matches only `null` or the exact empty string on the owning
+entity. The required `value` member is ignored in this mode; whitespace-only
+strings do not match.
 
 ## include2
 
-`include2` is available in the proxy API and the docs describe it as the preferred replacement for complex nested include cases in `3.1.47+`.
+`include2` is available in the proxy API and is the preferred replacement for
+complex nested include cases. It first appears in the tagged source at `3.1.68`.
 
 Pattern:
 
@@ -86,7 +92,7 @@ List<SchoolClass> rows = easyEntityQuery.queryable(SchoolClass.class)
         ctx.query(schoolClass.schoolStudents())
             .where(s -> s.name().ne("test"))
             .orderBy(s -> s.createTime().asc())
-            .limit(5);
+            .limit(0, 5);
         ctx.query(schoolClass.schoolStudents().flatElement().schoolClass());
     })
     .toList();

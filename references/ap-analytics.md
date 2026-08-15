@@ -23,11 +23,47 @@ functions that stay inside the ORM DSL.
 - Use `union(...)` / `unionAll(...)` only when all branches have the same
   result shape.
 
-## 1. Explicit GroupBy + Having
+## 1. Aggregate-only `groupBy()`
+
+When the report needs several aggregate metrics but no grouping dimension, use
+the no-argument `groupBy()` overload. For one whole-result scalar, prefer the
+matching aggregate terminal such as `sumOrNull(...)` or `maxOrNull(...)`.
+In current source, `groupBy()` changes the select lambda's proxy to
+`com.easy.query.core.proxy.AggregateQueryable`, whose `count`, `avg`, `sum`,
+`where`, and related methods describe the aggregate query. Project a stable DTO
+or a `Select.DRAFT` tuple directly:
+
+```java
+import com.easy.query.core.proxy.core.draft.Draft2;
+import com.easy.query.core.proxy.sql.Select;
+
+List<Draft2<Long, BigDecimal>> rows = easyEntityQuery.queryable(Topic.class)
+    .where(topic -> topic.title().contains("123"))
+    .groupBy()
+    .select(topic -> Select.DRAFT.of(
+        topic.count(),
+        topic.avg(t -> t.stars())
+    ))
+    .toList();
+```
+
+Use this shape for whole-result metrics. Do not create a synthetic grouping key
+just to reach aggregate methods. The overload is also available after joins;
+the select lambda then receives one `AggregateQueryable` proxy per source.
+
+Source anchors:
+
+- `IEntityGroup1.groupBy()` and its arity-specific counterparts
+- `com.easy.query.core.proxy.AggregateQueryable`
+- `sql-test/.../QueryTest28.java` (`testQueryAggregate1` / `testQueryAggregate2`)
+
+## 2. Explicit GroupBy + Having
 
 Proxy group queries are group-aware. After `groupBy(...)`, the grouped source is
 accessed from `group.groupTable()`, and group keys come from `key1()`, `key2()`,
-... depending on `GroupKeys.of(...)`.
+... depending on the keyed `GroupKeys.of(...)` overload. Use the no-argument
+form above when no dimension key is required and the result projects several
+aggregate metrics.
 
 ```java
 List<UserCompanyAgg> rows = easyEntityQuery.queryable(SysUser.class)
@@ -59,7 +95,7 @@ Source anchors:
 - source: `com.easy.query.core.proxy.sql.GroupKeys`
 - proxy entry: `AbstractEntityQueryable.having(...)`
 
-## 2. Conditional Aggregates (`CASE WHEN`-style metrics)
+## 3. Conditional Aggregates (`CASE WHEN`-style metrics)
 
 For KPI-style metrics such as recent-user count, adult average age, debit-card
 count, or channel-specific revenue, prefer aggregate `.filter(...)` first.
@@ -89,7 +125,7 @@ Source anchors:
 - docs/readme examples: `easy-query/README.md`, `easy-query/README-zh.md`
 - relation/aggregate grouping docs: `easy-query-doc/src/ability/select/group.md`
 
-## 3. Ad Hoc Metric Tuples with `Select.DRAFT`
+## 4. Ad Hoc Metric Tuples with `Select.DRAFT`
 
 If a one-off analytics query does not justify a dedicated DTO/VO, use
 `Select.DRAFT.of(...)` for a lightweight typed result.
@@ -108,7 +144,7 @@ var rows = easyEntityQuery.queryable(SysUser.class)
 
 Use a DTO/VO instead when the result becomes stable API surface.
 
-## 4. Relation Analytics with Implicit Group
+## 5. Relation Analytics with Implicit Group
 
 This is one of easy-query's strongest AP capabilities. When the same to-many
 relation is used multiple times for metrics, relation-driven subqueries can be
@@ -147,7 +183,7 @@ Source anchors:
 - source: `Navigate.subQueryToGroupJoin()`
 - tests: `sql-test/.../ManyJoinTest.java`
 
-## 5. CTE + Window / Partition Analytics
+## 6. CTE + Window / Partition Analytics
 
 For ranked snapshots, dedupe-latest-row, top-N-per-group, partition totals, and
 staged report pipelines, use CTE plus window functions.
@@ -209,7 +245,7 @@ Source anchors:
 - source: `Query.toCteAs(...)`, `SQLPartitionByFunc`
 - tests: `sql-test/.../M8UserTemp2.java`, `MySQL8Test2.java`, `ManyJoinTest.java`
 
-## 6. UNION / UNION ALL for Report Shaping
+## 7. UNION / UNION ALL for Report Shaping
 
 Use union when multiple branches share the same output schema and should be
 filtered or sorted as one result set.
@@ -245,7 +281,7 @@ Source anchors:
 - proxy entry: `AbstractEntityQueryable.unionAll(...)`
 - tests: `sql-test/.../QueryTest.java`
 
-## 7. Common Mistakes
+## 8. Common Mistakes
 
 - Doing Java Stream regrouping / ranking first instead of expressing the report
   in DSL.

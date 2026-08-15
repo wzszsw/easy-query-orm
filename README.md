@@ -7,6 +7,7 @@ This skill is tuned for:
 
 - easy-query setup and proxy generation
 - query, CRUD, pagination, and transactions
+- row-level locking with `forUpdate()` inside a transaction
 - `@Navigate`, `include` / `include2`, and implicit relation queries
 - `whereObject`, `orderByObject`, `EasySearch`, and `selectAutoInclude`
 - `savable`, native SQL, sharding, and troubleshooting

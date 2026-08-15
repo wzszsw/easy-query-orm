@@ -20,23 +20,23 @@ Use for a plain Java (non-Spring) project. The query/write/transaction DSL appli
     <dependency>
         <groupId>com.easy-query</groupId>
         <artifactId>sql-core</artifactId>
-        <version>3.2.13</version>
+        <version>3.2.14</version>
     </dependency>
     <dependency>
         <groupId>com.easy-query</groupId>
         <artifactId>sql-api-proxy</artifactId>   <!-- strong-typed proxy API -->
-        <version>3.2.13</version>
+        <version>3.2.14</version>
     </dependency>
     <dependency>
         <groupId>com.easy-query</groupId>
         <artifactId>sql-mysql</artifactId>       <!-- dialect: pick one (sql-h2 / sql-pgsql / sql-mssql ...) -->
-        <version>3.2.13</version>
+        <version>3.2.14</version>
     </dependency>
     <!-- APT processor: generates the *Proxy classes at compile time -->
     <dependency>
         <groupId>com.easy-query</groupId>
         <artifactId>sql-processor</artifactId>
-        <version>3.2.13</version>
+        <version>3.2.14</version>
         <scope>provided</scope>
     </dependency>
     <!-- your JDBC driver + connection pool -->
@@ -164,10 +164,12 @@ from `sql-mysql`, `H2DatabaseConfiguration` from `sql-h2`).
 - Assuming `ProxyEntityAvailable` is mandatory for generation. It is a common
   usage shape, not the APT trigger.
 - Dialect mismatch: `useDatabaseConfigure(new MySQLDatabaseConfiguration())` while depending only on `sql-h2`.
-- Forgetting `implements ProxyEntityAvailable<Entity, EntityProxy>` on the entity.
+- If the project uses the `ProxyEntityAvailable<Entity, EntityProxy>` entity
+  contract, forgetting its implementation prevents that contract from
+  compiling; it is not required for APT generation.
 
 ## Sources
 - 源码验证: `EasyQueryBootstrapper` @ `com.easy.query.core.bootstrapper`; `DefaultEasyEntityQuery` @
   `com.easy.query.api.proxy.client`; entity pattern from `sql-test/.../entity/Topic.java`;
   `MySQLDatabaseConfiguration` @ `com.easy.query.mysql.config`.
-- APT module: `sql-processor`. Skill baseline 3.2.13.
+- APT module: `sql-processor`. Skill baseline 3.2.14.

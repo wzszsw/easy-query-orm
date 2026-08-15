@@ -115,7 +115,7 @@ primary key exactly as usual. It is purely an **in-memory identity** used by the
 children already loaded from DB.
 
 Pipeline points where it is consulted (only inside `savable(...)`, never in
-standalone `insertable` / `updatable` / `deletable` / `saveOrUpdate`):
+standalone `insertable` / `updatable` / `deletable` operations):
 
 - `DatabaseEntityValues.getTrackKey(entity)`: first tries the PK-based track key
   via `EasyTrackUtil.getTrackKey(...)`; only when that returns `null` does it
@@ -196,8 +196,8 @@ middle row with a fresh instance having a new `id` but the same
   `EasyQueryInvalidOperationException("... save key property:[...] can not be
   null")` on any null value.
 - `@SaveKey` is a savable-only concept. It has no effect on direct
-  `insertable/updatable/deletable`, on `saveOrUpdate`, or on plain query/update
-  WHERE clauses.
+  `insertable/updatable/deletable` operations or on plain query/update WHERE
+  clauses.
 - A field can be both `@Column(primaryKey=true)` and `@SaveKey`, but that is
   redundant: the PK-based track key already matches first, so `@SaveKey` only
   helps on non-PK business fields where the PK is unknown/unset.

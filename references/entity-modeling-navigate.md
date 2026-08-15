@@ -175,15 +175,15 @@ Rules:
 
 ## `@IncludeOnProperty`
 
-`3.2.13` adds entity-side conditional navigation include metadata through
-`@IncludeOnProperty`.
+Current `3.2.14` source supports entity-side conditional navigation include
+metadata through `@IncludeOnProperty`.
 
 Use it when:
 
 - the root row should still be returned
 - a relation path should only participate for some root rows
-- the gating condition depends on root entity property values already loaded in
-  memory
+- the gating condition depends on property values already loaded in memory from
+  the entity that owns the navigation
 
 Example pattern from current-source tests:
 
@@ -215,10 +215,10 @@ Meaning:
 - rows with other versions skip that include path entirely
 - the root `MyTask` row still remains in the result
 
-Current source marks `@IncludeOnProperty` as `@Repeatable`, so multiple root
-property checks can be stacked on the same navigation field. `matchNull = true`
-means the dependent root property must be null or blank for the navigation to
-participate.
+Current source marks `@IncludeOnProperty` as `@Repeatable`. Multiple checks on
+the same navigation field are combined with AND semantics. `matchNull = true`
+ignores the annotation's required `value` member and matches only `null` or the
+exact empty string; whitespace-only strings do not match.
 
 Practical boundary:
 
@@ -230,11 +230,12 @@ Practical boundary:
 
 Important behavior from current source:
 
-- gating is evaluated in memory from root-row values, before the relation query
-  for that path is executed
-- the navigation dependency columns are carried as hidden relation-extra values
-  so `include`, `include2`, `loadInclude`, and `selectAutoInclude` can decide
-  whether to issue that relation query for a given root row
+- gating is evaluated in memory from each navigation owner's values, before the
+  relation query for that path is executed
+- query-produced `include`, `include2`, and `selectAutoInclude` results carry
+  navigation dependency columns as hidden relation-extra values
+- `loadInclude` instead reads the dependency fields directly from each already
+  loaded navigation-owner object
 - this is entity-side metadata; DTO-only `@Navigate` fields do not replace it
 
 Use it for version-discriminated extensions, type-specific child collections,

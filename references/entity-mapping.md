@@ -15,8 +15,9 @@ Boundary:
 
 ## The proxy model in one paragraph
 
-Each entity is paired with a generated `*Proxy` class. You annotate the entity with `@EntityProxy` and make
-it `implements ProxyEntityAvailable<Entity, EntityProxy>`. At compile time the processor (APT for Java, KSP
+Each entity is paired with a generated `*Proxy` class. Annotate the entity with
+`@EntityProxy`; projects that use the entity-side typed contract also make it
+`implements ProxyEntityAvailable<Entity, EntityProxy>`. At compile time the processor (APT for Java, KSP
 for Kotlin) generates `<entity-package>.proxy.<Entity>Proxy`, which extends `AbstractProxyEntity` and exposes
 one typed column accessor per field (`id()`, `title()`, …). The proxy is what gives you the strong-typed DSL
 inside `where(o -> o.title().eq(x))` — `o` is the proxy. You never hand-write or edit the proxy.
@@ -146,7 +147,10 @@ class SysUser : ProxyEntityAvailable<SysUser, SysUserProxy> {
 
 ## Common mistakes
 
-- Missing `implements ProxyEntityAvailable<Entity, EntityProxy>` → no proxy, no strong-typed DSL.
+- Missing `implements ProxyEntityAvailable<Entity, EntityProxy>` does not stop
+  `@EntityProxy` generation, but the entity cannot be used through the typed
+  `ProxyEntityAvailable` contract; add the interface when the project uses that
+  strong-typed entity/proxy style.
 - Importing the wrong `proxy.<Entity>Proxy` (it lives in the `.proxy` subpackage of the entity).
 - Putting business-only fields without `@Column(exist = false)` → easy-query tries to map them to columns.
 - Confusing logic-delete with physical delete (see `write.md`).
@@ -155,4 +159,4 @@ class SysUser : ProxyEntityAvailable<SysUser, SysUserProxy> {
 - 源码验证: `sql-test/.../entity/SysUserVersionLongLogicDel.java`, `.../entity/Topic.java`; annotations @
   `com.easy.query.core.annotation`; `LogicDeleteStrategyEnum` @
   `com.easy.query.core.basic.extension.logicdel`; `VersionLongStrategy` @
-  `com.easy.query.core.basic.extension.version`. Skill baseline 3.2.13.
+  `com.easy.query.core.basic.extension.version`. Skill baseline 3.2.14.

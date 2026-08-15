@@ -46,7 +46,7 @@ Common top-level methods:
 | `@Version` | Optimistic lock | `write-update.md`, `write-delete.md` |
 | `@LogicDelete` | Logic-delete column and strategy binding | `logic-delete.md` |
 | `@Navigate` | Relation metadata | `relation-query.md`, `entity-modeling-navigate.md` |
-| `@IncludeOnProperty` | Conditionally enable a navigation/include path based on root property values | `entity-modeling-navigate.md`, `include-structured-loading.md`, `select-auto-include.md` |
+| `@IncludeOnProperty` | Conditionally enable a navigation/include path from property values on the object that owns that navigation | `entity-modeling-navigate.md`, `include-structured-loading.md`, `select-auto-include.md` |
 | `@NavigateFlat` | DTO/VO path flattening | `entity-modeling-navigate.md` |
 | `@EasyTree` | Mark which self `List<SelfType>` navigation is the tree children path | `entity-modeling-navigate.md`, `implicit-query.md` |
 | `ProxyEntityAvailable<TEntity, TProxy>` | Proxy-enabled entity contract | `entity-mapping.md` |
@@ -66,6 +66,10 @@ High-value exact terminals and pagination helpers:
 - `.count()`
 - `.limit(n)`
 - `.limit(offset, rows)`
+
+| Symbol | Purpose | Read Next |
+|--------|---------|-----------|
+| `.forUpdate()` | Pessimistic row-level lock on the single-table root query; requires an active transaction and dialect support | `query-locking.md` |
 
 ## Predicate Symbols
 
@@ -169,7 +173,7 @@ For non-form dynamic query composition, read `query.md` instead.
 | `loadInclude(...)` | Load relations after query | `include-structured-loading.md` |
 | `fillOne(...)` | Programmatically backfill a to-one relation or nested object graph without `@Navigate` metadata | `include-structured-loading.md` |
 | `fillMany(...)` | Programmatically backfill a to-many relation or nested object graph without `@Navigate` metadata | `include-structured-loading.md` |
-| `@IncludeOnProperty(matchNull = true)` | Include the relation only when the dependent root property is null/blank | `entity-modeling-navigate.md`, `include-structured-loading.md` |
+| `@IncludeOnProperty(name = "property", value = "", matchNull = true)` | Include the relation only when the named property on the navigation owner is null or exactly the empty string; `value` is still required | `entity-modeling-navigate.md`, `include-structured-loading.md` |
 | `expression().subQueryable(Entity.class)` | Context-aware explicit subquery bound to the current expression | `subquery-explicit.md` |
 | `expression().subQuery(query)` | Wrap a query as a scalar subquery expression | `subquery-explicit.md` |
 | `exists(query)` / `notExists(query)` | Explicit subquery predicate on the current expression | `subquery-explicit.md` |
@@ -329,13 +333,15 @@ projection, and `select-auto-include.md` for DTO graphs.
 
 | Symbol | Purpose | Read Next |
 |--------|---------|-----------|
-| `groupBy(...)` / `GroupKeys.of(...)` | Group query (`com.easy.query.core.proxy.sql.GroupKeys`) | `ap-analytics.md`, `advanced.md` |
+| `groupBy()` | Aggregate-only group query; select receives `AggregateQueryable` | `ap-analytics.md`, `advanced.md` |
+| `groupBy(...)` / `GroupKeys.of(...)` | Keyed group query with grouping proxies and `key1()` / `groupTable()` | `ap-analytics.md`, `advanced.md` |
+| `AggregateQueryable` | Aggregate proxy returned by no-argument `groupBy()` | `ap-analytics.md`, `advanced.md` |
 | `having(...)` | Apply aggregate-level filtering after `groupBy(...)` rather than row-level filtering before grouping | `ap-analytics.md` |
 | `union(...)` | Combine same-shape query branches with de-duplication | `ap-analytics.md` |
 | `unionAll(...)` | Combine same-shape query branches without de-duplication | `ap-analytics.md` |
 | `getDatabaseCodeFirst()` | Code-first DDL | `advanced.md` |
 | `applyShardingInitializer(...)` | Sharding registration | `advanced.md` |
-| `EasyMultiEntityQuery.executeScope(...)` | Multi-datasource scope | `advanced.md` |
+| Multi-datasource scope | Use explicit clients or the doc-demo wrapper described in `multi-datasource.md`; no built-in `EasyMultiEntityQuery` API | `multi-datasource.md` |
 
 ## Starter and Config Symbols
 

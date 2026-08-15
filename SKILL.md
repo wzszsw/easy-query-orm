@@ -10,7 +10,8 @@ description: >-
   update tracking, search-form DTO query (`whereObject`, `orderByObject`,
   `EasySearch`), relation metadata/loading (`@Navigate`, `include`,
   `selectAutoInclude`), implicit and explicit
-  subquery/group-join/CTE/window/UNION analytics, `savable`, sharding,
+  subquery/group-join/CTE/window/UNION analytics, row-level query locking,
+  `savable`, sharding,
   code-first DDL, and verified API lookup/troubleshooting. Do not use for
   unrelated ORMs.
 ---
@@ -207,6 +208,10 @@ most one secondary reference when a boundary rule below says it is needed.
 
 - Ordinary filter/order/select/page/terminal query chains:
   `references/query.md`.
+- Pessimistic row-level locking with `forUpdate()`, transaction and
+  single-table requirements, nested-query scope, and dialect support:
+  `references/query-locking.md`. Pair with `references/transaction.md` when
+  the transaction boundary is also part of the answer.
 - Explicit joins, advanced projection, draft/tuple, or proxy VO relation
   `.set(...)`:
   `references/query-composition.md`.
@@ -308,6 +313,10 @@ most one secondary reference when a boundary rule below says it is needed.
   default `query ids first -> .in(...) -> build tree` template.
 - Prefer `singleOrNull()` for unique business keys.
 - Push filter/sort/page/aggregate work into DSL.
+- Treat `forUpdate()` as a pessimistic row lock: it requires an active
+  transaction, is applied once to a single-table root query in 3.2.14, and
+  varies by dialect. Do not present it as a replacement for `@Version` or
+  claim that nested subqueries are locked by the outer query.
 - Use DTO/VO result types for `selectAutoInclude`, not database entity
   classes. Explain that nested child data is fetched by separate
   include-style relation queries per relation path, not by a single joined
@@ -325,6 +334,11 @@ most one secondary reference when a boundary rule below says it is needed.
 - For AP/reporting answers, prefer DSL aggregation / CTE / UNION / partition
   APIs over Java Stream regrouping, manual SQL strings, or post-query
   in-memory metrics.
+- For aggregate-only multi-metric projections, prefer the no-argument
+  `groupBy()` path with `AggregateQueryable` and `Select.DRAFT`. For one
+  whole-result scalar, prefer the matching aggregate terminal such as
+  `sumOrNull(...)` or `maxOrNull(...)`. Use `GroupKeys.of(...)` only when
+  actual grouping dimensions must be projected.
 - For typed SQL expression questions, keep the answer inside the typed surface
   and do not drift into raw SQL fragment advice unless that surface is truly
   missing.
