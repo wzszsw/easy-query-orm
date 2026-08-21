@@ -1,7 +1,7 @@
 # Row-Level Query Locking
 
 Use this reference when a read must lock the selected rows until the enclosing
-transaction ends. The 3.2.14 API is `forUpdate()` on both the weakly typed
+transaction ends. The 3.2.15 API is `forUpdate()` on both the weakly typed
 `com.easy.query.core.basic.api.select.ClientQueryable` and the proxy
 `com.easy.query.api.proxy.entity.select.EntityQueryable`.
 
@@ -53,7 +53,7 @@ be combined with `where`, `orderBy`, `limit`, projection, and terminals such as
 - An active transaction recognized by easy-query is required. Calling
   `forUpdate()` outside a transaction throws `IllegalStateException`; SQL
   rendering also checks the transaction again.
-- The current 3.2.14 implementation accepts only a single-table root query.
+- The current 3.2.15 implementation accepts only a single-table root query.
   A join that adds another table to the root expression is rejected by
   `forUpdate()`.
 - Repeating `forUpdate()` on the same chain is rejected. Apply it once to the
@@ -67,7 +67,7 @@ be combined with `where`, `orderBy`, `limit`, projection, and terminals such as
 
 ## Dialect support
 
-The 3.2.14 source has `toSQL()` smoke coverage that renders a lock suffix for
+The 3.2.15 source has `toSQL()` smoke coverage that renders a lock suffix for
 MySQL, PostgreSQL, H2, SQLite, KingbaseES, GaussDB, Dameng, Oracle, and DB2.
 That verifies ORM SQL shape, not execution against every database. In
 particular, SQLite does not support `SELECT ... FOR UPDATE`, even though the
@@ -84,7 +84,7 @@ independent of `@Version`/`withVersion(...)`, which detect stale writes through
 an optimistic version predicate. Use one or both deliberately based on the
 concurrency protocol.
 
-## Source verification (3.2.14)
+## Source verification (3.2.15)
 
 - `ClientQueryable.forUpdate()`:
   `sql-core/src/main/java/com/easy/query/core/basic/api/select/ClientQueryable.java`

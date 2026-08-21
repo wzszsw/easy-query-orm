@@ -41,14 +41,14 @@ Important behavior:
 - If differential update/tracking matters, configure tracking on relation subqueries too, for example `asTracking()`.
 - Relation subqueries can use `where`, `orderBy`, `limit`, `asTracking/asNoTracking`, and `disableLogicDelete`.
 - `include` is for returning database object instances. For DTO object graphs, prefer `selectAutoInclude`.
-- In 3.2.14, partition-mode `include(..., q -> q.limit(...))` no longer
+- In 3.2.15, partition-mode `include(..., q -> q.limit(...))` no longer
   projects columns marked `@Column(autoSelect = false)` into its window-query
   wrapper. This avoids the earlier `Unknown column` failure; do not re-enable
   those columns merely as an include-limit workaround.
 
 ### Entity-side conditional include with `@IncludeOnProperty`
 
-Current `3.2.14` source supports entity-side conditional relation gating through
+Current `3.2.15` source supports entity-side conditional relation gating through
 `@IncludeOnProperty` on a `@Navigate` field.
 
 ```java

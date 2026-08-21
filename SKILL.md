@@ -314,7 +314,7 @@ most one secondary reference when a boundary rule below says it is needed.
 - Prefer `singleOrNull()` for unique business keys.
 - Push filter/sort/page/aggregate work into DSL.
 - Treat `forUpdate()` as a pessimistic row lock: it requires an active
-  transaction, is applied once to a single-table root query in 3.2.14, and
+  transaction, is applied once to a single-table root query in 3.2.15, and
   varies by dialect. Do not present it as a replacement for `@Version` or
   claim that nested subqueries are locked by the outer query.
 - Use DTO/VO result types for `selectAutoInclude`, not database entity

@@ -175,7 +175,7 @@ Rules:
 
 ## `@IncludeOnProperty`
 
-Current `3.2.14` source supports entity-side conditional navigation include
+Current `3.2.15` source supports entity-side conditional navigation include
 metadata through `@IncludeOnProperty`.
 
 Use it when:

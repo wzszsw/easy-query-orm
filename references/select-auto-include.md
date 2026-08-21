@@ -104,7 +104,7 @@ If names or paths do not line up, use `entity-modeling-navigate.md`.
 
 ### Entity-side conditional navigation with `@IncludeOnProperty`
 
-Current `3.2.14` source honors entity-side `@IncludeOnProperty` when
+Current `3.2.15` source honors entity-side `@IncludeOnProperty` when
 `selectAutoInclude(...)` traverses relation metadata.
 
 Meaning:
